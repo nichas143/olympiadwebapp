@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
+import { Input, Select, SelectItem, Button, Checkbox, Card, CardBody, CardHeader, Divider } from "@heroui/react";
 
 // Form validation schema
 const formSchema = z.object({
@@ -66,7 +67,9 @@ export default function Join() {
     register,
     handleSubmit,
     formState: { errors },
-    reset
+    reset,
+    setValue,
+    watch
   } = useForm<FormData>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -219,208 +222,205 @@ export default function Join() {
       </section>
 
       {/* Registration Form */}
-      <section className="py-16 bg-white">
+      <div className="py-16 bg-background-50">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="bg-white rounded-xl shadow-lg p-8">
-            <div className="text-center mb-8">
-              <h2 className="text-3xl font-bold text-gray-900 mb-4">
+          <Card className="shadow-xl">
+            <CardHeader className="text-center pb-6 flex flex-col items-center">
+              <h2 className="text-3xl font-bold text-gray-900">
                 Student Registration Form
               </h2>
-              <p className="text-gray-600">
+
+              <h3 className="text-black mt-2">
                 Please fill in your details below. We'll review your application and get back to you soon.
-              </p>
-            </div>
+              </h3>
+            </CardHeader>
 
-            {/* Status Messages */}
-            {submitStatus === 'success' && (
-              <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg">
-                <div className="flex">
-                  <div className="flex-shrink-0">
-                    <svg className="h-5 w-5 text-green-400" viewBox="0 0 20 20" fill="currentColor">
-                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                    </svg>
-                  </div>
-                  <div className="ml-3">
-                    <p className="text-sm font-medium text-green-800">{submitMessage}</p>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {submitStatus === 'error' && (
-              <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
-                <div className="flex">
-                  <div className="flex-shrink-0">
-                    <svg className="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
-                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
-                    </svg>
-                  </div>
-                  <div className="ml-3">
-                    <p className="text-sm font-medium text-red-800">{submitMessage}</p>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-              {/* Personal Information */}
-              <div className="grid md:grid-cols-2 gap-6">
-                <div>
-                  <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-2">
-                    Full Name *
-                  </label>
-                  <input
-                    type="text"
-                    id="name"
-                    {...register('name')}
-                    className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                      errors.name ? 'border-red-300' : 'border-gray-300'
-                    }`}
-                    placeholder="Enter your full name"
-                  />
-                  {errors.name && (
-                    <p className="mt-1 text-sm text-red-600">{errors.name.message}</p>
-                  )}
-                </div>
-
-                <div>
-                  <label htmlFor="currentClass" className="block text-sm font-medium text-gray-700 mb-2">
-                    Current Class *
-                  </label>
-                  <select
-                    id="currentClass"
-                    {...register('currentClass')}
-                    className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                      errors.currentClass ? 'border-red-300' : 'border-gray-300'
-                    }`}
-                  >
-                    <option value="">Select your class</option>
-                    <option value="Class 8">Class 8</option>
-                    <option value="Class 9">Class 9</option>
-                    <option value="Class 10">Class 10</option>
-                    <option value="Class 11">Class 11</option>
-                    <option value="Class 12">Class 12</option>
-                  </select>
-                  {errors.currentClass && (
-                    <p className="mt-1 text-sm text-red-600">{errors.currentClass.message}</p>
-                  )}
-                </div>
-              </div>
-
-              <div>
-                <label htmlFor="schoolName" className="block text-sm font-medium text-gray-700 mb-2">
-                  School Name *
-                </label>
-                <input
-                  type="text"
-                  id="schoolName"
-                  {...register('schoolName')}
-                  className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                    errors.schoolName ? 'border-red-300' : 'border-gray-300'
-                  }`}
-                  placeholder="Enter your school name"
-                />
-                {errors.schoolName && (
-                  <p className="mt-1 text-sm text-red-600">{errors.schoolName.message}</p>
-                )}
-              </div>
-
-              <div className="grid md:grid-cols-2 gap-6">
-                <div>
-                  <label htmlFor="phoneNumber" className="block text-sm font-medium text-gray-700 mb-2">
-                    Phone Number *
-                  </label>
-                  <input
-                    type="tel"
-                    id="phoneNumber"
-                    {...register('phoneNumber')}
-                    className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                      errors.phoneNumber ? 'border-red-300' : 'border-gray-300'
-                    }`}
-                    placeholder="Enter 10-digit phone number"
-                  />
-                  {errors.phoneNumber && (
-                    <p className="mt-1 text-sm text-red-600">{errors.phoneNumber.message}</p>
-                  )}
-                </div>
-
-                <div>
-                  <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
-                    Email Address *
-                  </label>
-                  <input
-                    type="email"
-                    id="email"
-                    {...register('email')}
-                    className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                      errors.email ? 'border-red-300' : 'border-gray-300'
-                    }`}
-                    placeholder="Enter your email address"
-                  />
-                  {errors.email && (
-                    <p className="mt-1 text-sm text-red-600">{errors.email.message}</p>
-                  )}
-                </div>
-              </div>
-
-              {/* Prerequisites Section */}
-              <div className="border-t border-gray-200 pt-6">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">
-                  Prerequisites Knowledge Assessment
-                </h3>
-                <p className="text-sm text-gray-600 mb-6">
-                  Please indicate which topics you are familiar with. This helps us understand your current level and provide appropriate guidance. Check all topics that you have studied and are comfortable with.
-                </p>
-                
-                <div className="space-y-8">
-                  {prerequisiteTopics.map((category) => (
-                    <div key={category.category} className="border border-gray-200 rounded-lg p-6">
-                      <h4 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
-                        <span className="w-2 h-2 bg-blue-600 rounded-full mr-3"></span>
-                        {category.category}
-                      </h4>
-                      <div className="space-y-3">
-                        {category.topics.map((topic) => (
-                          <div key={topic.key} className="flex items-start">
-                            <div className="flex items-center h-5 mt-0.5">
-                              <input
-                                type="checkbox"
-                                id={topic.key}
-                                {...register(`prerequisites.${topic.key as keyof FormData['prerequisites']}`)}
-                                className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-                              />
-                            </div>
-                            <div className="ml-3">
-                              <label htmlFor={topic.key} className="text-sm font-medium text-gray-700">
-                                {topic.label}
-                              </label>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
+            <CardBody className="px-8 pb-8">
+              {/* Status Messages */}
+              {submitStatus === 'success' && (
+                <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg">
+                  <div className="flex">
+                    <div className="flex-shrink-0">
+                      <svg className="h-5 w-5 text-green-400" viewBox="0 0 20 20" fill="currentColor">
+                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                      </svg>
                     </div>
-                  ))}
+                    <div className="ml-3">
+                      <p className="text-sm font-medium text-green-800">{submitMessage}</p>
+                    </div>
+                  </div>
                 </div>
-              </div>
+              )}
 
-              {/* Submit Button */}
-              <div className="flex justify-center pt-6">
-                <button
-                  type="submit"
-                  disabled={isSubmitting}
-                  className={`px-8 py-3 rounded-lg font-semibold text-lg transition-colors duration-200 ${
-                    isSubmitting
-                      ? 'bg-gray-400 text-gray-200 cursor-not-allowed'
-                      : 'bg-blue-600 text-white hover:bg-blue-700'
-                  }`}
-                >
-                  {isSubmitting ? 'Submitting...' : 'Submit Application'}
-                </button>
-              </div>
-            </form>
-          </div>
+              {submitStatus === 'error' && (
+                <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
+                  <div className="flex">
+                    <div className="flex-shrink-0">
+                      <svg className="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
+                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                      </svg>
+                    </div>
+                    <div className="ml-3">
+                      <p className="text-sm font-medium text-red-800">{submitMessage}</p>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+                {/* Personal Information */}
+                <div className="space-y-6">
+                  <div className="grid md:grid-cols-2 gap-6">
+                    <Input
+                      type="text"
+                      // label="Full Name *"
+                      placeholder="Enter your full name"
+                      {...register('name')}
+                      isInvalid={!!errors.name}
+                      errorMessage={errors.name?.message}
+                      variant="bordered"
+                      size="lg"
+                      classNames={{
+                        input: "text-gray-900 placeholder:text-gray-500",
+                        inputWrapper: "bg-white"
+                      }}
+                    />
+
+                    <Select
+                      // label="Current Class *"
+                      placeholder="Select your class"
+                      {...register('currentClass')}
+                      isInvalid={!!errors.currentClass}
+                      errorMessage={errors.currentClass?.message}
+                      variant="bordered"
+                      size="lg"
+                      classNames={{
+                        trigger: "bg-white",
+                        value: "text-black"
+                      }}
+                    >
+                      <SelectItem key="Class 7">Class 7</SelectItem>
+                      <SelectItem key="Class 8">Class 8</SelectItem>
+                      <SelectItem key="Class 9">Class 9</SelectItem>
+                      <SelectItem key="Class 10">Class 10</SelectItem>
+                      <SelectItem key="Class 11">Class 11</SelectItem>
+                      <SelectItem key="Class 12">Class 12</SelectItem>
+                    </Select>
+                  </div>
+
+                  <Input
+                    type="text"
+                    // label="School Name *"
+                    placeholder="Enter your school name"
+                    {...register('schoolName')}
+                    isInvalid={!!errors.schoolName}
+                    errorMessage={errors.schoolName?.message}
+                    variant="bordered"
+                    size="lg"
+                    classNames={{
+                      input: "text-gray-900 placeholder:text-gray-500",
+                      inputWrapper: "bg-white"
+                    }}
+                  />
+
+                  <div className="grid md:grid-cols-2 gap-6">
+                    <Input
+                      type="tel"
+                      // label="Phone Number *"
+                      placeholder="Enter 10-digit phone number"
+                      {...register('phoneNumber')}
+                      isInvalid={!!errors.phoneNumber}
+                      errorMessage={errors.phoneNumber?.message}
+                      variant="bordered"
+                      size="lg"
+                      classNames={{
+                        input: "text-gray-900 placeholder:text-gray-500",
+                        inputWrapper: "bg-white"
+                      }}
+                    />
+
+                    <Input
+                      type="email"
+                      // label="Email Address *"
+                      placeholder="Enter your email address"
+                      {...register('email')}
+                      isInvalid={!!errors.email}
+                      errorMessage={errors.email?.message}
+                      variant="bordered"
+                      size="lg"
+                      classNames={{
+                        input: "text-gray-900 placeholder:text-gray-500",
+                        inputWrapper: "bg-white"
+                      }}
+                    />
+                  </div>
+                </div>
+
+                <Divider className="my-8" />
+
+                {/* Prerequisites Section */}
+                <div>
+                  <h3 className="text-xl font-semibold text-gray-900 mb-4">
+                    Prerequisites Knowledge Assessment
+                  </h3>
+                  <p className="text-sm text-gray-600 mb-6">
+                    Please indicate which topics you are familiar with. This helps us understand your current level and provide appropriate guidance. Check all topics that you have studied and are comfortable with.
+                  </p>
+                  
+                  <div className="space-y-6">
+                    {prerequisiteTopics.map((category) => (
+                      <Card key={category.category} className="border border-gray-200">
+                        <CardHeader className="pb-3">
+                          <h4 className="text-lg font-semibold text-blue-900 flex items-center">
+                            <span className="w-2 h-2 bg-primary rounded-full mr-3"></span>
+                            {category.category}
+                          </h4>
+                        </CardHeader>
+                        <CardBody className="pt-0 flex">
+                          <div className="space-y-3 flex flex-col px-4">
+                            
+                            {category.topics.map((topic) => (
+                               <div className="flex justify-between gap-2" key={topic.key}>
+                                <div className="text-black">
+                                  {topic.label}
+                                </div>
+                                <Checkbox
+                                  key={topic.key}
+                                  {...register(`prerequisites.${topic.key as keyof FormData['prerequisites']}`)}
+                                  size="sm"
+                                  color="primary"
+                                  classNames={{
+                                    base: "text-black"
+                                  }}
+                                >
+                               
+                                </Checkbox>
+                               </div>
+                            ))}
+                          </div>
+                        </CardBody>
+                      </Card>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Submit Button */}
+                <div className="flex justify-center pt-8">
+                  <Button
+                    type="submit"
+                    color="primary"
+                    size="lg"
+                    isLoading={isSubmitting}
+                    className="px-12 py-6 text-lg font-semibold"
+                  >
+                    {isSubmitting ? 'Submitting...' : 'Submit Application'}
+                  </Button>
+                </div>
+              </form>
+            </CardBody>
+          </Card>
         </div>
-      </section>
+      </div>
 
       {/* Information Section */}
       <section className="py-16 bg-gray-50">

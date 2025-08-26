@@ -31,6 +31,11 @@ export default function Navbar() {
       name: 'Curriculum',
       href: '/curriculum',
       description: 'Following topics will be taught to the student in the course'
+    },
+    {
+      name: 'Sample Lessons',
+      href: '/sample-lessons',
+      description: 'Watch sample video lessons to experience our teaching methodology'
     }
   ];
 
@@ -45,7 +50,7 @@ export default function Navbar() {
     return `${baseClasses} ${isActive ? 'text-blue-600 bg-blue-50' : 'text-gray-700 hover:text-blue-600 hover:bg-gray-50'}`;
   };
 
-  const isProgramActive = mounted && (pathname === '/prerequisites' || pathname === '/curriculum');
+  const isProgramActive = mounted && (pathname === '/prerequisites' || pathname === '/curriculum' || pathname === '/sample-lessons');
 
   return (
     <nav className="bg-white shadow-lg border-b border-gray-200 sticky top-0 z-50" suppressHydrationWarning>

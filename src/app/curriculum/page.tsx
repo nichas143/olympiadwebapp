@@ -297,12 +297,18 @@ export default function Curriculum() {
             Join our comprehensive curriculum and begin your path to mathematical olympiad success.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <button className="bg-white text-blue-600 px-8 py-3 rounded-lg font-semibold hover:bg-gray-100 transition-colors duration-200">
+            <a
+              href="/join"
+              className="bg-white text-blue-600 px-8 py-3 rounded-lg font-semibold hover:bg-gray-100 transition-colors duration-200 inline-block"
+            >
               Enroll Now
-            </button>
-            <button className="border-2 border-white text-white px-8 py-3 rounded-lg font-semibold hover:bg-white hover:text-blue-600 transition-colors duration-200">
+            </a>
+            <a
+              href="/sample-lessons"
+              className="border-2 border-white text-white px-8 py-3 rounded-lg font-semibold hover:bg-white hover:text-blue-600 transition-colors duration-200 inline-block"
+            >
               View Sample Lessons
-            </button>
+            </a>
           </div>
         </div>
       </section>

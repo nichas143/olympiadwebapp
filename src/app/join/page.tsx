@@ -15,11 +15,43 @@ const formSchema = z.object({
   phoneNumber: z.string().regex(/^[0-9]{10}$/, 'Please enter a valid 10-digit phone number'),
   email: z.string().email('Please enter a valid email address'),
   prerequisites: z.object({
-    basicMathematics: z.boolean(),
-    algebra: z.boolean(),
-    geometry: z.boolean(),
-    numberTheory: z.boolean(),
-    combinatorics: z.boolean()
+    // Algebra
+    basicFractions: z.boolean(),
+    bodmasRule: z.boolean(),
+    linearEquationsOneVariable: z.boolean(),
+    simultaneousLinearEquations: z.boolean(),
+    squareRoots: z.boolean(),
+    squaresOfNumbers: z.boolean(),
+    polynomials: z.boolean(),
+    polynomialDivision: z.boolean(),
+    
+    // Geometry
+    parallelLinesAngles: z.boolean(),
+    typesOfTriangles: z.boolean(),
+    circleTangentSecant: z.boolean(),
+    arcOfCircle: z.boolean(),
+    pythagorasTheorem: z.boolean(),
+    linearPairFormation: z.boolean(),
+    sumOfAngles: z.boolean(),
+    
+    // Number Theory
+    gcdLcm: z.boolean(),
+    primeCompositeNumbers: z.boolean(),
+    divisionAlgorithm: z.boolean(),
+    
+    // Combinatorics
+    additionMultiplicationPrinciple: z.boolean(),
+    permutations: z.boolean(),
+    combinations: z.boolean(),
+    
+    // Functional
+    conceptOfFunctions: z.boolean(),
+    
+    // Basic Inequalities
+    basicInequalityRules: z.boolean(),
+    inequalityOperations: z.boolean(),
+    inequalitiesOneTwoVariables: z.boolean(),
+    sosMethod: z.boolean()
   })
 });
 
@@ -39,11 +71,43 @@ export default function Join() {
     resolver: zodResolver(formSchema),
     defaultValues: {
       prerequisites: {
-        basicMathematics: false,
-        algebra: false,
-        geometry: false,
-        numberTheory: false,
-        combinatorics: false
+        // Algebra
+        basicFractions: false,
+        bodmasRule: false,
+        linearEquationsOneVariable: false,
+        simultaneousLinearEquations: false,
+        squareRoots: false,
+        squaresOfNumbers: false,
+        polynomials: false,
+        polynomialDivision: false,
+        
+        // Geometry
+        parallelLinesAngles: false,
+        typesOfTriangles: false,
+        circleTangentSecant: false,
+        arcOfCircle: false,
+        pythagorasTheorem: false,
+        linearPairFormation: false,
+        sumOfAngles: false,
+        
+        // Number Theory
+        gcdLcm: false,
+        primeCompositeNumbers: false,
+        divisionAlgorithm: false,
+        
+        // Combinatorics
+        additionMultiplicationPrinciple: false,
+        permutations: false,
+        combinations: false,
+        
+        // Functional
+        conceptOfFunctions: false,
+        
+        // Basic Inequalities
+        basicInequalityRules: false,
+        inequalityOperations: false,
+        inequalitiesOneTwoVariables: false,
+        sosMethod: false
       }
     }
   });
@@ -80,11 +144,62 @@ export default function Join() {
   };
 
   const prerequisiteTopics = [
-    { key: 'basicMathematics', label: 'Basic Mathematics', description: 'Arithmetic, fractions, decimals, basic algebra' },
-    { key: 'algebra', label: 'Algebra', description: 'Quadratic equations, polynomials, inequalities' },
-    { key: 'geometry', label: 'Geometry', description: 'Triangles, circles, coordinate geometry' },
-    { key: 'numberTheory', label: 'Number Theory', description: 'Divisibility, prime numbers, modular arithmetic' },
-    { key: 'combinatorics', label: 'Combinatorics', description: 'Counting principles, permutations, combinations' }
+    {
+      category: 'Algebra',
+      topics: [
+        { key: 'basicFractions', label: 'Basic fraction addition, multiplication, division' },
+        { key: 'bodmasRule', label: 'BODMAS rule' },
+        { key: 'linearEquationsOneVariable', label: 'Solving linear equation in one variable' },
+        { key: 'simultaneousLinearEquations', label: 'Solving simultaneous linear equation in two variables' },
+        { key: 'squareRoots', label: 'Working and finding roots of 2-3 digits numbers' },
+        { key: 'squaresOfNumbers', label: 'Knowing what are square of numbers' },
+        { key: 'polynomials', label: 'Know what are polynomials in 1-2 variables, Monomials, working with product, addition, subtraction of polynomials' },
+        { key: 'polynomialDivision', label: 'Division of polynomials (long division) with linear divisor' }
+      ]
+    },
+    {
+      category: 'Geometry',
+      topics: [
+        { key: 'parallelLinesAngles', label: 'Corresponding, alternate, interior, vertically opposite angles in parallel lines with transversal' },
+        { key: 'typesOfTriangles', label: 'Types of triangles (acute, obtuse, right angled) (isosceles, equilateral, scalene)' },
+        { key: 'circleTangentSecant', label: 'Circle, tangent, secant' },
+        { key: 'arcOfCircle', label: 'Arc of circle' },
+        { key: 'pythagorasTheorem', label: 'Pythagoras theorem' },
+        { key: 'linearPairFormation', label: 'Linear pair formation' },
+        { key: 'sumOfAngles', label: 'Sum of angles in a triangle, polygon' }
+      ]
+    },
+    {
+      category: 'Number Theory',
+      topics: [
+        { key: 'gcdLcm', label: 'Finding GCD and LCM of numbers' },
+        { key: 'primeCompositeNumbers', label: 'Know what are prime numbers, composites' },
+        { key: 'divisionAlgorithm', label: 'Division algorithm' }
+      ]
+    },
+    {
+      category: 'Combinatorics (not needed)',
+      topics: [
+        { key: 'additionMultiplicationPrinciple', label: 'Addition, multiplication principle' },
+        { key: 'permutations', label: 'Permutations' },
+        { key: 'combinations', label: 'Combination' }
+      ]
+    },
+    {
+      category: 'Functional',
+      topics: [
+        { key: 'conceptOfFunctions', label: 'Concept of functions' }
+      ]
+    },
+    {
+      category: 'Basic Inequalities',
+      topics: [
+        { key: 'basicInequalityRules', label: 'Basic rules of inequalities' },
+        { key: 'inequalityOperations', label: 'Addition, multiplication in inequalities' },
+        { key: 'inequalitiesOneTwoVariables', label: 'Inequalities in one, two variable' },
+        { key: 'sosMethod', label: 'SOS' }
+      ]
+    }
   ];
 
   return (
@@ -251,28 +366,37 @@ export default function Join() {
               {/* Prerequisites Section */}
               <div className="border-t border-gray-200 pt-6">
                 <h3 className="text-lg font-semibold text-gray-900 mb-4">
-                  Prerequisites Knowledge
+                  Prerequisites Knowledge Assessment
                 </h3>
-                <p className="text-sm text-gray-600 mb-4">
-                  Please indicate which topics you are familiar with. This helps us understand your current level and provide appropriate guidance.
+                <p className="text-sm text-gray-600 mb-6">
+                  Please indicate which topics you are familiar with. This helps us understand your current level and provide appropriate guidance. Check all topics that you have studied and are comfortable with.
                 </p>
                 
-                <div className="space-y-4">
-                  {prerequisiteTopics.map((topic) => (
-                    <div key={topic.key} className="flex items-start">
-                      <div className="flex items-center h-5">
-                        <input
-                          type="checkbox"
-                          id={topic.key}
-                          {...register(`prerequisites.${topic.key as keyof FormData['prerequisites']}`)}
-                          className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-                        />
-                      </div>
-                      <div className="ml-3">
-                        <label htmlFor={topic.key} className="text-sm font-medium text-gray-700">
-                          {topic.label}
-                        </label>
-                        <p className="text-sm text-gray-500">{topic.description}</p>
+                <div className="space-y-8">
+                  {prerequisiteTopics.map((category) => (
+                    <div key={category.category} className="border border-gray-200 rounded-lg p-6">
+                      <h4 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                        <span className="w-2 h-2 bg-blue-600 rounded-full mr-3"></span>
+                        {category.category}
+                      </h4>
+                      <div className="space-y-3">
+                        {category.topics.map((topic) => (
+                          <div key={topic.key} className="flex items-start">
+                            <div className="flex items-center h-5 mt-0.5">
+                              <input
+                                type="checkbox"
+                                id={topic.key}
+                                {...register(`prerequisites.${topic.key as keyof FormData['prerequisites']}`)}
+                                className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                              />
+                            </div>
+                            <div className="ml-3">
+                              <label htmlFor={topic.key} className="text-sm font-medium text-gray-700">
+                                {topic.label}
+                              </label>
+                            </div>
+                          </div>
+                        ))}
                       </div>
                     </div>
                   ))}

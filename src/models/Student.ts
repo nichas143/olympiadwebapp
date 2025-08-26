@@ -20,23 +20,118 @@ const studentSchema = new mongoose.Schema({
     maxlength: [200, 'School name cannot be more than 200 characters']
   },
   prerequisites: {
-    basicMathematics: {
+    // Algebra
+    basicFractions: {
       type: Boolean,
       default: false
     },
-    algebra: {
+    bodmasRule: {
       type: Boolean,
       default: false
     },
-    geometry: {
+    linearEquationsOneVariable: {
       type: Boolean,
       default: false
     },
-    numberTheory: {
+    simultaneousLinearEquations: {
       type: Boolean,
       default: false
     },
-    combinatorics: {
+    squareRoots: {
+      type: Boolean,
+      default: false
+    },
+    squaresOfNumbers: {
+      type: Boolean,
+      default: false
+    },
+    polynomials: {
+      type: Boolean,
+      default: false
+    },
+    polynomialDivision: {
+      type: Boolean,
+      default: false
+    },
+    
+    // Geometry
+    parallelLinesAngles: {
+      type: Boolean,
+      default: false
+    },
+    typesOfTriangles: {
+      type: Boolean,
+      default: false
+    },
+    circleTangentSecant: {
+      type: Boolean,
+      default: false
+    },
+    arcOfCircle: {
+      type: Boolean,
+      default: false
+    },
+    pythagorasTheorem: {
+      type: Boolean,
+      default: false
+    },
+    linearPairFormation: {
+      type: Boolean,
+      default: false
+    },
+    sumOfAngles: {
+      type: Boolean,
+      default: false
+    },
+    
+    // Number Theory
+    gcdLcm: {
+      type: Boolean,
+      default: false
+    },
+    primeCompositeNumbers: {
+      type: Boolean,
+      default: false
+    },
+    divisionAlgorithm: {
+      type: Boolean,
+      default: false
+    },
+    
+    // Combinatorics
+    additionMultiplicationPrinciple: {
+      type: Boolean,
+      default: false
+    },
+    permutations: {
+      type: Boolean,
+      default: false
+    },
+    combinations: {
+      type: Boolean,
+      default: false
+    },
+    
+    // Functional
+    conceptOfFunctions: {
+      type: Boolean,
+      default: false
+    },
+    
+    // Basic Inequalities
+    basicInequalityRules: {
+      type: Boolean,
+      default: false
+    },
+    inequalityOperations: {
+      type: Boolean,
+      default: false
+    },
+    inequalitiesOneTwoVariables: {
+      type: Boolean,
+      default: false
+    },
+    sosMethod: {
       type: Boolean,
       default: false
     }

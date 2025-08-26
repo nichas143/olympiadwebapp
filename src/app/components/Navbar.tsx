@@ -79,9 +79,9 @@ export default function Navbar() {
           <div className="flex items-center">
             <Link href="/" className="flex-shrink-0 flex items-center">
               <div className="w-8 h-8 bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg flex items-center justify-center">
-                <span className="text-white font-bold text-lg">M</span>
+                <span className="text-white text-2xl font-bold">π</span>
               </div>
-              <span className="ml-2 text-xl font-bold text-gray-900">Math Olympiad Prep</span>
+              <span className="ml-2 text-xl font-bold text-gray-900">Olympiad Pi Math </span>
             </Link>
           </div>
 

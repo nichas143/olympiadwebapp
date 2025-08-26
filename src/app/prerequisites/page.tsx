@@ -107,45 +107,45 @@ export default function Prerequisites() {
     {
       title: 'Algebra Assessment',
       topics: ['Fractions & BODMAS', 'Linear Equations', 'Polynomials', 'Square Roots'],
-      color: 'blue'
+      color: 'primary'
     },
     {
       title: 'Geometry Assessment', 
       topics: ['Angles & Triangles', 'Circles & Tangents', 'Pythagoras Theorem', 'Polygons'],
-      color: 'green'
+      color: 'success'
     },
     {
       title: 'Number Theory Assessment',
       topics: ['GCD & LCM', 'Prime Numbers', 'Division Algorithm'],
-      color: 'purple'
+      color: 'secondary'
     },
     {
       title: 'Combinatorics Assessment',
       topics: ['Counting Principles', 'Permutations', 'Combinations'],
-      color: 'orange'
+      color: 'warning'
     },
     {
       title: 'Functions Assessment',
       topics: ['Function Concepts', 'Function Properties'],
-      color: 'red'
+      color: 'danger'
     },
     {
       title: 'Inequalities Assessment',
       topics: ['Basic Rules', 'Operations', 'SOS Method'],
-      color: 'indigo'
+      color: 'default'
     }
   ];
 
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Hero Section */}
-      <section className="bg-gradient-to-r from-green-600 to-blue-600 text-white">
+      <section className="bg-gradient-to-r from-success-600 to-primary-600 text-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
           <div className="text-center">
             <h1 className="text-4xl md:text-5xl font-bold mb-6">
               Prerequisites for Mathematical Olympiads
             </h1>
-            <p className="text-xl md:text-2xl text-green-100 max-w-3xl mx-auto">
+            <p className="text-xl md:text-2xl text-success-100 max-w-3xl mx-auto">
               Master these fundamental mathematical concepts before starting your olympiad preparation journey
             </p>
           </div>
@@ -170,9 +170,11 @@ export default function Prerequisites() {
                 <div className="flex items-center justify-between mb-4">
                   <h3 className="text-xl font-bold text-gray-900">{prereq.category}</h3>
                   <span className={`px-3 py-1 rounded-full text-sm font-medium ${
-                    prereq.level === 'Beginner' 
-                      ? 'bg-green-100 text-green-800' 
-                      : 'bg-blue-100 text-blue-800'
+                    prereq.level === 'Compulsory' 
+                      ? 'bg-success-100 text-success-800' 
+                      : prereq.level === 'Optional'
+                      ? 'bg-warning-100 text-warning-800'
+                      : 'bg-primary-100 text-primary-800'
                   }`}>
                     {prereq.level}
                   </span>
@@ -181,7 +183,7 @@ export default function Prerequisites() {
                 <ul className="space-y-2">
                   {prereq.skills.map((skill, skillIndex) => (
                     <li key={skillIndex} className="flex items-start">
-                      <span className="text-green-500 mr-2 mt-1">•</span>
+                      <span className="text-success-500 mr-2 mt-1">•</span>
                       <span className="text-gray-700 text-sm">{skill}</span>
                     </li>
                   ))}
@@ -207,8 +209,22 @@ export default function Prerequisites() {
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
             {assessmentAreas.map((area, index) => (
               <div key={index} className="bg-white rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow duration-200">
-                <div className={`w-12 h-12 rounded-lg bg-${area.color}-100 flex items-center justify-center mb-4`}>
-                  <span className={`text-${area.color}-600 font-bold text-lg`}>
+                <div className={`w-12 h-12 rounded-lg flex items-center justify-center mb-4 ${
+                  area.color === 'primary' ? 'bg-primary-100' :
+                  area.color === 'success' ? 'bg-success-100' :
+                  area.color === 'secondary' ? 'bg-secondary-100' :
+                  area.color === 'warning' ? 'bg-warning-100' :
+                  area.color === 'danger' ? 'bg-danger-100' :
+                  'bg-default-100'
+                }`}>
+                  <span className={`font-bold text-lg ${
+                    area.color === 'primary' ? 'text-primary-600' :
+                    area.color === 'success' ? 'text-success-600' :
+                    area.color === 'secondary' ? 'text-secondary-600' :
+                    area.color === 'warning' ? 'text-warning-600' :
+                    area.color === 'danger' ? 'text-danger-600' :
+                    'text-default-600'
+                  }`}>
                     {index + 1}
                   </span>
                 </div>
@@ -260,12 +276,12 @@ export default function Prerequisites() {
           <p className="text-xl text-gray-600 mb-8">
             Take our comprehensive diagnostic test to evaluate your current mathematical proficiency across all prerequisite areas.
           </p>
-          <div className="bg-gradient-to-r from-blue-600 to-purple-600 rounded-xl p-8 text-white">
+          <div className="bg-gradient-to-r from-primary-600 to-secondary-600 rounded-xl p-8 text-white">
             <h3 className="text-2xl font-bold mb-4">Free Diagnostic Assessment</h3>
-            <p className="text-blue-100 mb-6">
+                          <p className="text-primary-100 mb-6">
               Get a detailed report of your strengths and areas that need attention in each prerequisite category
             </p>
-            <button className="bg-white text-blue-600 px-8 py-3 rounded-lg font-semibold hover:bg-gray-100 transition-colors duration-200">
+            <button className="bg-white text-primary-600 px-8 py-3 rounded-lg font-semibold hover:bg-gray-100 transition-colors duration-200">
               Take Assessment
             </button>
           </div>
@@ -284,7 +300,7 @@ export default function Prerequisites() {
               <p className="text-gray-600 mb-4">
                 You're ready to start our comprehensive curriculum designed for olympiad preparation.
               </p>
-              <a href="/curriculum" className="inline-block bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors duration-200">
+              <a href="/curriculum" className="inline-block bg-primary-600 text-white px-6 py-2 rounded-lg hover:bg-primary-700 transition-colors duration-200">
                 Explore Curriculum
               </a>
             </div>
@@ -293,7 +309,7 @@ export default function Prerequisites() {
               <p className="text-gray-600 mb-4">
                 Join our program and start your journey towards mathematical olympiad success.
               </p>
-              <a href="/join" className="inline-block bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700 transition-colors duration-200">
+              <a href="/join" className="inline-block bg-success-600 text-white px-6 py-2 rounded-lg hover:bg-success-700 transition-colors duration-200">
                 Enroll Now
               </a>
             </div>

@@ -2,21 +2,53 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 export default function Navbar() {
   const pathname = usePathname();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isProgramDropdownOpen, setIsProgramDropdownOpen] = useState(false);
+  const [mounted, setMounted] = useState(false);
+
+  // Prevent hydration mismatch by only rendering after mount
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const navItems = [
     { name: 'Home', href: '/' },
-    { name: 'Pre-requisites', href: '/prerequisites' },
     { name: 'About Us', href: '/about' },
-    { name: 'Curriculum', href: '/curriculum' },
+    { name: 'Join', href: '/join' },
   ];
 
+  const programItems = [
+    {
+      name: 'Pre-requisites',
+      href: '/prerequisites',
+      description: 'Student should know following areas before joining the class'
+    },
+    {
+      name: 'Curriculum',
+      href: '/curriculum',
+      description: 'Following topics will be taught to the student in the course'
+    }
+  ];
+
+  // Always use the same className structure to prevent hydration mismatches
+  const getLinkClassName = (href: string, isActive: boolean) => {
+    const baseClasses = "px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200";
+    return `${baseClasses} ${isActive ? 'text-blue-600 bg-blue-50' : 'text-gray-700 hover:text-blue-600 hover:bg-gray-50'}`;
+  };
+
+  const getMobileLinkClassName = (href: string, isActive: boolean) => {
+    const baseClasses = "block px-3 py-2 rounded-md text-base font-medium transition-colors duration-200";
+    return `${baseClasses} ${isActive ? 'text-blue-600 bg-blue-50' : 'text-gray-700 hover:text-blue-600 hover:bg-gray-50'}`;
+  };
+
+  const isProgramActive = mounted && (pathname === '/prerequisites' || pathname === '/curriculum');
+
   return (
-    <nav className="bg-white shadow-lg border-b border-gray-200 sticky top-0 z-50">
+    <nav className="bg-white shadow-lg border-b border-gray-200 sticky top-0 z-50" suppressHydrationWarning>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-16">
           <div className="flex items-center">
@@ -34,22 +66,62 @@ export default function Navbar() {
               <Link
                 key={item.name}
                 href={item.href}
-                className={`px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200 ${
-                  pathname === item.href
-                    ? 'text-blue-600 bg-blue-50'
-                    : 'text-gray-700 hover:text-blue-600 hover:bg-gray-50'
-                }`}
+                className={mounted ? getLinkClassName(item.href, pathname === item.href) : "px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200 text-gray-700 hover:text-blue-600 hover:bg-gray-50"}
               >
                 {item.name}
               </Link>
             ))}
+
+            {/* Program Dropdown */}
+            <div className="relative">
+              <button
+                onClick={() => mounted && setIsProgramDropdownOpen(!isProgramDropdownOpen)}
+                onBlur={() => mounted && setTimeout(() => setIsProgramDropdownOpen(false), 150)}
+                className={mounted ? getLinkClassName('/program', isProgramActive) : "px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200 text-gray-700 hover:text-blue-600 hover:bg-gray-50 flex items-center"}
+                disabled={!mounted}
+              >
+                <span className="flex items-center">
+                  Program
+                  <svg
+                    className={`ml-1 h-4 w-4 transition-transform duration-200 ${
+                      mounted && isProgramDropdownOpen ? 'rotate-180' : ''
+                    }`}
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                  </svg>
+                </span>
+              </button>
+
+              {/* Dropdown Menu */}
+              {mounted && isProgramDropdownOpen && (
+                <div className="absolute right-0 mt-2 w-80 bg-white rounded-lg shadow-lg border border-gray-200 z-50">
+                  <div className="py-2">
+                    {programItems.map((item) => (
+                      <Link
+                        key={item.name}
+                        href={item.href}
+                        className="block px-4 py-3 hover:bg-gray-50 transition-colors duration-200"
+                        onClick={() => setIsProgramDropdownOpen(false)}
+                      >
+                        <div className="font-medium text-gray-900 mb-1">{item.name}</div>
+                        <div className="text-sm text-gray-600">{item.description}</div>
+                      </Link>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
 
           {/* Mobile menu button */}
           <div className="md:hidden flex items-center">
             <button
-              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+              onClick={() => mounted && setIsMobileMenuOpen(!isMobileMenuOpen)}
               className="inline-flex items-center justify-center p-2 rounded-md text-gray-700 hover:text-blue-600 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-blue-500"
+              disabled={!mounted}
             >
               <span className="sr-only">Open main menu</span>
               {!isMobileMenuOpen ? (
@@ -67,23 +139,37 @@ export default function Navbar() {
       </div>
 
       {/* Mobile Navigation */}
-      {isMobileMenuOpen && (
+      {mounted && isMobileMenuOpen && (
         <div className="md:hidden">
           <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3 bg-white border-t border-gray-200">
             {navItems.map((item) => (
               <Link
                 key={item.name}
                 href={item.href}
-                className={`block px-3 py-2 rounded-md text-base font-medium transition-colors duration-200 ${
-                  pathname === item.href
-                    ? 'text-blue-600 bg-blue-50'
-                    : 'text-gray-700 hover:text-blue-600 hover:bg-gray-50'
-                }`}
+                className={getMobileLinkClassName(item.href, pathname === item.href)}
                 onClick={() => setIsMobileMenuOpen(false)}
               >
                 {item.name}
               </Link>
             ))}
+            
+            {/* Mobile Program Section */}
+            <div className="border-t border-gray-200 pt-2 mt-2">
+              <div className="px-3 py-2 text-sm font-medium text-gray-500 uppercase tracking-wider">
+                Program
+              </div>
+              {programItems.map((item) => (
+                <Link
+                  key={item.name}
+                  href={item.href}
+                  className={getMobileLinkClassName(item.href, pathname === item.href)}
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  <div className="font-medium">{item.name}</div>
+                  <div className="text-sm text-gray-600 mt-1">{item.description}</div>
+                </Link>
+              ))}
+            </div>
           </div>
         </div>
       )}

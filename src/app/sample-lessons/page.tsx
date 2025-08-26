@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { Select, SelectItem } from "@heroui/react";
 
 interface VideoLesson {
   id: string;
@@ -86,13 +87,13 @@ export default function SampleLessons() {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
-      <section className="bg-gradient-to-r from-blue-600 to-purple-600 text-white py-16">
+      <section className="bg-gradient-to-r from-primary-600 to-secondary-600 text-white py-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center">
             <h1 className="text-4xl md:text-5xl font-bold mb-4">
               Sample Video Lessons
             </h1>
-            <p className="text-xl text-blue-100 max-w-3xl mx-auto">
+            <p className="text-xl text-primary-100 max-w-3xl mx-auto">
               Experience our teaching methodology through these carefully curated sample lessons. 
               Get a taste of our comprehensive curriculum designed for mathematical olympiad success.
             </p>
@@ -105,25 +106,70 @@ export default function SampleLessons() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <div className="flex flex-col sm:flex-row gap-4">
-              <select
-                value={selectedCategory}
-                onChange={(e) => setSelectedCategory(e.target.value)}
-                className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              <Select
+                // label="Category"
+                placeholder="Select a category"
+                color='primary'
+                // selectedKeys={[selectedCategory]}
+                onSelectionChange={(keys) => {
+                  const selected = Array.from(keys)[0] as string;
+                  setSelectedCategory(selected);
+                }}
+                className="w-full sm:w-48"
+                variant="underlined"
+                size="md"
+                classNames={{
+                  base: "w-full sm:w-48",
+                  trigger: "bg-white border-gray-300 hover:border-gray-400 focus:border-primary-500",
+                  listbox: "bg-white border border-gray-300 shadow-2xl rounded-lg z-[9999]",
+                  listboxWrapper: "bg-white rounded-lg",
+                  popoverContent: "bg-white rounded-lg shadow-2xl border border-gray-200 z-[9999]",
+                  selectorIcon: "text-foreground-500",
+                  value: "text-gray-900 font-medium",
+                  label: "text-primary-700 font-medium"
+                }}
               >
                 {categories.map(category => (
-                  <option key={category} value={category}>{category}</option>
+                  <SelectItem 
+                    key={category}
+                    className="text-gray-900 font-medium hover:bg-gray-100"
+                  >
+                    {category}
+                  </SelectItem>
                 ))}
-              </select>
+              </Select>
               
-              <select
-                value={selectedDifficulty}
-                onChange={(e) => setSelectedDifficulty(e.target.value)}
-                className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              <Select
+                // label="Difficulty"
+                placeholder="Select difficulty"
+                // selectedKeys={[selectedDifficulty]}
+                onSelectionChange={(keys) => {
+                  const selected = Array.from(keys)[0] as string;
+                  setSelectedDifficulty(selected);
+                }}
+                className="w-full sm:w-48"
+                variant="bordered"
+                size="md"
+                classNames={{
+                  base: "w-full sm:w-48",
+                  trigger: "bg-white border-gray-300 hover:border-gray-400 focus:border-primary-500",
+                  listbox: "bg-white border border-gray-300 shadow-2xl rounded-lg z-[9999]",
+                  listboxWrapper: "bg-white rounded-lg",
+                  popoverContent: "bg-white rounded-lg shadow-2xl border border-gray-200 z-[9999]",
+                  selectorIcon: "text-gray-500",
+                  value: "text-gray-900 font-medium",
+                  label: "text-gray-700 font-medium"
+                }}
               >
                 {difficulties.map(difficulty => (
-                  <option key={difficulty} value={difficulty}>{difficulty}</option>
+                  <SelectItem 
+                    key={difficulty}
+                    className="text-gray-900 font-medium hover:bg-gray-100"
+                  >
+                    {difficulty}
+                  </SelectItem>
                 ))}
-              </select>
+              </Select>
             </div>
           </div>
         </div>
@@ -160,9 +206,9 @@ export default function SampleLessons() {
                   <span>Category: {selectedVideo.category}</span>
                   <span>Duration: {selectedVideo.duration}</span>
                   <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                    selectedVideo.difficulty === 'Beginner' ? 'bg-green-100 text-green-800' :
-                    selectedVideo.difficulty === 'Intermediate' ? 'bg-blue-100 text-blue-800' :
-                    'bg-purple-100 text-purple-800'
+                    selectedVideo.difficulty === 'Beginner' ? 'bg-success-100 text-success-800' :
+                    selectedVideo.difficulty === 'Intermediate' ? 'bg-primary-100 text-primary-800' :
+                    'bg-secondary-100 text-secondary-800'
                   }`}>
                     {selectedVideo.difficulty}
                   </span>
@@ -207,9 +253,9 @@ export default function SampleLessons() {
                     </div>
                     <div className="absolute top-2 right-2">
                       <span className={`px-2 py-1 rounded-full text-xs font-medium text-white ${
-                        lesson.difficulty === 'Beginner' ? 'bg-green-600' :
-                        lesson.difficulty === 'Intermediate' ? 'bg-blue-600' :
-                        'bg-purple-600'
+                        lesson.difficulty === 'Beginner' ? 'bg-success-600' :
+                        lesson.difficulty === 'Intermediate' ? 'bg-primary-600' :
+                        'bg-secondary-600'
                       }`}>
                         {lesson.difficulty}
                       </span>
@@ -236,24 +282,24 @@ export default function SampleLessons() {
       </section>
 
       {/* Call to Action */}
-      <section className="py-16 bg-gradient-to-r from-blue-600 to-purple-600 text-white">
+      <section className="py-16 bg-gradient-to-r from-primary-600 to-secondary-600 text-white">
         <div className="max-w-4xl mx-auto text-center px-4 sm:px-6 lg:px-8">
           <h2 className="text-3xl md:text-4xl font-bold mb-6">
             Ready to Join the Full Program?
           </h2>
-          <p className="text-xl mb-8 text-blue-100">
+          <p className="text-xl mb-8 text-primary-100">
             Get access to our complete curriculum with hundreds of video lessons, practice problems, and expert guidance.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <a
               href="/join"
-              className="bg-white text-blue-600 px-8 py-3 rounded-lg font-semibold hover:bg-gray-100 transition-colors duration-200 inline-block"
+              className="bg-white text-primary-600 px-8 py-3 rounded-lg font-semibold hover:bg-gray-100 transition-colors duration-200 inline-block"
             >
               Enroll Now
             </a>
             <a
               href="/curriculum"
-              className="border-2 border-white text-white px-8 py-3 rounded-lg font-semibold hover:bg-white hover:text-blue-600 transition-colors duration-200 inline-block"
+              className="border-2 border-white text-white px-8 py-3 rounded-lg font-semibold hover:bg-white hover:text-primary-600 transition-colors duration-200 inline-block"
             >
               View Full Curriculum
             </a>

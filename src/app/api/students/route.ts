@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import connectDB from '@/lib/mongodb';
 import Student from '@/models/Student';
+import { sendAdminNotification, sendThankYouEmail, validateEmail, checkRateLimit } from '@/lib/email';
 
 export async function POST(request: NextRequest) {
   try {
@@ -24,11 +25,56 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Email validation and spam protection
+    const emailValidation = validateEmail(email);
+    if (!emailValidation.isValid) {
+      return NextResponse.json(
+        { error: emailValidation.reason },
+        { status: 400 }
+      );
+    }
+
+    // Rate limiting check (by IP address)
+    const clientIP = request.headers.get('x-forwarded-for') || 
+                    request.headers.get('x-real-ip') || 
+                    'unknown';
+    
+    if (!checkRateLimit(clientIP, 3, 60000)) { // 3 attempts per minute
+      return NextResponse.json(
+        { error: 'Too many registration attempts. Please try again later.' },
+        { status: 429 }
+      );
+    }
+
+    // Rate limiting check (by email)
+    if (!checkRateLimit(email, 2, 300000)) { // 2 attempts per 5 minutes per email
+      return NextResponse.json(
+        { error: 'Too many registration attempts with this email. Please try again later.' },
+        { status: 429 }
+      );
+    }
+
     // Check if email already exists
     const existingStudent = await Student.findOne({ email });
     if (existingStudent) {
       return NextResponse.json(
         { error: 'A student with this email already exists' },
+        { status: 400 }
+      );
+    }
+
+    // Additional spam detection
+    const suspiciousPatterns = [
+      /^test/i, /^admin/i, /^info/i, /^contact/i, /^hello/i, /^hi/i,
+      /^a$/i, /^b$/i, /^c$/i, /^user/i, /^demo/i, /^sample/i, /^example/i
+    ];
+
+    const isSuspiciousName = suspiciousPatterns.some(pattern => pattern.test(name));
+    const isSuspiciousSchool = suspiciousPatterns.some(pattern => pattern.test(schoolName));
+
+    if (isSuspiciousName || isSuspiciousSchool) {
+      return NextResponse.json(
+        { error: 'Invalid information provided. Please provide real details.' },
         { status: 400 }
       );
     }
@@ -45,9 +91,39 @@ export async function POST(request: NextRequest) {
 
     await student.save();
 
+    // Send emails asynchronously (don't wait for them to complete)
+    Promise.all([
+      sendAdminNotification({
+        name,
+        currentClass,
+        schoolName,
+        phoneNumber,
+        email,
+        prerequisites
+      }),
+      sendThankYouEmail({
+        name,
+        currentClass,
+        schoolName,
+        phoneNumber,
+        email,
+        prerequisites
+      })
+    ]).then(([adminEmailSent, thankYouEmailSent]) => {
+      if (!adminEmailSent) {
+        console.error('Failed to send admin notification email');
+      }
+      if (!thankYouEmailSent) {
+        console.error('Failed to send thank you email');
+      }
+    }).catch(error => {
+      console.error('Email sending error:', error);
+      // Don't fail the registration if emails fail
+    });
+
     return NextResponse.json(
       { 
-        message: 'Registration successful! We will contact you soon.',
+        message: 'Registration successful! We will contact you soon. Please check your email for confirmation.',
         studentId: student._id 
       },
       { status: 201 }

@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { useForm } from 'react-hook-form';
+import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { Input, Select, SelectItem, Button, Checkbox, Card, CardBody, CardHeader, Divider } from "@heroui/react";
@@ -65,6 +65,7 @@ export default function Join() {
 
   const {
     register,
+    control,
     handleSubmit,
     formState: { errors },
     reset,
@@ -118,6 +119,16 @@ export default function Join() {
   const onSubmit = async (data: FormData) => {
     setIsSubmitting(true);
     setSubmitStatus('idle');
+
+    // Honeypot validation
+    const formData = new FormData(document.querySelector('form') as HTMLFormElement);
+    const honeypotValue = formData.get('website');
+    if (honeypotValue) {
+      setSubmitStatus('error');
+      setSubmitMessage('Invalid submission detected.');
+      setIsSubmitting(false);
+      return;
+    }
 
     try {
       const response = await fetch('/api/students', {
@@ -236,38 +247,20 @@ export default function Join() {
             </CardHeader>
 
             <CardBody className="px-8 pb-8">
-              {/* Status Messages */}
-              {submitStatus === 'success' && (
-                <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg">
-                  <div className="flex">
-                    <div className="flex-shrink-0">
-                      <svg className="h-5 w-5 text-green-400" viewBox="0 0 20 20" fill="currentColor">
-                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                      </svg>
-                    </div>
-                    <div className="ml-3">
-                      <p className="text-sm font-medium text-green-800">{submitMessage}</p>
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {submitStatus === 'error' && (
-                <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
-                  <div className="flex">
-                    <div className="flex-shrink-0">
-                      <svg className="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
-                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
-                      </svg>
-                    </div>
-                    <div className="ml-3">
-                      <p className="text-sm font-medium text-red-800">{submitMessage}</p>
-                    </div>
-                  </div>
-                </div>
-              )}
+            
 
               <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+                {/* Honeypot field for bot protection */}
+                <div className="hidden">
+                  <input
+                    type="text"
+                    name="website"
+                    tabIndex={-1}
+                    autoComplete="off"
+                    style={{ position: 'absolute', left: '-9999px' }}
+                  />
+                </div>
+
                 {/* Required Fields Note */}
                 <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
                   <p className="text-sm text-blue-800">
@@ -282,66 +275,76 @@ export default function Join() {
                   </h3>
                   <div className="grid md:grid-cols-2 gap-6">
                     <div>
-                      <Input
-                        type="text"
-                        // label="Full Name *"
-                        placeholder="Enter your full name"
-                        {...register('name')}
-                        isInvalid={!!errors.name}
-                        errorMessage={errors.name?.message}
-                        variant="bordered"
-                        size="lg"
-                        classNames={{
-                          input: "text-gray-900 placeholder:text-gray-500",
-                          inputWrapper: "bg-white",
-                          label: "text-gray-700 font-medium"
-                        }}
-                      />
+                                              <Input
+                          type="text"
+                          // label="Full Name *"
+                          placeholder="Enter your full name"
+                          {...register('name')}
+                          isInvalid={!!errors.name}
+                          errorMessage={errors.name?.message}
+                          variant="bordered"
+                          size="lg"
+                          classNames={{
+                            input: "text-gray-900 placeholder:text-gray-500",
+                            inputWrapper: "bg-white",
+                            label: "text-gray-700 font-medium"
+                          }}
+                        />
                     </div>
 
-                    <div>
-                      <Select
-                        // label="Current Class *"
-                        placeholder="Select your class"
-                        {...register('currentClass')}
-                        isInvalid={!!errors.currentClass}
-                        errorMessage={errors.currentClass?.message}
-                        variant="bordered"
-                        size="lg"
-                        classNames={{
-                          trigger: "bg-white",
-                          value: "text-black",
-                          base: "w-full",
-                          listbox: "bg-white border border-gray-200 shadow-lg z-50",
-                          selectorIcon: "text-gray-500",
-                          label: "text-gray-700 font-medium"
-                        }}
-                      >
-                                              <SelectItem key="Class 7" className="text-black">Class 7</SelectItem>
-                        <SelectItem key="Class 8" className="text-black">Class 8</SelectItem>
-                        <SelectItem key="Class 9" className="text-black">Class 9</SelectItem>
-                        <SelectItem key="Class 10" className="text-black">Class 10</SelectItem>
-                        <SelectItem key="Class 11" className="text-black">Class 11</SelectItem>
-                        <SelectItem key="Class 12" className="text-black">Class 12</SelectItem>
-                      </Select>
+                                        <div>
+                      <Controller
+                        name="currentClass"
+                        control={control}
+                        render={({ field }) => (
+                          <Select
+                            // label="Current Class *"
+                            placeholder="Select your class"
+                            selectedKeys={field.value ? [field.value] : []}
+                            onSelectionChange={(keys) => {
+                              const selectedKey = Array.from(keys)[0] as string;
+                              field.onChange(selectedKey);
+                            }}
+                            isInvalid={!!errors.currentClass}
+                            errorMessage={errors.currentClass?.message}
+                            variant="bordered"
+                            size="lg"
+                            classNames={{
+                              trigger: "bg-white",
+                              value: "text-black",
+                              base: "w-full",
+                              listbox: "bg-white border border-gray-200 shadow-lg z-50",
+                              selectorIcon: "text-gray-500",
+                              label: "text-gray-700 font-medium"
+                            }}
+                          >
+                            <SelectItem key="Class 7" className="text-black">Class 7</SelectItem>
+                            <SelectItem key="Class 8" className="text-black">Class 8</SelectItem>
+                            <SelectItem key="Class 9" className="text-black">Class 9</SelectItem>
+                            <SelectItem key="Class 10" className="text-black">Class 10</SelectItem>
+                            <SelectItem key="Class 11" className="text-black">Class 11</SelectItem>
+                            <SelectItem key="Class 12" className="text-black">Class 12</SelectItem>
+                          </Select>
+                        )}
+                      />
                     </div>
                   </div>
 
-                  <Input
-                    type="text"
-                    // label="School Name *"
-                    placeholder="Enter your school name"
-                    {...register('schoolName')}
-                    isInvalid={!!errors.schoolName}
-                    errorMessage={errors.schoolName?.message}
-                    variant="bordered"
-                    size="lg"
-                    classNames={{
-                      input: "text-gray-900 placeholder:text-gray-500",
-                      inputWrapper: "bg-white",
-                      label: "text-gray-700 font-medium"
-                    }}
-                  />
+                                      <Input
+                      type="text"
+                      // label="School Name *"
+                      placeholder="Enter your school name"
+                      {...register('schoolName')}
+                      isInvalid={!!errors.schoolName}
+                      errorMessage={errors.schoolName?.message}
+                      variant="bordered"
+                      size="lg"
+                      classNames={{
+                        input: "text-gray-900 placeholder:text-gray-500",
+                        inputWrapper: "bg-white",
+                        label: "text-gray-700 font-medium"
+                      }}
+                    />
 
                   <div className="grid md:grid-cols-2 gap-6">
                     <Input
@@ -435,6 +438,37 @@ export default function Join() {
                     {isSubmitting ? 'Submitting...' : 'Submit'}
                   </button>
                 </div>
+
+                  {/* Status Messages */}
+              {submitStatus === 'success' && (
+                <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg">
+                  <div className="flex">
+                    <div className="flex-shrink-0">
+                      <svg className="h-5 w-5 text-green-400" viewBox="0 0 20 20" fill="currentColor">
+                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                      </svg>
+                    </div>
+                    <div className="ml-3">
+                      <p className="text-sm font-medium text-green-800">{submitMessage}</p>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {submitStatus === 'error' && (
+                <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
+                  <div className="flex">
+                    <div className="flex-shrink-0">
+                      <svg className="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
+                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                      </svg>
+                    </div>
+                    <div className="ml-3">
+                      <p className="text-sm font-medium text-red-800">{submitMessage}</p>
+                    </div>
+                  </div>
+                </div>
+              )}
               </form>
             </CardBody>
           </Card>

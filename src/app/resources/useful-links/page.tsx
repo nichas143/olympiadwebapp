@@ -1,4 +1,43 @@
 export default function UsefulLinksPage() {
+  // Color scheme for different categories
+  const categoryColors = [
+    {
+      bg: "bg-blue-50",
+      border: "border-blue-200",
+      text: "text-blue-800",
+      link: "text-blue-600",
+      linkHover: "hover:text-blue-800"
+    },
+    {
+      bg: "bg-green-50",
+      border: "border-green-200", 
+      text: "text-green-800",
+      link: "text-green-600",
+      linkHover: "hover:text-green-800"
+    },
+    {
+      bg: "bg-purple-50",
+      border: "border-purple-200",
+      text: "text-purple-800", 
+      link: "text-purple-600",
+      linkHover: "hover:text-purple-800"
+    },
+    {
+      bg: "bg-orange-50",
+      border: "border-orange-200",
+      text: "text-orange-800",
+      link: "text-orange-600", 
+      linkHover: "hover:text-orange-800"
+    },
+    {
+      bg: "bg-pink-50",
+      border: "border-pink-200",
+      text: "text-pink-800",
+      link: "text-pink-600",
+      linkHover: "hover:text-pink-800"
+    }
+  ];
+
   const usefulLinks = [
     {
       category: "Problem Solving Platforms",
@@ -137,45 +176,51 @@ export default function UsefulLinksPage() {
 
         {/* Links Grid */}
         <div className="space-y-8">
-          {usefulLinks.map((category, categoryIndex) => (
-            <div key={categoryIndex} className="bg-white rounded-lg shadow-md p-6">
-              <h2 className="text-2xl font-semibold text-gray-900 mb-6 border-b border-gray-200 pb-2">
-                {category.category}
-              </h2>
-              <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-                {category.links.map((link, linkIndex) => (
-                  <div key={linkIndex} className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow duration-200">
-                    <h3 className="text-lg font-medium text-blue-600 mb-2">
-                      <a 
-                        href={link.url} 
-                        target="_blank" 
-                        rel="noopener noreferrer"
-                        className="hover:text-blue-800 transition-colors duration-200"
-                      >
-                        {link.name}
-                      </a>
-                    </h3>
-                    <p className="text-gray-600 text-sm leading-relaxed">
-                      {link.description}
-                    </p>
-                    <div className="mt-3">
-                      <a 
-                        href={link.url} 
-                        target="_blank" 
-                        rel="noopener noreferrer"
-                        className="inline-flex items-center text-sm text-blue-600 hover:text-blue-800 font-medium"
-                      >
-                        Visit Site
-                        <svg className="ml-1 h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-                        </svg>
-                      </a>
+          {usefulLinks.map((category, categoryIndex) => {
+            const colorScheme = categoryColors[categoryIndex % categoryColors.length];
+            return (
+              <div key={categoryIndex} className="bg-white rounded-lg shadow-md p-6">
+                <h2 className="text-2xl font-semibold text-gray-900 mb-6 border-b border-gray-200 pb-2">
+                  {category.category}
+                </h2>
+                <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+                  {category.links.map((link, linkIndex) => (
+                    <div 
+                      key={linkIndex} 
+                      className={`${colorScheme.bg} ${colorScheme.border} border rounded-lg p-4 hover:shadow-md transition-shadow duration-200`}
+                    >
+                      <h3 className={`text-lg font-medium ${colorScheme.link} mb-2`}>
+                        <a 
+                          href={link.url} 
+                          target="_blank" 
+                          rel="noopener noreferrer"
+                          className={`${colorScheme.linkHover} transition-colors duration-200`}
+                        >
+                          {link.name}
+                        </a>
+                      </h3>
+                      <p className={`${colorScheme.text} text-sm leading-relaxed`}>
+                        {link.description}
+                      </p>
+                      <div className="mt-3">
+                        <a 
+                          href={link.url} 
+                          target="_blank" 
+                          rel="noopener noreferrer"
+                          className={`inline-flex items-center text-sm ${colorScheme.link} ${colorScheme.linkHover} font-medium`}
+                        >
+                          Visit Site
+                          <svg className="ml-1 h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                          </svg>
+                        </a>
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  ))}
+                </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
 
         {/* Additional Information */}

@@ -34,12 +34,12 @@ const sampleLessons: VideoLesson[] = [
   },
   {
     id: '3',
-    title: 'Algebraic Inequalities',
-    description: 'Explore techniques for solving and proving algebraic inequalities.',
-    category: 'Algebra',
-    duration: '52 min',
+    title: 'Miquel\'s theorem',
+    description: 'Miquels Point and Theorem.',
+    category: 'Geometry',
+    duration: '6 min',
     difficulty: 'Intermediate',
-    youtubeId: 'dQw4w9WgXcQ' // Replace with actual YouTube video ID
+    youtubeId: 'V1wbNqiw8a4' // Replace with actual YouTube video ID
   },
   {
     id: '4',

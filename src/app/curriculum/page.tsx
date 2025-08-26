@@ -12,22 +12,22 @@ export default function Curriculum() {
         },
         {
           title: 'Elementary Algebra',
-          topics: ['Polynomials', 'Quadratic Equations', 'Inequalities', 'Functions'],
+          topics: ['Polynomials', 'Quadratic Equations', 'Basic Inequalities', 'Sequences Series'],
           duration: '6 weeks',
           difficulty: 'Beginner',
           description: 'Master fundamental algebraic techniques and problem-solving strategies.'
         },
         {
           title: 'Basic Geometry',
-          topics: ['Triangles', 'Circles', 'Quadrilaterals', 'Area & Perimeter'],
-          duration: '5 weeks',
+          topics: ['Triangles', 'Circles', 'Quadrilaterals','Angle Chasing','Ratios','Similarity','Congruence','Pythagoras Theorem'],
+          duration: '10 weeks',
           difficulty: 'Beginner',
           description: 'Develop geometric intuition and learn essential geometric properties.'
         },
         {
           title: 'Introduction to Combinatorics',
-          topics: ['Counting Principles', 'Permutations', 'Combinations', 'Basic Probability'],
-          duration: '4 weeks',
+          topics: ['Counting Principles', 'Permutations in general', 'Combinations without repetition'],
+          duration: '5 weeks',
           difficulty: 'Beginner',
           description: 'Learn fundamental counting techniques and combinatorial reasoning.'
         }
@@ -38,7 +38,7 @@ export default function Curriculum() {
       modules: [
         {
           title: 'Advanced Number Theory',
-          topics: ['Chinese Remainder Theorem', 'Euler\'s Totient', 'Quadratic Residues', 'Diophantine Equations'],
+          topics: ['Chinese Remainder Theorem', 'Euler\'s Totient', 'Congruence equations', 'Diophantine Equations'],
           duration: '6 weeks',
           difficulty: 'Intermediate',
           description: 'Explore advanced number theory concepts frequently appearing in olympiads.'
@@ -52,7 +52,7 @@ export default function Curriculum() {
         },
         {
           title: 'Synthetic Geometry',
-          topics: ['Power of a Point', 'Inversion', 'Homothety', 'Advanced Triangle Centers'],
+          topics: ['Power of a Point', 'Inversion', 'Homothety', 'Advanced Triangle Centers','Coordinate Geometry'],
           duration: '7 weeks',
           difficulty: 'Intermediate',
           description: 'Learn advanced geometric transformations and synthetic methods.'
@@ -97,7 +97,7 @@ export default function Curriculum() {
   const learningFeatures = [
     {
       title: 'Interactive Lessons',
-      description: 'Engaging video lessons with step-by-step explanations of concepts and techniques.',
+      description: 'Engaging online lessons with step-by-step explanations of concepts and techniques.',
       icon: '🎥'
     },
     {
@@ -107,24 +107,24 @@ export default function Curriculum() {
     },
     {
       title: 'Live Sessions',
-      description: 'Weekly live doubt-clearing sessions with expert instructors.',
+      description: 'Weekly live doubt-clearing sessions',
       icon: '🎯'
     },
-    {
-      title: 'Progress Tracking',
-      description: 'Monitor your learning progress with detailed analytics and performance reports.',
-      icon: '📊'
-    },
+    // {
+    //   title: 'Progress Tracking',
+    //   description: 'Monitor your learning progress with detailed analytics and performance reports.',
+    //   icon: '📊'
+    // },
     {
       title: 'Mock Tests',
-      description: 'Regular mock tests simulating real olympiad exam conditions.',
+      description: 'Regular mock tests simulating real olympiad exams',
       icon: '⏱️'
     },
-    {
-      title: 'Community Support',
-      description: 'Join study groups and forums to discuss problems with peers.',
-      icon: '👥'
-    }
+    // {
+    //   title: 'Community Support',
+    //   description: 'Join study groups and forums to discuss problems with peers.',
+    //   icon: '👥'
+    // }
   ];
 
   const examPreparation = [

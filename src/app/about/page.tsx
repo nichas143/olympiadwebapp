@@ -1,53 +1,33 @@
 export default function About() {
   const teamMembers = [
-    {
-      name: 'Dr. Rajesh Kumar',
-      role: 'Lead Mathematics Instructor',
-      expertise: 'Former INMO qualifier, PhD in Mathematics',
-      description: 'Specializes in Number Theory and Combinatorics with 15+ years of olympiad coaching experience.',
-      achievements: ['INMO 2005', 'PhD Mathematics', '15+ Years Teaching']
+     {
+      name: 'Mr. Sachin Gadkar',
+      role: 'Mathematics Instructor',
+      expertise: 'Math Olympiad Trainer',
+      description: 'Developed Math Olympiad curriculum from basic to advanced level',
+      achievements: [ 'Masters in Mathematics,IITB', 'JEE Advanced Trainer', '22+ Years Teaching']
     },
-    {
-      name: 'Prof. Priya Sharma',
-      role: 'Geometry Specialist',
-      expertise: 'IMO Training Camp Mentor',
-      description: 'Expert in Euclidean and Synthetic Geometry with a passion for making complex concepts accessible.',
-      achievements: ['IMO Mentor', 'Geometry Expert', '10+ Years Experience']
-    },
-    {
-      name: 'Dr. Amit Patel',
-      role: 'Algebra & Analysis Expert',
-      expertise: 'Former RMO Coordinator',
-      description: 'Deep knowledge of advanced algebra and mathematical analysis techniques for olympiad problems.',
-      achievements: ['RMO Coordinator', 'PhD Mathematics', '12+ Years Teaching']
-    },
-    {
-      name: 'Ms. Sneha Reddy',
-      role: 'Combinatorics & Problem Solving',
-      expertise: 'National Olympiad Winner',
-      description: 'Specializes in combinatorial problems and creative problem-solving strategies.',
-      achievements: ['National Winner', 'Problem Solving Expert', '8+ Years Experience']
-    }
+    
   ];
 
   const achievements = [
     {
-      number: '500+',
+      number: '100+',
       label: 'Students Qualified for RMO',
       description: 'Successfully guided students to regional level'
     },
     {
-      number: '150+',
-      label: 'INMO Qualifiers',
+      number: '30+',
+      label: 'IOQM & RMO Qualifiers',
       description: 'Students who reached national level'
     },
     {
-      number: '25+',
+      number: '5+',
       label: 'IMO Training Camp Selections',
       description: 'Students selected for international training'
     },
     {
-      number: '95%',
+      number: '80%',
       label: 'Success Rate',
       description: 'Students who improved their performance'
     }
@@ -102,18 +82,15 @@ export default function About() {
               </h2>
               <div className="space-y-4 text-lg text-gray-700">
                 <p>
-                  Founded in 2010 by a group of former mathematical olympiad participants and educators, 
+                  Founded in 2010 by Mr. Sachin Gadkar, 
                   our organization was born from a simple belief: every talented student deserves the 
-                  opportunity to excel in mathematics and represent their country internationally.
+                  opportunity to excel in mathematics and and make most out of this opportunity of learning non-traditional Mathematical curriculum.
                 </p>
                 <p>
-                  What started as a small coaching center has grown into a comprehensive platform 
-                  that has helped hundreds of students qualify for various stages of the Indian 
-                  Mathematical Olympiad program.
+                  Purpose is to enhance problem solving skill and abstract thinking which eventually helps students excel in Mathematical and in general thinking. As a by-product selections in IOQM, RMO, INMO and JEE Advanced towards IITs. 
                 </p>
                 <p>
-                  Our team consists of former olympiad winners, PhD mathematicians, and experienced 
-                  educators who understand the challenges and requirements of mathematical olympiad preparation.
+                  This venture is a small endevour to form only one batch of students on a yearly basis for Coaching MathOlympiad right from class 7th till class 10th.
                 </p>
               </div>
             </div>
@@ -194,7 +171,7 @@ export default function About() {
             </p>
           </div>
           
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
+          <div className="grid md:grid-cols-1 lg:grid-cols-1 gap-8">
             {teamMembers.map((member, index) => (
               <div key={index} className="bg-white rounded-xl p-6 shadow-sm hover:shadow-lg transition-shadow duration-200">
                 <div className="w-20 h-20 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full mx-auto mb-4 flex items-center justify-center text-white text-2xl font-bold">
@@ -203,7 +180,7 @@ export default function About() {
                 <h3 className="text-xl font-bold text-gray-900 text-center mb-1">{member.name}</h3>
                 <p className="text-blue-600 text-center font-medium mb-2">{member.role}</p>
                 <p className="text-sm text-gray-600 text-center mb-3">{member.expertise}</p>
-                <p className="text-gray-700 text-sm mb-4">{member.description}</p>
+                {/* <p className="text-gray-700 text-sm mb-4">{member.description}</p> */}
                 <div className="flex flex-wrap gap-1 justify-center">
                   {member.achievements.map((achievement, achievementIndex) => (
                     <span key={achievementIndex} className="bg-gray-100 text-gray-700 px-2 py-1 rounded-full text-xs">

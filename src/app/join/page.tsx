@@ -8,13 +8,13 @@ import { Input, Select, SelectItem, Button, Checkbox, Card, CardBody, CardHeader
 
 // Form validation schema
 const formSchema = z.object({
-  name: z.string().min(2, 'Name must be at least 2 characters').max(100, 'Name cannot exceed 100 characters'),
-  currentClass: z.enum(['Class 8', 'Class 9', 'Class 10', 'Class 11', 'Class 12'], {
+  name: z.string().min(1, 'Full name is required').min(2, 'Name must be at least 2 characters').max(100, 'Name cannot exceed 100 characters'),
+  currentClass: z.enum(['Class 7', 'Class 8', 'Class 9', 'Class 10', 'Class 11', 'Class 12'], {
     required_error: 'Please select your current class'
   }),
-  schoolName: z.string().min(2, 'School name must be at least 2 characters').max(200, 'School name cannot exceed 200 characters'),
-  phoneNumber: z.string().regex(/^[0-9]{10}$/, 'Please enter a valid 10-digit phone number'),
-  email: z.string().email('Please enter a valid email address'),
+  schoolName: z.string().min(1, 'School name is required').min(2, 'School name must be at least 2 characters').max(200, 'School name cannot exceed 200 characters'),
+  phoneNumber: z.string().min(1, 'Phone number is required').regex(/^[0-9]{10}$/, 'Please enter a valid 10-digit phone number'),
+  email: z.string().min(1, 'Email address is required').email('Please enter a valid email address'),
   prerequisites: z.object({
     // Algebra
     basicFractions: z.boolean(),
@@ -268,44 +268,63 @@ export default function Join() {
               )}
 
               <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+                {/* Required Fields Note */}
+                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+                  <p className="text-sm text-blue-800">
+                    <span className="font-semibold">Note:</span> Fields marked with <span className="text-red-500 font-bold">*</span> are required. Please fill in all required fields to submit your application.
+                  </p>
+                </div>
+
                 {/* Personal Information */}
                 <div className="space-y-6">
+                  <h3 className="text-xl font-semibold text-gray-900 mb-4">
+                    Personal Information <span className="text-red-500">*</span>
+                  </h3>
                   <div className="grid md:grid-cols-2 gap-6">
-                    <Input
-                      type="text"
-                      // label="Full Name *"
-                      placeholder="Enter your full name"
-                      {...register('name')}
-                      isInvalid={!!errors.name}
-                      errorMessage={errors.name?.message}
-                      variant="bordered"
-                      size="lg"
-                      classNames={{
-                        input: "text-gray-900 placeholder:text-gray-500",
-                        inputWrapper: "bg-white"
-                      }}
-                    />
+                    <div>
+                      <Input
+                        type="text"
+                        // label="Full Name *"
+                        placeholder="Enter your full name"
+                        {...register('name')}
+                        isInvalid={!!errors.name}
+                        errorMessage={errors.name?.message}
+                        variant="bordered"
+                        size="lg"
+                        classNames={{
+                          input: "text-gray-900 placeholder:text-gray-500",
+                          inputWrapper: "bg-white",
+                          label: "text-gray-700 font-medium"
+                        }}
+                      />
+                    </div>
 
-                    <Select
-                      // label="Current Class *"
-                      placeholder="Select your class"
-                      {...register('currentClass')}
-                      isInvalid={!!errors.currentClass}
-                      errorMessage={errors.currentClass?.message}
-                      variant="bordered"
-                      size="lg"
-                      classNames={{
-                        trigger: "bg-white",
-                        value: "text-black"
-                      }}
-                    >
-                      <SelectItem key="Class 7">Class 7</SelectItem>
-                      <SelectItem key="Class 8">Class 8</SelectItem>
-                      <SelectItem key="Class 9">Class 9</SelectItem>
-                      <SelectItem key="Class 10">Class 10</SelectItem>
-                      <SelectItem key="Class 11">Class 11</SelectItem>
-                      <SelectItem key="Class 12">Class 12</SelectItem>
-                    </Select>
+                    <div>
+                      <Select
+                        // label="Current Class *"
+                        placeholder="Select your class"
+                        {...register('currentClass')}
+                        isInvalid={!!errors.currentClass}
+                        errorMessage={errors.currentClass?.message}
+                        variant="bordered"
+                        size="lg"
+                        classNames={{
+                          trigger: "bg-white",
+                          value: "text-black",
+                          base: "w-full",
+                          listbox: "bg-white border border-gray-200 shadow-lg z-50",
+                          selectorIcon: "text-gray-500",
+                          label: "text-gray-700 font-medium"
+                        }}
+                      >
+                                              <SelectItem key="Class 7" className="text-black">Class 7</SelectItem>
+                        <SelectItem key="Class 8" className="text-black">Class 8</SelectItem>
+                        <SelectItem key="Class 9" className="text-black">Class 9</SelectItem>
+                        <SelectItem key="Class 10" className="text-black">Class 10</SelectItem>
+                        <SelectItem key="Class 11" className="text-black">Class 11</SelectItem>
+                        <SelectItem key="Class 12" className="text-black">Class 12</SelectItem>
+                      </Select>
+                    </div>
                   </div>
 
                   <Input
@@ -319,7 +338,8 @@ export default function Join() {
                     size="lg"
                     classNames={{
                       input: "text-gray-900 placeholder:text-gray-500",
-                      inputWrapper: "bg-white"
+                      inputWrapper: "bg-white",
+                      label: "text-gray-700 font-medium"
                     }}
                   />
 
@@ -335,7 +355,8 @@ export default function Join() {
                       size="lg"
                       classNames={{
                         input: "text-gray-900 placeholder:text-gray-500",
-                        inputWrapper: "bg-white"
+                        inputWrapper: "bg-white",
+                        label: "text-gray-700 font-medium"
                       }}
                     />
 
@@ -350,7 +371,8 @@ export default function Join() {
                       size="lg"
                       classNames={{
                         input: "text-gray-900 placeholder:text-gray-500",
-                        inputWrapper: "bg-white"
+                        inputWrapper: "bg-white",
+                        label: "text-gray-700 font-medium"
                       }}
                     />
                   </div>
@@ -364,7 +386,7 @@ export default function Join() {
                     Prerequisites Knowledge Assessment
                   </h3>
                   <p className="text-sm text-gray-600 mb-6">
-                    Please indicate which topics you are familiar with. This helps us understand your current level and provide appropriate guidance. Check all topics that you have studied and are comfortable with.
+                    Please indicate which topics you are familiar with. This helps us understand your current level and provide appropriate guidance. Check all topics that you have studied and are comfortable with. <span className="text-blue-600 font-medium">This section is optional but recommended.</span>
                   </p>
                   
                   <div className="space-y-6">
@@ -376,25 +398,22 @@ export default function Join() {
                             {category.category}
                           </h4>
                         </CardHeader>
-                        <CardBody className="pt-0 flex">
-                          <div className="space-y-3 flex flex-col px-4">
+                        <CardBody className="pt-0">
+                          <div className="space-y-3 px-4">
                             
                             {category.topics.map((topic) => (
-                               <div className="flex justify-between gap-2" key={topic.key}>
-                                <div className="text-black">
-                                  {topic.label}
-                                </div>
+                               <div className="flex items-start gap-3" key={topic.key}>
                                 <Checkbox
-                                  key={topic.key}
                                   {...register(`prerequisites.${topic.key as keyof FormData['prerequisites']}`)}
                                   size="sm"
                                   color="primary"
                                   classNames={{
-                                    base: "text-black"
+                                    base: "mt-0.5"
                                   }}
-                                >
-                               
-                                </Checkbox>
+                                />
+                                <div className="text-black text-sm leading-relaxed">
+                                  {topic.label}
+                                </div>
                                </div>
                             ))}
                           </div>
@@ -406,15 +425,15 @@ export default function Join() {
 
                 {/* Submit Button */}
                 <div className="flex justify-center pt-8">
-                  <Button
+                  {/* <div className="bg-yellow-300 p-4 mb-4">
+                    <p className="text-black">Debug: Button container is visible</p>
+                  </div> */}
+                  <button
                     type="submit"
-                    color="primary"
-                    size="lg"
-                    isLoading={isSubmitting}
-                    className="px-12 py-6 text-lg font-semibold"
+                    className="px-10 py-3 text-lg font-semibold bg-blue-600 hover:bg-blue-700 text-white border-2 border-red-500 rounded-lg"
                   >
-                    {isSubmitting ? 'Submitting...' : 'Submit Application'}
-                  </Button>
+                    {isSubmitting ? 'Submitting...' : 'Submit'}
+                  </button>
                 </div>
               </form>
             </CardBody>

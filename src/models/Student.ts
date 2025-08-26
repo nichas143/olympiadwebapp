@@ -10,7 +10,7 @@ const studentSchema = new mongoose.Schema({
   currentClass: {
     type: String,
     required: [true, 'Current class is required'],
-    enum: ['Class 8', 'Class 9', 'Class 10', 'Class 11', 'Class 12'],
+    enum: ['Class 7', 'Class 8', 'Class 9', 'Class 10', 'Class 11', 'Class 12'],
     trim: true
   },
   schoolName: {

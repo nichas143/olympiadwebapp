@@ -10,7 +10,7 @@ const transporter = nodemailer.createTransport({
 });
 
 // Verify transporter configuration
-transporter.verify(function(error, success) {
+transporter.verify(function(error) {
   if (error) {
     console.error('Email transporter error:', error);
     console.error('Please check your EMAIL_USER and EMAIL_PASS in .env.local');
@@ -31,14 +31,14 @@ export interface StudentData {
   schoolName: string;
   phoneNumber: string;
   email: string;
-  prerequisites: any;
+  prerequisites: Record<string, boolean>;
 }
 
 // Send notification email to admin
 export async function sendAdminNotification(studentData: StudentData) {
   const prerequisitesList = Object.entries(studentData.prerequisites)
-    .filter(([_, value]) => value === true)
-    .map(([key, _]) => key.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase()))
+    .filter(([, value]) => value === true)
+    .map(([key]) => key.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase()))
     .join(', ');
 
   const mailOptions = {
@@ -109,8 +109,8 @@ export async function sendAdminNotification(studentData: StudentData) {
     await transporter.sendMail(mailOptions);
     console.log('Admin notification email sent successfully');
     return true;
-  } catch (error) {
-    console.error('Error sending admin notification email:', error);
+  } catch {
+    console.error('Error sending admin notification email');
     return false;
   }
 }

@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { Input, Select, SelectItem, Button, Checkbox, Card, CardBody, CardHeader, Divider } from "@heroui/react";
+import { Input, Select, SelectItem, Checkbox, Card, CardBody, CardHeader, Divider } from "@heroui/react";
 
 // Form validation schema
 const formSchema = z.object({
@@ -68,9 +68,7 @@ export default function Join() {
     control,
     handleSubmit,
     formState: { errors },
-    reset,
-    setValue,
-    watch
+    reset
   } = useForm<FormData>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -149,7 +147,7 @@ export default function Join() {
         setSubmitStatus('error');
         setSubmitMessage(result.error || 'Registration failed. Please try again.');
       }
-    } catch (error) {
+    } catch {
       setSubmitStatus('error');
       setSubmitMessage('Network error. Please check your connection and try again.');
     } finally {
@@ -242,7 +240,7 @@ export default function Join() {
               </h2>
 
               <h3 className="text-black mt-2">
-                Please fill in your details below. We'll review your application and get back to you soon.
+                Please fill in your details below. We&apos;ll review your application and get back to you soon.
               </h3>
             </CardHeader>
 
@@ -483,7 +481,7 @@ export default function Join() {
               What Happens Next?
             </h2>
             <p className="text-xl text-gray-600">
-              After submitting your application, here's what you can expect
+              After submitting your application, here&apos;s what you can expect
             </p>
           </div>
 
@@ -493,7 +491,7 @@ export default function Join() {
                 <span className="text-2xl">📧</span>
               </div>
               <h3 className="text-lg font-semibold text-gray-900 mb-2">Application Review</h3>
-              <p className="text-gray-600">We'll review your application and prerequisites within 2-3 business days.</p>
+                              <p className="text-gray-600">We&apos;ll review your application and prerequisites within 2-3 business days.</p>
             </div>
 
             <div className="text-center">
@@ -501,7 +499,7 @@ export default function Join() {
                 <span className="text-2xl">📞</span>
               </div>
               <h3 className="text-lg font-semibold text-gray-900 mb-2">Contact & Assessment</h3>
-              <p className="text-gray-600">We'll contact you to discuss your goals and conduct a brief assessment.</p>
+                              <p className="text-gray-600">We&apos;ll contact you to discuss your goals and conduct a brief assessment.</p>
             </div>
 
             <div className="text-center">
@@ -509,7 +507,7 @@ export default function Join() {
                 <span className="text-2xl">🎯</span>
               </div>
               <h3 className="text-lg font-semibold text-gray-900 mb-2">Program Start</h3>
-              <p className="text-gray-600">Once approved, you'll receive access to our comprehensive curriculum.</p>
+              <p className="text-gray-600">Once approved, you&apos;ll receive access to our comprehensive curriculum.</p>
             </div>
           </div>
         </div>

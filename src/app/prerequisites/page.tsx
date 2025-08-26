@@ -291,14 +291,14 @@ export default function Prerequisites() {
       {/* Next Steps */}
       <section className="py-16 bg-white">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-6">
-            What's Next?
-          </h2>
+                      <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-6">
+              What&apos;s Next?
+            </h2>
           <div className="grid md:grid-cols-2 gap-8">
             <div className="bg-gray-50 rounded-xl p-6">
               <h3 className="text-xl font-semibold text-gray-900 mb-3">If You Meet Prerequisites</h3>
               <p className="text-gray-600 mb-4">
-                You're ready to start our comprehensive curriculum designed for olympiad preparation.
+                You&apos;re ready to start our comprehensive curriculum designed for olympiad preparation.
               </p>
               <a href="/curriculum" className="inline-block bg-primary-600 text-white px-6 py-2 rounded-lg hover:bg-primary-700 transition-colors duration-200">
                 Explore Curriculum

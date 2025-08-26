@@ -129,11 +129,12 @@ export async function POST(request: NextRequest) {
       { status: 201 }
     );
 
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Registration error:', error);
     
-    if (error.name === 'ValidationError') {
-      const validationErrors = Object.values(error.errors).map((err: any) => err.message);
+    if (error && typeof error === 'object' && 'name' in error && error.name === 'ValidationError') {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const validationErrors = Object.values((error as any).errors).map((err: any) => err.message);
       return NextResponse.json(
         { error: 'Validation failed', details: validationErrors },
         { status: 400 }

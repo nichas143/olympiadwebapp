@@ -114,7 +114,7 @@ export default function Home() {
               Your Journey to IMO
             </h2>
             <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-              Understand the progression through India's mathematical olympiad system
+              Understand the progression through India&apos;s mathematical olympiad system
             </p>
           </div>
 

@@ -29,14 +29,24 @@ export default function UsefulLinksPage() {
           description: "Official IMO website with past problems and results"
         },
         {
-          name: "USA Mathematical Olympiad (USAMO)",
-          url: "https://www.maa.org/math-competitions/usa-mathematical-olympiad",
-          description: "Official USAMO information and past problems"
+          name: "American Mathematics Competitions (AMC)",
+          url: "https://maa.org/student-programs/amc/",
+          description: "Official AMC 8, 10, and 12 competitions with registration and preparation resources"
         },
         {
-          name: "Canadian Mathematical Olympiad (CMO)",
-          url: "https://cms.math.ca/competitions/cmo/",
-          description: "Canadian Mathematical Olympiad resources"
+          name: "Indian Olympiad Qualifier in Mathematics (IOQM)",
+          url: "https://ioqmexam.in/",
+          description: "Official IOQM website with registration, exam dates, and preparation materials"
+        },
+        {
+          name: "HBCSE Past Papers (IOQM/RMO/INMO)",
+          url: "https://olympiads.hbcse.tifr.res.in/how-to-prepare/past-papers/",
+          description: "Comprehensive collection of past papers and solutions for Indian Mathematical Olympiad stages"
+        },
+        {
+          name: "Mathematics Teachers' Association (India) - MTA(I)",
+          url: "https://www.mtai.org.in/",
+          description: "Official math olympiad body in India organizing IOQM and other mathematical competitions"
         }
       ]
     },
@@ -97,6 +107,16 @@ export default function UsefulLinksPage() {
           name: "Math Olympiad Training",
           url: "https://matholympiad.org",
           description: "Training materials and practice problems"
+        },
+        {
+          name: "AoPS Contest Collection",
+          url: "https://artofproblemsolving.com/community/c13_contests",
+          description: "Comprehensive collection of contest papers from around the globe"
+        },
+        {
+          name: "KöMaL Magazine",
+          url: "https://www.komal.hu/verseny/korabbi.e.shtml",
+          description: "Hungarian mathematical and physical journal with problems in mathematics, physics, and informatics"
         }
       ]
     }

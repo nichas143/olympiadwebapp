@@ -55,11 +55,6 @@ export default function Navbar() {
       name: 'Self Study Guide',
       href: '/resources/self-study-guide',
       description: 'Comprehensive guide for independent learning and practice'
-    },
-    {
-      name: 'Blog',
-      href: '/resources/blog',
-      description: 'Latest articles, tips, and insights on math olympiad preparation'
     }
   ];
 

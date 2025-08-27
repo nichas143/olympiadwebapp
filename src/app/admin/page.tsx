@@ -159,17 +159,24 @@ export default function AdminDashboard() {
               : 'Manage user registrations and approvals'
             }
           </p>
-          {session.user.role === 'superadmin' && (
-            <div className="mt-4 flex space-x-4">
+          <div className="mt-4 flex flex-wrap gap-4">
+            <Button
+              color="primary"
+              variant="flat"
+              onPress={() => router.push('/admin/content')}
+            >
+              📚 Manage Content
+            </Button>
+            {session.user.role === 'superadmin' && (
               <Button
                 color="secondary"
                 variant="flat"
                 onPress={() => window.open('/admin/manage-admins', '_blank')}
               >
-                Manage Admin Accounts
+                👥 Manage Admin Accounts
               </Button>
-            </div>
-          )}
+            )}
+          </div>
         </div>
 
         <Card>

@@ -4,7 +4,7 @@ import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import { Card, CardBody, CardHeader, Button, Select, SelectItem, Chip, Badge } from "@heroui/react"
-import { PlayCircleIcon, ClockIcon, AcademicCapIcon, BookOpenIcon, LinkIcon } from '@heroicons/react/24/outline'
+import { PlayCircleIcon, ClockIcon, AcademicCapIcon, BookOpenIcon, LinkIcon, DocumentIcon } from '@heroicons/react/24/outline'
 
 interface Content {
   _id: string
@@ -20,15 +20,17 @@ interface Content {
   createdAt: string
 }
 
-export default function VideoLectures() {
+export default function StudyMaterials() {
   const { data: session, status } = useSession()
   const router = useRouter()
   const [content, setContent] = useState<Content[]>([])
   const [loading, setLoading] = useState(true)
   const [selectedUnit, setSelectedUnit] = useState<string>('all')
+  const [selectedContentType, setSelectedContentType] = useState<string>('all')
   const [selectedInstructionType, setSelectedInstructionType] = useState<string>('all')
   
   const units = ['Algebra', 'Geometry', 'Number Theory', 'Combinatorics', 'Functional Equations', 'Inequalities', 'Advanced Math', 'Calculus', 'Other']
+  const contentTypes = ['video', 'pdf', 'link', 'testpaperLink']
   const instructionTypes = ['problemDiscussion', 'conceptDiscussion']
   
   useEffect(() => {
@@ -40,17 +42,19 @@ export default function VideoLectures() {
     }
     
     fetchContent()
-  }, [session, status, router, selectedUnit, selectedInstructionType])
+  }, [session, status, router, selectedUnit, selectedContentType, selectedInstructionType])
 
   const fetchContent = async () => {
     try {
       setLoading(true)
-      const params = new URLSearchParams({
-        contentType: 'video'
-      })
+      const params = new URLSearchParams()
       
       if (selectedUnit !== 'all') {
         params.append('unit', selectedUnit)
+      }
+      
+      if (selectedContentType !== 'all') {
+        params.append('contentType', selectedContentType)
       }
       
       if (selectedInstructionType !== 'all') {
@@ -87,9 +91,20 @@ export default function VideoLectures() {
   const getContentTypeIcon = (type: string) => {
     switch (type) {
       case 'video': return <PlayCircleIcon className="h-5 w-5" />
-      case 'pdf': return <BookOpenIcon className="h-5 w-5" />
+      case 'pdf': return <DocumentIcon className="h-5 w-5" />
       case 'link': return <LinkIcon className="h-5 w-5" />
+      case 'testpaperLink': return <BookOpenIcon className="h-5 w-5" />
       default: return <AcademicCapIcon className="h-5 w-5" />
+    }
+  }
+
+  const getContentTypeColor = (type: string) => {
+    switch (type) {
+      case 'video': return 'primary'
+      case 'pdf': return 'danger'
+      case 'link': return 'success'
+      case 'testpaperLink': return 'warning'
+      default: return 'default'
     }
   }
 
@@ -97,12 +112,28 @@ export default function VideoLectures() {
     return type === 'conceptDiscussion' ? 'primary' : 'secondary'
   }
 
+  const handleContentAction = (item: Content) => {
+    if (item.videoLink) {
+      window.open(item.videoLink, '_blank')
+    }
+  }
+
+  const getActionButtonText = (type: string) => {
+    switch (type) {
+      case 'video': return 'Watch'
+      case 'pdf': return 'Download'
+      case 'link': return 'Open'
+      case 'testpaperLink': return 'View Test'
+      default: return 'View'
+    }
+  }
+
   if (status === 'loading' || loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Loading video lectures...</p>
+          <p className="mt-4 text-gray-600">Loading study materials...</p>
         </div>
       </div>
     )
@@ -117,14 +148,14 @@ export default function VideoLectures() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">Video Lectures</h1>
+          <h1 className="text-3xl font-bold text-gray-900">Study Materials</h1>
           <p className="mt-2 text-gray-600">
-            Comprehensive video tutorials covering all Olympiad topics
+            Comprehensive collection of videos, PDFs, links, and test papers covering all Olympiad topics
           </p>
         </div>
 
         {/* Filters */}
-        <div className="mb-6 grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="mb-6 grid grid-cols-1 md:grid-cols-3 gap-4">
           <Select
             label="Select Unit"
             placeholder="All Units"
@@ -144,6 +175,19 @@ export default function VideoLectures() {
           </Select>
           
           <Select
+            label="Content Type"
+            placeholder="All Types"
+            selectedKeys={[selectedContentType]}
+            onSelectionChange={(keys) => setSelectedContentType(Array.from(keys)[0] as string)}
+          >
+            <SelectItem key="all">All Types</SelectItem>
+            <SelectItem key="video">Videos</SelectItem>
+            <SelectItem key="pdf">PDFs</SelectItem>
+            <SelectItem key="link">Links</SelectItem>
+            <SelectItem key="testpaperLink">Test Papers</SelectItem>
+          </Select>
+          
+          <Select
             label="Instruction Type"
             placeholder="All Types"
             selectedKeys={[selectedInstructionType]}
@@ -155,68 +199,55 @@ export default function VideoLectures() {
           </Select>
         </div>
 
-        {/* Quick Access to All Materials */}
-        <div className="mb-6">
-          <Card className="bg-gradient-to-r from-blue-50 to-purple-50 border-blue-200">
-            <CardBody className="text-center py-6">
-              <AcademicCapIcon className="h-8 w-8 text-blue-600 mx-auto mb-2" />
-              <h3 className="font-semibold text-gray-900 mb-2">Looking for PDFs, Links, or Test Papers?</h3>
-              <p className="text-gray-600 text-sm mb-4">
-                Access our complete collection of study materials including PDFs, external links, and practice test papers.
-              </p>
-              <Button 
-                color="primary" 
-                variant="flat"
-                onPress={() => router.push('/training/study-materials')}
-              >
-                Browse All Study Materials
-              </Button>
-            </CardBody>
-          </Card>
-        </div>
-
-        {/* Video Content Grid */}
+        {/* Content Grid */}
         {content.length === 0 ? (
           <div className="text-center py-12">
-            <PlayCircleIcon className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-            <h3 className="text-lg font-medium text-gray-900 mb-2">No video lectures found</h3>
-            <p className="text-gray-500">Try adjusting your filters or check back later for new video content.</p>
+            <AcademicCapIcon className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+            <h3 className="text-lg font-medium text-gray-900 mb-2">No content found</h3>
+            <p className="text-gray-500">Try adjusting your filters or check back later for new content.</p>
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {content.map((item) => (
-              <Card key={item._id} className="hover:shadow-lg transition-shadow group">
+              <Card key={item._id} className="hover:shadow-lg transition-shadow">
                 <CardHeader className="pb-0">
-                  <div className="relative overflow-hidden rounded-lg">
-                    {item.videoLink && getYouTubeVideoId(item.videoLink) ? (
-                      <>
-                        <img
-                          src={`https://img.youtube.com/vi/${getYouTubeVideoId(item.videoLink)}/maxresdefault.jpg`}
-                          alt={item.concept}
-                          className="w-full h-48 object-cover rounded-lg transition-transform group-hover:scale-105"
-                          onError={(e) => {
-                            const target = e.target as HTMLImageElement
-                            target.src = `https://img.youtube.com/vi/${getYouTubeVideoId(item.videoLink!)}/hqdefault.jpg`
-                          }}
-                        />
-                        {/* Play overlay */}
-                        <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-30 transition-all flex items-center justify-center">
-                          <PlayCircleIcon className="h-16 w-16 text-white opacity-0 group-hover:opacity-100 transition-opacity" />
-                        </div>
-                      </>
+                  <div className="relative">
+                    {item.contentType === 'video' && item.videoLink && getYouTubeVideoId(item.videoLink) ? (
+                      <img
+                        src={`https://img.youtube.com/vi/${getYouTubeVideoId(item.videoLink)}/maxresdefault.jpg`}
+                        alt={item.concept}
+                        className="w-full h-48 object-cover rounded-lg"
+                        onError={(e) => {
+                          const target = e.target as HTMLImageElement
+                          target.src = `https://img.youtube.com/vi/${getYouTubeVideoId(item.videoLink!)}/hqdefault.jpg`
+                        }}
+                      />
                     ) : (
                       <div className="w-full h-48 bg-gradient-to-br from-blue-100 to-purple-100 rounded-lg flex items-center justify-center">
-                        <PlayCircleIcon className="h-16 w-16 text-blue-600" />
+                        <div className="text-center">
+                          {getContentTypeIcon(item.contentType)}
+                          <p className="mt-2 text-sm font-medium text-gray-600 capitalize">{item.contentType}</p>
+                        </div>
                       </div>
                     )}
-                    <div className="absolute top-2 right-2 bg-red-600 text-white px-2 py-1 rounded text-sm font-medium">
+                    <div className="absolute top-2 right-2 bg-black bg-opacity-75 text-white px-2 py-1 rounded text-sm">
                       {formatDuration(item.duration)}
                     </div>
-                    <div className="absolute top-2 left-2">
+                    <div className="absolute top-2 left-2 flex gap-1">
+                      <Chip
+                        size="sm"
+                        color={getContentTypeColor(item.contentType)}
+                        variant="flat"
+                        startContent={getContentTypeIcon(item.contentType)}
+                      >
+                        {item.contentType}
+                      </Chip>
+                    </div>
+                    <div className="absolute bottom-2 left-2">
                       <Chip
                         size="sm"
                         color={getInstructionTypeColor(item.instructionType)}
-                        variant="solid"
+                        variant="flat"
                       >
                         {item.instructionType === 'conceptDiscussion' ? 'Concept' : 'Problem'}
                       </Chip>
@@ -227,27 +258,22 @@ export default function VideoLectures() {
                   <div className="flex items-center gap-2 mb-2">
                     <Badge color="primary" variant="flat">{item.unit}</Badge>
                   </div>
-                  <h3 className="text-lg font-semibold mb-1 line-clamp-2">{item.concept}</h3>
+                  <h3 className="text-lg font-semibold mb-1">{item.concept}</h3>
                   <p className="text-sm text-gray-500 mb-2">{item.chapter} • {item.topic}</p>
-                  <p className="text-gray-600 text-sm mb-4 line-clamp-2">{item.description}</p>
+                  <p className="text-gray-600 text-sm mb-4 line-clamp-3">{item.description}</p>
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2 text-sm text-gray-500">
                       <ClockIcon className="h-4 w-4" />
                       <span>{formatDuration(item.duration)}</span>
                     </div>
                     <Button 
-                      color="primary" 
+                      color={getContentTypeColor(item.contentType) as any} 
                       size="sm"
-                      variant="solid"
-                      startContent={<PlayCircleIcon className="h-4 w-4" />}
-                      onPress={() => {
-                        if (item.videoLink) {
-                          window.open(item.videoLink, '_blank')
-                        }
-                      }}
+                      startContent={getContentTypeIcon(item.contentType)}
+                      onPress={() => handleContentAction(item)}
                       isDisabled={!item.videoLink}
                     >
-                      Watch Now
+                      {getActionButtonText(item.contentType)}
                     </Button>
                   </div>
                 </CardBody>

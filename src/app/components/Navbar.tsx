@@ -13,6 +13,7 @@ export default function Navbar() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isProgramDropdownOpen, setIsProgramDropdownOpen] = useState(false);
   const [isResourcesDropdownOpen, setIsResourcesDropdownOpen] = useState(false);
+  const [isTrainingDropdownOpen, setIsTrainingDropdownOpen] = useState(false);
   const [isUserDropdownOpen, setIsUserDropdownOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
 
@@ -42,6 +43,24 @@ export default function Navbar() {
       name: 'Sample Lessons',
       href: '/sample-lessons',
       description: 'Watch sample video lessons to experience our teaching methodology'
+    }
+  ];
+
+  const trainingItems = [
+    {
+      name: 'Video Lectures',
+      href: '/training/video-lectures',
+      description: 'Comprehensive video tutorials covering all Olympiad topics'
+    },
+    {
+      name: 'Study Materials',
+      href: '/training/study-materials',
+      description: 'PDFs, links, test papers and all study resources'
+    },
+    {
+      name: 'Practice Problems',
+      href: '/training/practice-problems',
+      description: 'Curated practice problems with detailed solutions'
     }
   ];
 
@@ -192,6 +211,50 @@ export default function Navbar() {
               )}
             </div>
 
+            {/* Training Dropdown */}
+            {mounted && session && (
+              <div className="relative">
+                <button
+                  onClick={() => setIsTrainingDropdownOpen(!isTrainingDropdownOpen)}
+                  onBlur={() => setTimeout(() => setIsTrainingDropdownOpen(false), 150)}
+                  className="px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200 text-gray-700 hover:text-blue-600 hover:bg-gray-50 flex items-center"
+                >
+                  Training
+                  <span className="ml-1">
+                    <svg
+                      className={`ml-1 h-4 w-4 transition-transform duration-200 ${
+                        isTrainingDropdownOpen ? 'rotate-180' : ''
+                      }`}
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                    </svg>
+                  </span>
+                </button>
+
+                {/* Dropdown Menu */}
+                {isTrainingDropdownOpen && (
+                  <div className="absolute right-0 mt-2 w-80 bg-white rounded-lg shadow-lg border border-gray-200 z-50">
+                    <div className="py-2">
+                      {trainingItems.map((item) => (
+                        <Link
+                          key={item.name}
+                          href={item.href}
+                          className="block px-4 py-3 hover:bg-gray-50 transition-colors duration-200"
+                          onClick={() => setIsTrainingDropdownOpen(false)}
+                        >
+                          <div className="font-medium text-gray-900 mb-1">{item.name}</div>
+                          <div className="text-sm text-gray-600">{item.description}</div>
+                        </Link>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+
             {/* Authentication */}
             {mounted && status === 'loading' ? (
               <div className="px-3 py-2 text-sm text-gray-500">Loading...</div>
@@ -219,14 +282,32 @@ export default function Navbar() {
                 {isUserDropdownOpen && (
                   <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 z-50">
                     <div className="py-2">
-                      {session.user?.role === 'admin' ? (
-                        <Link
-                          href="/admin"
-                          className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
-                          onClick={() => setIsUserDropdownOpen(false)}
-                        >
-                          Admin Panel
-                        </Link>
+                      {(session.user?.role === 'admin' || session.user?.role === 'superadmin') ? (
+                        <>
+                          <Link
+                            href="/admin"
+                            className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                            onClick={() => setIsUserDropdownOpen(false)}
+                          >
+                            {session.user?.role === 'superadmin' ? 'Super Admin Panel' : 'Admin Panel'}
+                          </Link>
+                          <Link
+                            href="/admin/content"
+                            className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                            onClick={() => setIsUserDropdownOpen(false)}
+                          >
+                            📚 Content Management
+                          </Link>
+                          {session.user?.role === 'superadmin' && (
+                            <Link
+                              href="/dashboard"
+                              className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                              onClick={() => setIsUserDropdownOpen(false)}
+                            >
+                              Student View
+                            </Link>
+                          )}
+                        </>
                       ) : (
                         <Link
                           href="/dashboard"
@@ -325,6 +406,26 @@ export default function Navbar() {
               ))}
             </div>
 
+            {/* Mobile Training Section */}
+            {session && (
+              <div className="border-t border-gray-200 pt-2 mt-2">
+                <div className="px-3 py-2 text-sm font-medium text-gray-500 uppercase tracking-wider">
+                  Training
+                </div>
+                {trainingItems.map((item) => (
+                  <Link
+                    key={item.name}
+                    href={item.href}
+                    className={getMobileLinkClassName(item.href, pathname === item.href)}
+                    onClick={() => setIsMobileMenuOpen(false)}
+                  >
+                    <div className="font-medium">{item.name}</div>
+                    <div className="text-sm text-gray-600 mt-1">{item.description}</div>
+                  </Link>
+                ))}
+              </div>
+            )}
+
             {/* Mobile Resources Section */}
             <div className="border-t border-gray-200 pt-2 mt-2">
               <div className="px-3 py-2 text-sm font-medium text-gray-500 uppercase tracking-wider">
@@ -350,13 +451,41 @@ export default function Navbar() {
                   <div className="px-3 py-2 text-sm font-medium text-gray-500 uppercase tracking-wider">
                     Account
                   </div>
-                  <Link
-                    href="/dashboard"
-                    className={getMobileLinkClassName('/dashboard', pathname === '/dashboard')}
-                    onClick={() => setIsMobileMenuOpen(false)}
-                  >
-                    Dashboard
-                  </Link>
+                  {(session.user?.role === 'admin' || session.user?.role === 'superadmin') ? (
+                    <>
+                      <Link
+                        href="/admin"
+                        className={getMobileLinkClassName('/admin', pathname === '/admin')}
+                        onClick={() => setIsMobileMenuOpen(false)}
+                      >
+                        {session.user?.role === 'superadmin' ? 'Super Admin Panel' : 'Admin Panel'}
+                      </Link>
+                      <Link
+                        href="/admin/content"
+                        className={getMobileLinkClassName('/admin/content', pathname === '/admin/content')}
+                        onClick={() => setIsMobileMenuOpen(false)}
+                      >
+                        📚 Content Management
+                      </Link>
+                      {session.user?.role === 'superadmin' && (
+                        <Link
+                          href="/dashboard"
+                          className={getMobileLinkClassName('/dashboard', pathname === '/dashboard')}
+                          onClick={() => setIsMobileMenuOpen(false)}
+                        >
+                          Student View
+                        </Link>
+                      )}
+                    </>
+                  ) : (
+                    <Link
+                      href="/dashboard"
+                      className={getMobileLinkClassName('/dashboard', pathname === '/dashboard')}
+                      onClick={() => setIsMobileMenuOpen(false)}
+                    >
+                      Dashboard
+                    </Link>
+                  )}
                   <Link
                     href="/profile"
                     className={getMobileLinkClassName('/profile', pathname === '/profile')}

@@ -189,7 +189,7 @@ contentSchema.statics.getByContentType = function(contentType: string, options: 
   sort?: Record<string, number>
 } = {}) {
   const query = { contentType, isActive: true }
-  return this.find(query).sort(options.sort || { unit: 1, sequenceNo: 1, chapter: 1 })
+  return this.find(query).sort(options.sort || { sequenceNo: 1, unit: 1, chapter: 1 })
 }
 
 // Static method to get content by document category
@@ -197,14 +197,14 @@ contentSchema.statics.getByDocCategory = function(docCategory: string, options: 
   sort?: Record<string, number>
 } = {}) {
   const query = { docCategory, isActive: true }
-  return this.find(query).sort(options.sort || { unit: 1, sequenceNo: 1, chapter: 1 })
+  return this.find(query).sort(options.sort || { sequenceNo: 1, unit: 1, chapter: 1 })
 }
 
 // Static method to get content in sequence order
 contentSchema.statics.getInSequence = function(unit?: string) {
   const query: Record<string, unknown> = { isActive: true }
   if (unit) query.unit = unit
-  return this.find(query).sort({ unit: 1, sequenceNo: 1, chapter: 1, topic: 1 })
+  return this.find(query).sort({ sequenceNo: 1, unit: 1, chapter: 1, topic: 1 })
 }
 
 // Clear any existing model to ensure schema updates are applied

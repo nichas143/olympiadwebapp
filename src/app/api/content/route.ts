@@ -34,7 +34,7 @@ export async function GET(request: NextRequest) {
     let sortOrder: Record<string, 1 | -1>
     switch (sortBy) {
       case 'sequence':
-        sortOrder = { unit: 1, sequenceNo: 1, chapter: 1, topic: 1 }
+        sortOrder = { sequenceNo: 1, unit: 1, chapter: 1, topic: 1 }
         break
       case 'newest':
         sortOrder = { createdAt: -1 }
@@ -43,7 +43,7 @@ export async function GET(request: NextRequest) {
         sortOrder = { unit: 1, chapter: 1, topic: 1, concept: 1 }
         break
       default:
-        sortOrder = { unit: 1, sequenceNo: 1, chapter: 1, topic: 1 }
+        sortOrder = { sequenceNo: 1, unit: 1, chapter: 1, topic: 1 }
     }
 
     const content = await Content.find(query)

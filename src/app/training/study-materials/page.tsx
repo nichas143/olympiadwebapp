@@ -5,19 +5,26 @@ import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import { Card, CardBody, CardHeader, Button, Select, SelectItem, Chip, Badge } from "@heroui/react"
 import { PlayCircleIcon, ClockIcon, AcademicCapIcon, BookOpenIcon, LinkIcon, DocumentIcon } from '@heroicons/react/24/outline'
+import ContentViewer from '@/app/components/ContentViewer'
 
 interface Content {
   _id: string
-  unit: string
+  unit: 'Algebra' | 'Geometry' | 'Number Theory' | 'Combinatorics' | 'Functional Equations' | 'Inequalities' | 'Advanced Math' | 'Calculus' | 'Other'
   chapter: string
   topic: string
   concept: string
-  contentType: string
-  instructionType: string
+  contentType: 'pdf' | 'video' | 'link' | 'testpaperLink'
+  instructionType: 'problemDiscussion' | 'conceptDiscussion'
   duration: number
-  videoLink?: string
+  videoLink?: string | null
   description: string
+  sequenceNo: number
+  docCategory: 'Learning' | 'MockTest' | 'PracticeSet'
+  noOfProblems?: number
   createdAt: string
+  updatedAt: string
+  createdBy?: string
+  isActive: boolean
 }
 
 export default function StudyMaterials() {
@@ -28,10 +35,14 @@ export default function StudyMaterials() {
   const [selectedUnit, setSelectedUnit] = useState<string>('all')
   const [selectedContentType, setSelectedContentType] = useState<string>('all')
   const [selectedInstructionType, setSelectedInstructionType] = useState<string>('all')
+  const [selectedDocCategory, setSelectedDocCategory] = useState<string>('all')
+  const [selectedContent, setSelectedContent] = useState<Content | null>(null)
+  const [showContentViewer, setShowContentViewer] = useState(false)
   
   const units = ['Algebra', 'Geometry', 'Number Theory', 'Combinatorics', 'Functional Equations', 'Inequalities', 'Advanced Math', 'Calculus', 'Other']
   const contentTypes = ['video', 'pdf', 'link', 'testpaperLink']
   const instructionTypes = ['problemDiscussion', 'conceptDiscussion']
+  const docCategories = ['Learning', 'MockTest', 'PracticeSet']
   
   useEffect(() => {
     if (status === 'loading') return
@@ -42,7 +53,7 @@ export default function StudyMaterials() {
     }
     
     fetchContent()
-  }, [session, status, router, selectedUnit, selectedContentType, selectedInstructionType])
+  }, [session, status, router, selectedUnit, selectedContentType, selectedInstructionType, selectedDocCategory])
 
   const fetchContent = async () => {
     try {
@@ -60,6 +71,13 @@ export default function StudyMaterials() {
       if (selectedInstructionType !== 'all') {
         params.append('instructionType', selectedInstructionType)
       }
+      
+      if (selectedDocCategory !== 'all') {
+        params.append('docCategory', selectedDocCategory)
+      }
+      
+      // Ensure content is sorted by sequence (this is the default in the API)
+      params.append('sortBy', 'sequence')
       
       const response = await fetch(`/api/content?${params}`)
       if (response.ok) {
@@ -113,8 +131,31 @@ export default function StudyMaterials() {
   }
 
   const handleContentAction = (item: Content) => {
-    if (item.videoLink) {
-      window.open(item.videoLink, '_blank')
+    setSelectedContent(item)
+    setShowContentViewer(true)
+  }
+
+  const handleProgressUpdate = async (contentId: string, progressPercentage: number, timeSpent: number) => {
+    try {
+      const response = await fetch('/api/progress', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          contentId,
+          progressPercentage,
+          timeSpent,
+          status: progressPercentage >= 100 ? 'completed' : 'in_progress'
+        }),
+      })
+
+      if (response.ok) {
+        // Could refresh content here if needed
+        console.log('Progress updated successfully')
+      }
+    } catch (error) {
+      console.error('Failed to update progress:', error)
     }
   }
 
@@ -155,7 +196,7 @@ export default function StudyMaterials() {
         </div>
 
         {/* Filters */}
-        <div className="mb-6 grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="mb-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           <Select
             label="Select Unit"
             placeholder="All Units"
@@ -196,6 +237,18 @@ export default function StudyMaterials() {
             <SelectItem key="all">All Types</SelectItem>
             <SelectItem key="conceptDiscussion">Concept Discussion</SelectItem>
             <SelectItem key="problemDiscussion">Problem Discussion</SelectItem>
+          </Select>
+          
+          <Select
+            label="Document Category"
+            placeholder="All Categories"
+            selectedKeys={[selectedDocCategory]}
+            onSelectionChange={(keys) => setSelectedDocCategory(Array.from(keys)[0] as string)}
+          >
+            <SelectItem key="all">All Categories</SelectItem>
+            <SelectItem key="Learning">Learning</SelectItem>
+            <SelectItem key="MockTest">Mock Test</SelectItem>
+            <SelectItem key="PracticeSet">Practice Set</SelectItem>
           </Select>
         </div>
 
@@ -255,8 +308,15 @@ export default function StudyMaterials() {
                   </div>
                 </CardHeader>
                 <CardBody>
-                  <div className="flex items-center gap-2 mb-2">
+                  <div className="flex items-center gap-2 mb-2 flex-wrap">
                     <Badge color="primary" variant="flat">{item.unit}</Badge>
+                    <Badge color="secondary" variant="flat">{item.docCategory}</Badge>
+                    <Badge color="default" variant="flat" size="sm">#{item.sequenceNo}</Badge>
+                    {item.noOfProblems && (
+                      <Badge color="warning" variant="flat" size="sm">
+                        {item.noOfProblems} problems
+                      </Badge>
+                    )}
                   </div>
                   <h3 className="text-lg font-semibold mb-1">{item.concept}</h3>
                   <p className="text-sm text-gray-500 mb-2">{item.chapter} • {item.topic}</p>
@@ -271,7 +331,6 @@ export default function StudyMaterials() {
                       size="sm"
                       startContent={getContentTypeIcon(item.contentType)}
                       onPress={() => handleContentAction(item)}
-                      isDisabled={!item.videoLink}
                     >
                       {getActionButtonText(item.contentType)}
                     </Button>
@@ -280,6 +339,29 @@ export default function StudyMaterials() {
               </Card>
             ))}
           </div>
+        )}
+        
+        {/* Content Viewer */}
+        {selectedContent && (
+          <ContentViewer
+            isOpen={showContentViewer}
+            onClose={() => {
+              setShowContentViewer(false)
+              setSelectedContent(null)
+            }}
+            content={{
+              _id: selectedContent._id,
+              title: selectedContent.concept,
+              description: selectedContent.description,
+              contentType: selectedContent.contentType,
+              videoLink: selectedContent.videoLink,
+              concept: selectedContent.concept,
+              chapter: selectedContent.chapter,
+              topic: selectedContent.topic,
+              unit: selectedContent.unit
+            }}
+            onProgressUpdate={handleProgressUpdate}
+          />
         )}
       </div>
     </div>

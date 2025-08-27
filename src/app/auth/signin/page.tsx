@@ -1,0 +1,126 @@
+'use client'
+
+import { useState } from 'react'
+import { useRouter } from 'next/navigation'
+import Link from 'next/link'
+import { Button, Input, Card, CardBody, CardHeader } from "@heroui/react"
+import { EyeIcon, EyeSlashIcon } from '@heroicons/react/24/outline'
+
+export default function SignIn() {
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+  const [showPassword, setShowPassword] = useState(false)
+  const [isLoading, setIsLoading] = useState(false)
+  const [error, setError] = useState('')
+  const router = useRouter()
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setIsLoading(true)
+    setError('')
+
+    try {
+      const response = await fetch('/api/auth/signin', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email, password }),
+      })
+
+      if (response.ok) {
+        router.push('/dashboard')
+        router.refresh()
+      } else {
+        const data = await response.json()
+        setError(data.error || 'Sign in failed')
+      }
+    } catch (error) {
+      setError('An error occurred. Please try again.')
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-md w-full space-y-8">
+        <div>
+          <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
+            Sign in to your account
+          </h2>
+          <p className="mt-2 text-center text-sm text-gray-600">
+            Access your Olympiad training materials
+          </p>
+        </div>
+        
+        <Card className="w-full">
+          <CardHeader className="flex flex-col gap-1">
+            <h3 className="text-xl font-semibold">Welcome back</h3>
+            <p className="text-sm text-gray-500">Enter your credentials to continue</p>
+          </CardHeader>
+          <CardBody>
+            <form onSubmit={handleSubmit} className="space-y-4">
+              {error && (
+                <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-md text-sm">
+                  {error}
+                </div>
+              )}
+              
+              <Input
+                type="email"
+                label="Email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+                placeholder="Enter your email"
+                variant="bordered"
+              />
+              
+              <Input
+                type={showPassword ? "text" : "password"}
+                label="Password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                placeholder="Enter your password"
+                variant="bordered"
+                endContent={
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="focus:outline-none"
+                  >
+                    {showPassword ? (
+                      <EyeSlashIcon className="h-4 w-4 text-gray-400" />
+                    ) : (
+                      <EyeIcon className="h-4 w-4 text-gray-400" />
+                    )}
+                  </button>
+                }
+              />
+              
+              <Button
+                type="submit"
+                color="primary"
+                className="w-full"
+                isLoading={isLoading}
+              >
+                Sign in
+              </Button>
+            </form>
+            
+            <div className="mt-6 text-center">
+              <p className="text-sm text-gray-600">
+                Don't have an account?{' '}
+                <Link href="/auth/signup" className="font-medium text-blue-600 hover:text-blue-500">
+                  Sign up
+                </Link>
+              </p>
+            </div>
+          </CardBody>
+        </Card>
+      </div>
+    </div>
+  )
+}

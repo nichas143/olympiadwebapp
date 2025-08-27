@@ -220,6 +220,150 @@ export function validateEmail(email: string): { isValid: boolean; reason?: strin
   return { isValid: true };
 }
 
+// Send approval email to user
+export async function sendApprovalEmail(email: string, name: string) {
+  const mailOptions = {
+    from: process.env.EMAIL_USER,
+    to: email,
+    subject: 'Welcome! Your account has been approved - Math Olympiad Program',
+    html: `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+        <h2 style="color: #10b981; border-bottom: 2px solid #10b981; padding-bottom: 10px;">
+          🎉 Welcome to Math Olympiad Program!
+        </h2>
+        
+        <div style="background-color: #ecfdf5; padding: 20px; border-radius: 8px; margin: 20px 0;">
+          <p style="color: #065f46; font-size: 16px; line-height: 1.6;">
+            Dear <strong>${name}</strong>,
+          </p>
+          
+          <p style="color: #065f46; font-size: 16px; line-height: 1.6;">
+            Great news! Your account has been <strong>approved</strong> and you can now access the Math Olympiad preparation program.
+          </p>
+          
+          <p style="color: #065f46; font-size: 16px; line-height: 1.6;">
+            You can now sign in to your account and start your mathematical journey with us!
+          </p>
+        </div>
+        
+        <div style="background-color: #f0f9ff; padding: 20px; border-radius: 8px; margin: 20px 0;">
+          <h3 style="color: #1e40af; margin-top: 0;">What you can do now:</h3>
+          <ul style="color: #374151; line-height: 1.8;">
+            <li><strong>Sign In:</strong> Use your email and password to access your account</li>
+            <li><strong>Explore Curriculum:</strong> Check out our comprehensive math olympiad curriculum</li>
+            <li><strong>Watch Lectures:</strong> Access video lectures and training materials</li>
+            <li><strong>Practice Problems:</strong> Solve olympiad-level problems</li>
+            <li><strong>Track Progress:</strong> Monitor your learning journey through your dashboard</li>
+          </ul>
+        </div>
+        
+        <div style="text-align: center; margin: 30px 0;">
+          <a href="${process.env.NEXTAUTH_URL}/auth/signin" 
+             style="background-color: #2563eb; color: white; padding: 12px 24px; text-decoration: none; border-radius: 8px; font-weight: bold;">
+            Sign In Now
+          </a>
+        </div>
+        
+        <div style="text-align: center; margin-top: 30px; padding-top: 20px; border-top: 1px solid #e5e7eb;">
+          <p style="color: #6b7280; font-size: 14px;">
+            If you have any questions, please don't hesitate to contact us.
+          </p>
+          <p style="color: #6b7280; font-size: 12px;">
+            Best regards,<br>
+            Math Olympiad Preparation Team
+          </p>
+        </div>
+      </div>
+    `
+  };
+
+  try {
+    if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
+      console.error('Email credentials not configured');
+      return false;
+    }
+    
+    await transporter.sendMail(mailOptions);
+    console.log('Approval email sent successfully to:', email);
+    return true;
+  } catch (error) {
+    console.error('Error sending approval email:', error);
+    return false;
+  }
+}
+
+// Send rejection email to user
+export async function sendRejectionEmail(email: string, name: string, reason?: string) {
+  const mailOptions = {
+    from: process.env.EMAIL_USER,
+    to: email,
+    subject: 'Update on your application - Math Olympiad Program',
+    html: `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+        <h2 style="color: #dc2626; border-bottom: 2px solid #dc2626; padding-bottom: 10px;">
+          Application Update - Math Olympiad Program
+        </h2>
+        
+        <div style="background-color: #fef2f2; padding: 20px; border-radius: 8px; margin: 20px 0;">
+          <p style="color: #7f1d1d; font-size: 16px; line-height: 1.6;">
+            Dear <strong>${name}</strong>,
+          </p>
+          
+          <p style="color: #7f1d1d; font-size: 16px; line-height: 1.6;">
+            Thank you for your interest in our Math Olympiad preparation program. After careful review, we are unable to accept your application at this time.
+          </p>
+          
+          ${reason ? `
+          <div style="background-color: #fee2e2; padding: 15px; border-radius: 6px; margin: 15px 0;">
+            <p style="color: #991b1b; margin: 0;">
+              <strong>Reason:</strong> ${reason}
+            </p>
+          </div>
+          ` : ''}
+        </div>
+        
+        <div style="background-color: #f0f9ff; padding: 20px; border-radius: 8px; margin: 20px 0;">
+          <h3 style="color: #1e40af; margin-top: 0;">Don't be discouraged!</h3>
+          <p style="color: #374151; line-height: 1.6;">
+            We encourage you to continue developing your mathematical skills and consider reapplying in the future. 
+            Here are some resources that might help:
+          </p>
+          <ul style="color: #374151; line-height: 1.8;">
+            <li>Practice basic algebra and geometry concepts</li>
+            <li>Explore online math competitions and practice problems</li>
+            <li>Join local math clubs or study groups</li>
+            <li>Consider taking additional math courses</li>
+          </ul>
+        </div>
+        
+        <div style="text-align: center; margin-top: 30px; padding-top: 20px; border-top: 1px solid #e5e7eb;">
+          <p style="color: #6b7280; font-size: 14px;">
+            Thank you for your understanding, and we wish you success in your mathematical journey.
+          </p>
+          <p style="color: #6b7280; font-size: 12px;">
+            Best regards,<br>
+            Math Olympiad Preparation Team
+          </p>
+        </div>
+      </div>
+    `
+  };
+
+  try {
+    if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
+      console.error('Email credentials not configured');
+      return false;
+    }
+    
+    await transporter.sendMail(mailOptions);
+    console.log('Rejection email sent successfully to:', email);
+    return true;
+  } catch (error) {
+    console.error('Error sending rejection email:', error);
+    return false;
+  }
+}
+
 // Rate limiting check (simple in-memory implementation)
 const submissionAttempts = new Map<string, { count: number; lastAttempt: number }>();
 

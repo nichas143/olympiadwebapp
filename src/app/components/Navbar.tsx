@@ -3,12 +3,17 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useState, useEffect } from 'react';
+import { useSession, signOut } from 'next-auth/react';
+import { Button } from '@heroui/react';
+import { UserIcon, ArrowRightOnRectangleIcon } from '@heroicons/react/24/outline';
 
 export default function Navbar() {
   const pathname = usePathname();
+  const { data: session, status } = useSession();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isProgramDropdownOpen, setIsProgramDropdownOpen] = useState(false);
   const [isResourcesDropdownOpen, setIsResourcesDropdownOpen] = useState(false);
+  const [isUserDropdownOpen, setIsUserDropdownOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
 
   // Prevent hydration mismatch by only rendering after mount
@@ -71,6 +76,10 @@ export default function Navbar() {
 
   const isProgramActive = mounted && (pathname === '/prerequisites' || pathname === '/curriculum' || pathname === '/sample-lessons');
   const isResourcesActive = mounted && pathname.startsWith('/resources');
+
+  const handleSignOut = async () => {
+    await signOut({ callbackUrl: '/' });
+  };
 
   return (
     <nav className="bg-white shadow-lg border-b border-gray-200 sticky top-0 z-50" suppressHydrationWarning>
@@ -182,6 +191,73 @@ export default function Navbar() {
                 </div>
               )}
             </div>
+
+            {/* Authentication */}
+            {mounted && status === 'loading' ? (
+              <div className="px-3 py-2 text-sm text-gray-500">Loading...</div>
+            ) : mounted && session ? (
+              <div className="relative">
+                <button
+                  onClick={() => setIsUserDropdownOpen(!isUserDropdownOpen)}
+                  onBlur={() => setTimeout(() => setIsUserDropdownOpen(false), 150)}
+                  className="flex items-center space-x-2 px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:text-blue-600 hover:bg-gray-50"
+                >
+                  <UserIcon className="h-5 w-5" />
+                  <span>{session.user?.name}</span>
+                  <svg
+                    className={`h-4 w-4 transition-transform duration-200 ${
+                      isUserDropdownOpen ? 'rotate-180' : ''
+                    }`}
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                  </svg>
+                </button>
+
+                {isUserDropdownOpen && (
+                  <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 z-50">
+                    <div className="py-2">
+                      <Link
+                        href="/dashboard"
+                        className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                        onClick={() => setIsUserDropdownOpen(false)}
+                      >
+                        Dashboard
+                      </Link>
+                      <Link
+                        href="/profile"
+                        className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                        onClick={() => setIsUserDropdownOpen(false)}
+                      >
+                        Profile
+                      </Link>
+                      <hr className="my-1" />
+                      <button
+                        onClick={handleSignOut}
+                        className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                      >
+                        Sign out
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <div className="flex items-center space-x-4">
+                <Link href="/auth/signin">
+                  <Button variant="light" color="primary">
+                    Sign in
+                  </Button>
+                </Link>
+                <Link href="/auth/signup">
+                  <Button color="primary">
+                    Sign up
+                  </Button>
+                </Link>
+              </div>
+            )}
           </div>
 
           {/* Mobile menu button */}
@@ -255,6 +331,57 @@ export default function Navbar() {
                   <div className="text-sm text-gray-600 mt-1">{item.description}</div>
                 </Link>
               ))}
+            </div>
+
+            {/* Mobile Authentication */}
+            <div className="border-t border-gray-200 pt-2 mt-2">
+              {session ? (
+                <div className="space-y-2">
+                  <div className="px-3 py-2 text-sm font-medium text-gray-500 uppercase tracking-wider">
+                    Account
+                  </div>
+                  <Link
+                    href="/dashboard"
+                    className={getMobileLinkClassName('/dashboard', pathname === '/dashboard')}
+                    onClick={() => setIsMobileMenuOpen(false)}
+                  >
+                    Dashboard
+                  </Link>
+                  <Link
+                    href="/profile"
+                    className={getMobileLinkClassName('/profile', pathname === '/profile')}
+                    onClick={() => setIsMobileMenuOpen(false)}
+                  >
+                    Profile
+                  </Link>
+                  <button
+                    onClick={() => {
+                      handleSignOut();
+                      setIsMobileMenuOpen(false);
+                    }}
+                    className="block w-full text-left px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-blue-600 hover:bg-gray-50"
+                  >
+                    Sign out
+                  </button>
+                </div>
+              ) : (
+                <div className="space-y-2 pt-2">
+                  <Link
+                    href="/auth/signin"
+                    className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-blue-600 hover:bg-gray-50"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                  >
+                    Sign in
+                  </Link>
+                  <Link
+                    href="/auth/signup"
+                    className="block px-3 py-2 rounded-md text-base font-medium text-blue-600 hover:text-blue-500"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                  >
+                    Sign up
+                  </Link>
+                </div>
+              )}
             </div>
           </div>
         </div>

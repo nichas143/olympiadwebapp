@@ -2,13 +2,41 @@
 
 import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
-import { useEffect } from 'react'
-import { Card, CardBody, CardHeader, Button, Input, Divider } from "@heroui/react"
-import { UserIcon, EnvelopeIcon, AcademicCapIcon, ClockIcon } from '@heroicons/react/24/outline'
+import { useEffect, useState } from 'react'
+import { Card, CardBody, CardHeader, Button, Input, Divider, Chip } from "@heroui/react"
+import { UserIcon, EnvelopeIcon, AcademicCapIcon, ClockIcon, PlayCircleIcon, BookOpenIcon, CheckCircleIcon } from '@heroicons/react/24/outline'
+
+interface ProgressSummary {
+  summary: Array<{
+    _id: string
+    count: number
+  }>
+  totalContent: number
+  attemptedContent: number
+  attemptRate: number
+}
+
+interface UserProgress {
+  _id: string
+  contentId: string
+  status: 'not_attempted' | 'attempted'
+  lastAccessedAt: string
+  attemptedAt?: string
+  notes?: string
+  isBookmarked: boolean
+  content?: {
+    concept: string
+    unit: string
+    contentType: string
+  }
+}
 
 export default function Profile() {
   const { data: session, status } = useSession()
   const router = useRouter()
+  const [progressData, setProgressData] = useState<ProgressSummary | null>(null)
+  const [recentActivity, setRecentActivity] = useState<UserProgress[]>([])
+  const [loading, setLoading] = useState(true)
   
   useEffect(() => {
     if (status === 'loading') return
@@ -17,9 +45,77 @@ export default function Profile() {
       router.push('/auth/signin')
       return
     }
+
+    // Fetch profile data
+    const fetchProfileData = async () => {
+      try {
+        setLoading(true)
+        
+        // Fetch progress summary
+        const progressResponse = await fetch('/api/progress?summary=true')
+        if (progressResponse.ok) {
+          const progressData = await progressResponse.json()
+          setProgressData(progressData)
+        }
+
+        // Fetch recent activity (last 10 accessed items)
+        const activityResponse = await fetch('/api/progress')
+        if (activityResponse.ok) {
+          const activityData = await activityResponse.json()
+          // Get the most recent 10 items
+          const recent = activityData.progress?.slice(0, 10) || []
+          setRecentActivity(recent)
+        }
+      } catch (error) {
+        console.error('Failed to fetch profile data:', error)
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchProfileData()
   }, [session, status, router])
 
-  if (status === 'loading') {
+  const getAttemptedCount = () => {
+    if (!progressData?.summary) return 0
+    const attempted = progressData.summary.find(item => item._id === 'attempted')
+    return attempted?.count || 0
+  }
+
+  const getNotAttemptedCount = () => {
+    if (!progressData?.summary) return 0
+    const notAttempted = progressData.summary.find(item => item._id === 'not_attempted')
+    return notAttempted?.count || 0
+  }
+
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString)
+    const now = new Date()
+    const diffInHours = Math.floor((now.getTime() - date.getTime()) / (1000 * 60 * 60))
+    
+    if (diffInHours < 1) return 'Just now'
+    if (diffInHours < 24) return `${diffInHours} hours ago`
+    if (diffInHours < 48) return '1 day ago'
+    return `${Math.floor(diffInHours / 24)} days ago`
+  }
+
+  const getActivityIcon = (contentType: string) => {
+    switch (contentType) {
+      case 'video': return <PlayCircleIcon className="h-4 w-4" />
+      case 'pdf': return <BookOpenIcon className="h-4 w-4" />
+      default: return <AcademicCapIcon className="h-4 w-4" />
+    }
+  }
+
+  const getActivityColor = (contentType: string) => {
+    switch (contentType) {
+      case 'video': return 'blue'
+      case 'pdf': return 'green'
+      default: return 'purple'
+    }
+  }
+
+  if (status === 'loading' || loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
@@ -97,20 +193,20 @@ export default function Profile() {
               <CardBody>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                   <div className="text-center p-4 bg-blue-50 rounded-lg">
-                    <div className="text-2xl font-bold text-blue-600">12</div>
-                    <div className="text-sm text-gray-600">Videos Watched</div>
+                    <div className="text-2xl font-bold text-blue-600">{getAttemptedCount()}</div>
+                    <div className="text-sm text-gray-600">Content Attempted</div>
                   </div>
                   <div className="text-center p-4 bg-green-50 rounded-lg">
-                    <div className="text-2xl font-bold text-green-600">8</div>
-                    <div className="text-sm text-gray-600">Lessons Completed</div>
+                    <div className="text-2xl font-bold text-green-600">{progressData?.totalContent || 0}</div>
+                    <div className="text-sm text-gray-600">Total Content</div>
                   </div>
                   <div className="text-center p-4 bg-purple-50 rounded-lg">
-                    <div className="text-2xl font-bold text-purple-600">45</div>
-                    <div className="text-sm text-gray-600">Problems Solved</div>
+                    <div className="text-2xl font-bold text-purple-600">{progressData?.attemptRate || 0}%</div>
+                    <div className="text-sm text-gray-600">Attempt Rate</div>
                   </div>
                   <div className="text-center p-4 bg-orange-50 rounded-lg">
-                    <div className="text-2xl font-bold text-orange-600">24h</div>
-                    <div className="text-sm text-gray-600">Study Time</div>
+                    <div className="text-2xl font-bold text-orange-600">{getNotAttemptedCount()}</div>
+                    <div className="text-sm text-gray-600">Remaining</div>
                   </div>
                 </div>
               </CardBody>
@@ -121,37 +217,38 @@ export default function Profile() {
                 <h2 className="text-xl font-semibold">Recent Activity</h2>
               </CardHeader>
               <CardBody>
-                <div className="space-y-4">
-                  <div className="flex items-center space-x-3">
-                    <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
-                      <AcademicCapIcon className="h-4 w-4 text-blue-600" />
-                    </div>
-                    <div className="flex-1">
-                      <p className="font-medium">Completed Number Theory Basics</p>
-                      <p className="text-sm text-gray-500">2 hours ago</p>
-                    </div>
+                {recentActivity.length === 0 ? (
+                  <div className="text-center py-8">
+                    <AcademicCapIcon className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                    <p className="text-gray-500">No recent activity</p>
+                    <p className="text-sm text-gray-400">Start learning to see your activity here</p>
                   </div>
-                  
-                  <div className="flex items-center space-x-3">
-                    <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
-                      <ClockIcon className="h-4 w-4 text-green-600" />
-                    </div>
-                    <div className="flex-1">
-                      <p className="font-medium">Started Algebra Fundamentals</p>
-                      <p className="text-sm text-gray-500">1 day ago</p>
-                    </div>
+                ) : (
+                  <div className="space-y-4">
+                    {recentActivity.map((activity) => (
+                      <div key={activity._id} className="flex items-center space-x-3">
+                        <div className={`w-8 h-8 bg-${getActivityColor(activity.content?.contentType || 'default')}-100 rounded-full flex items-center justify-center`}>
+                          {getActivityIcon(activity.content?.contentType || 'default')}
+                        </div>
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2">
+                            <p className="font-medium">{activity.content?.concept || 'Unknown Content'}</p>
+                            <Chip
+                              size="sm"
+                              color={activity.status === 'attempted' ? "success" : "default"}
+                              variant="flat"
+                            >
+                              {activity.status === 'attempted' ? 'Attempted' : 'Not Attempted'}
+                            </Chip>
+                          </div>
+                          <p className="text-sm text-gray-500">
+                            {activity.content?.unit} • {formatDate(activity.lastAccessedAt)}
+                          </p>
+                        </div>
+                      </div>
+                    ))}
                   </div>
-                  
-                  <div className="flex items-center space-x-3">
-                    <div className="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center">
-                      <AcademicCapIcon className="h-4 w-4 text-purple-600" />
-                    </div>
-                    <div className="flex-1">
-                      <p className="font-medium">Solved 5 practice problems</p>
-                      <p className="text-sm text-gray-500">3 days ago</p>
-                    </div>
-                  </div>
-                </div>
+                )}
               </CardBody>
             </Card>
           </div>
@@ -180,15 +277,25 @@ export default function Profile() {
 
             <Card>
               <CardHeader>
-                <h3 className="text-lg font-semibold">Subscription</h3>
+                <h3 className="text-lg font-semibold">Learning Progress</h3>
               </CardHeader>
               <CardBody>
-                <div className="text-center">
-                  <div className="text-2xl font-bold text-green-600 mb-2">Active</div>
-                  <p className="text-sm text-gray-600 mb-4">Premium Student Plan</p>
-                  <Button color="primary" size="sm" className="w-full">
-                    Manage Subscription
-                  </Button>
+                <div className="space-y-3">
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm text-gray-600">Overall Progress</span>
+                    <span className="text-sm font-medium">{progressData?.attemptRate || 0}%</span>
+                  </div>
+                  <div className="w-full bg-gray-200 rounded-full h-2">
+                    <div 
+                      className="bg-blue-600 h-2 rounded-full transition-all duration-300"
+                      style={{ width: `${progressData?.attemptRate || 0}%` }}
+                    ></div>
+                  </div>
+                  <div className="text-center pt-2">
+                    <p className="text-sm text-gray-600">
+                      {getAttemptedCount()} of {progressData?.totalContent || 0} content items attempted
+                    </p>
+                  </div>
                 </div>
               </CardBody>
             </Card>

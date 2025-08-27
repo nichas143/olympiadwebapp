@@ -51,8 +51,24 @@ export async function GET(request: NextRequest) {
     }
 
     // Get all user progress
-    const allProgress = await UserProgress.getUserProgress(userId)
-    return NextResponse.json({ progress: allProgress })
+    const allProgress = await UserProgress.getUserProgress(userId, { sort: { lastAccessedAt: -1 } })
+    
+    // Populate content information for each progress record
+    const progressWithContent = await Promise.all(
+      allProgress.map(async (progress) => {
+        const content = await Content.findById(progress.contentId).select('concept unit contentType')
+        return {
+          ...progress.toObject(),
+          content: content ? {
+            concept: content.concept,
+            unit: content.unit,
+            contentType: content.contentType
+          } : null
+        }
+      })
+    )
+    
+    return NextResponse.json({ progress: progressWithContent })
 
   } catch (error) {
     console.error('Error fetching progress:', error)

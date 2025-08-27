@@ -221,7 +221,8 @@ export default function Join() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
           <div className="text-center">
             <h1 className="text-4xl md:text-5xl font-bold mb-6">
-              Apply for Yearly Batch Program
+              Apply for Yearly Online Batch Program
+
             </h1>
             <p className="text-xl md:text-2xl text-green-100 max-w-3xl mx-auto">
               Join our exclusive 1+1 year intensive olympiad preparation program. Limited seats available for October-November batch.

@@ -62,7 +62,7 @@ export default function Home() {
       color: 'from-blue-600 to-purple-600'
     },
     {
-      title: 'Yearly Batch Program',
+      title: 'Yearly Online Batch Program',
       description: 'Join our exclusive 1+1 year intensive program with limited seats. New batches start every October-November.',
       features: ['Limited batch size', 'Personalized attention', 'Live sessions', 'Direct mentor support'],
       icon: '🎓',

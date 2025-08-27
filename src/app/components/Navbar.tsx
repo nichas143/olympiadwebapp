@@ -30,17 +30,17 @@ export default function Navbar() {
 
   const programItems = [
     {
-      name: 'Pre-requisites',
+      name: 'Pre-requisites for Online Lectures',
       href: '/prerequisites',
       description: 'Student should know following areas before joining the class'
     },
     {
-      name: 'Curriculum',
+      name: 'Olympiad Curriculum',
       href: '/curriculum',
       description: 'Following topics will be taught to the student in the course'
     },
     {
-      name: 'Sample Lessons',
+      name: 'Online Sample Content',
       href: '/sample-lessons',
       description: 'Watch sample video lessons to experience our teaching methodology'
     }
@@ -118,7 +118,7 @@ export default function Navbar() {
                     className={getLinkClassName('/program', isProgramActive)}
                   >
                     <span className="flex items-center">
-                      Program
+                      Programs
                       <svg
                         className={`ml-1 h-4 w-4 transition-transform duration-200 ${
                           isProgramDropdownOpen ? 'rotate-180' : ''
@@ -335,7 +335,7 @@ export default function Navbar() {
                 {/* Mobile Program Section */}
                 <div className="border-t border-gray-200 pt-2 mt-2">
                   <div className="px-3 py-2 text-sm font-medium text-gray-500 uppercase tracking-wider">
-                    Program
+                    Programs
                   </div>
                   {programItems.map((item) => (
                     <Link

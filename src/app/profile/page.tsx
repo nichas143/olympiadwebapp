@@ -165,12 +165,14 @@ export default function Profile() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <Input
                     label="Full Name"
+                    // disabled={true}
                     defaultValue={session.user?.name || ''}
                     variant="bordered"
                     startContent={<UserIcon className="h-4 w-4 text-gray-400" />}
                   />
                   <Input
                     label="Email"
+                    // disabled={true}
                     defaultValue={session.user?.email || ''}
                     variant="bordered"
                     startContent={<EnvelopeIcon className="h-4 w-4 text-gray-400" />}
@@ -300,7 +302,7 @@ export default function Profile() {
               </CardBody>
             </Card>
 
-            <Card>
+            <Card isDisabled={true}>
               <CardHeader>
                 <h3 className="text-lg font-semibold">Support</h3>
               </CardHeader>

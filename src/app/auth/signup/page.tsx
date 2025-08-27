@@ -73,16 +73,23 @@ export default function SignUp() {
             Create your account
           </h2>
           <p className="mt-2 text-center text-sm text-gray-600">
-            Join our Olympiad training program
+            Sign up for online access to our olympiad training materials
           </p>
         </div>
         
         <Card className="w-full">
           <CardHeader className="flex flex-col gap-1">
-            <h3 className="text-xl font-semibold">Get started</h3>
-            <p className="text-sm text-gray-500">Create your account to access training materials</p>
+            <h3 className="text-xl font-semibold">Get started with online access</h3>
+            <p className="text-sm text-gray-500">Create your account to access our comprehensive online learning platform</p>
           </CardHeader>
           <CardBody>
+            {/* Program Information Note */}
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
+              <p className="text-sm text-blue-800">
+                <span className="font-semibold">About This Program:</span> This registration is for online content access (self-paced learning). For our exclusive yearly batch program with personalized guidance, please use the <a href="/join" className="text-blue-600 underline font-medium">Apply for Batch</a> option instead.
+              </p>
+            </div>
+
             <form onSubmit={handleSubmit} className="space-y-4">
               {error && (
                 <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-md text-sm">
@@ -102,16 +109,16 @@ export default function SignUp() {
                       <h3 className="text-sm font-medium text-blue-800">
                         Registration Successful! 🎉
                       </h3>
-                      <div className="mt-2 text-sm text-blue-700">
-                        <p className="mb-2">{success}</p>
-                        <div className="mt-3 space-y-1">
-                          <p className="font-medium">What happens next:</p>
-                          <ul className="list-disc list-inside space-y-1 text-xs">
-                            <li>Our OlympiaMath admin will review your application</li>
-                            <li>You&apos;ll receive a welcome email once approved</li>
-                            <li>After approval, you can sign in and start learning!</li>
-                          </ul>
-                        </div>
+                                              <div className="mt-2 text-sm text-blue-700">
+                          <p className="mb-2">{success}</p>
+                          <div className="mt-3 space-y-1">
+                            <p className="font-medium">What happens next:</p>
+                            <ul className="list-disc list-inside space-y-1 text-xs">
+                              <li>Our admin will review your online access application</li>
+                              <li>You&apos;ll receive a welcome email once approved</li>
+                              <li>After approval, you can sign in and access all online content!</li>
+                            </ul>
+                          </div>
                         <div className="mt-3 pt-2 border-t border-blue-200">
                           <Link 
                             href="/auth/signin"

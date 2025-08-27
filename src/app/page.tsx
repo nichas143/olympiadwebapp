@@ -51,6 +51,27 @@ export default function Home() {
     }
   ];
 
+  const programs = [
+    {
+      title: 'Online Content Access',
+      description: 'Access our comprehensive online learning platform with video lectures, practice problems, and study materials.',
+      features: ['Self-paced learning', '24/7 access to content', 'Progress tracking', 'Community forum'],
+      icon: '💻',
+      ctaText: 'Sign Up for Online Access',
+      ctaLink: '/auth/signup',
+      color: 'from-blue-600 to-purple-600'
+    },
+    {
+      title: 'Yearly Batch Program',
+      description: 'Join our exclusive 1+1 year intensive program with limited seats. New batches start every October-November.',
+      features: ['Limited batch size', 'Personalized attention', 'Live sessions', 'Direct mentor support'],
+      icon: '🎓',
+      ctaText: 'Apply for Batch Program',
+      ctaLink: '/join',
+      color: 'from-green-600 to-teal-600'
+    }
+  ];
+
   return (
     <div className="min-h-screen">
       {/* Hero Section */}
@@ -82,8 +103,53 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Features Section */}
+      {/* Programs Section */}
       <section className="py-20 bg-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-16">
+            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+              Choose Your Learning Path
+            </h2>
+            <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+              We offer two distinct programs to suit different learning preferences and goals
+            </p>
+          </div>
+          
+          <div className="grid lg:grid-cols-2 gap-8">
+            {programs.map((program, index) => (
+              <div key={index} className="bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden hover:shadow-xl transition-shadow duration-200">
+                <div className={`bg-gradient-to-r ${program.color} p-6 text-white`}>
+                  <div className="text-4xl mb-4">{program.icon}</div>
+                  <h3 className="text-2xl font-bold mb-2">{program.title}</h3>
+                  <p className="text-lg opacity-90">{program.description}</p>
+                </div>
+                <div className="p-6">
+                  <h4 className="font-semibold text-gray-900 mb-4">What's included:</h4>
+                  <ul className="space-y-2 mb-6">
+                    {program.features.map((feature, featureIndex) => (
+                      <li key={featureIndex} className="flex items-center text-gray-600">
+                        <svg className="w-4 h-4 text-green-500 mr-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                          <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                        </svg>
+                        {feature}
+                      </li>
+                    ))}
+                  </ul>
+                  <Link
+                    href={program.ctaLink}
+                    className={`block w-full text-center py-3 px-6 rounded-lg font-semibold text-white bg-gradient-to-r ${program.color} hover:opacity-90 transition-opacity duration-200`}
+                  >
+                    {program.ctaText}
+                  </Link>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Features Section */}
+      <section className="py-20 bg-gray-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
@@ -96,7 +162,7 @@ export default function Home() {
           
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
             {features.map((feature, index) => (
-              <div key={index} className="text-center p-6 rounded-xl bg-gray-50 hover:bg-gray-100 transition-colors duration-200">
+              <div key={index} className="text-center p-6 rounded-xl bg-white hover:bg-gray-50 transition-colors duration-200 shadow-sm">
                 <div className="text-4xl mb-4">{feature.icon}</div>
                 <h3 className="text-xl font-semibold text-gray-900 mb-2">{feature.title}</h3>
                 <p className="text-gray-600">{feature.description}</p>
@@ -167,14 +233,22 @@ export default function Home() {
             Ready to Begin Your Olympiad Journey?
           </h2>
           <p className="text-xl mb-8 text-blue-100">
-            Join thousands of students who have successfully prepared for mathematical olympiads with our comprehensive program.
+            Choose your preferred learning path and join thousands of students who have successfully prepared for mathematical olympiads.
           </p>
-          <Link
-            href="/curriculum"
-            className="bg-white text-blue-600 px-8 py-4 rounded-lg font-semibold text-lg hover:bg-gray-100 transition-colors duration-200 inline-block"
-          >
-            Explore Our Curriculum
-          </Link>
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <Link
+              href="/auth/signup"
+              className="bg-white text-blue-600 px-8 py-4 rounded-lg font-semibold text-lg hover:bg-gray-100 transition-colors duration-200"
+            >
+              Sign Up for Online Access
+            </Link>
+            <Link
+              href="/join"
+              className="border-2 border-white text-white px-8 py-4 rounded-lg font-semibold text-lg hover:bg-white hover:text-blue-600 transition-colors duration-200"
+            >
+              Apply for Batch Program
+            </Link>
+          </div>
         </div>
       </section>
     </div>

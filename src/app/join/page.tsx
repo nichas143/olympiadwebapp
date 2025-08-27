@@ -221,10 +221,10 @@ export default function Join() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
           <div className="text-center">
             <h1 className="text-4xl md:text-5xl font-bold mb-6">
-              Join Our Program
+              Apply for Yearly Batch Program
             </h1>
             <p className="text-xl md:text-2xl text-green-100 max-w-3xl mx-auto">
-              Take the first step towards mathematical excellence. Register for our comprehensive olympiad preparation program.
+              Join our exclusive 1+1 year intensive olympiad preparation program. Limited seats available for October-November batch.
             </p>
           </div>
         </div>
@@ -236,11 +236,11 @@ export default function Join() {
           <Card className="shadow-xl">
             <CardHeader className="text-center pb-6 flex flex-col items-center">
               <h2 className="text-3xl font-bold text-gray-900">
-                Student Registration Form
+                Batch Program Application Form
               </h2>
 
               <h3 className="text-black mt-2">
-                Please fill in your details below. We&apos;ll review your application and get back to you soon.
+                Please fill in your details below. We&apos;ll review your application and prerequisites, then contact you via email with our decision.
               </h3>
             </CardHeader>
 
@@ -257,6 +257,13 @@ export default function Join() {
                     autoComplete="off"
                     style={{ position: 'absolute', left: '-9999px' }}
                   />
+                </div>
+
+                {/* Program Information Note */}
+                <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-6">
+                  <p className="text-sm text-green-800">
+                    <span className="font-semibold">About This Program:</span> This application is for our exclusive yearly batch program (1+1 year duration) with limited seats. For online content access, please use the <a href="/auth/signup" className="text-green-600 underline font-medium">Sign Up</a> option instead.
+                  </p>
                 </div>
 
                 {/* Required Fields Note */}
@@ -478,10 +485,10 @@ export default function Join() {
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
             <h2 className="text-3xl font-bold text-gray-900 mb-4">
-              What Happens Next?
+              What Happens After Application?
             </h2>
             <p className="text-xl text-gray-600">
-              After submitting your application, here&apos;s what you can expect
+              Our process for the yearly batch program
             </p>
           </div>
 
@@ -491,23 +498,23 @@ export default function Join() {
                 <span className="text-2xl">📧</span>
               </div>
               <h3 className="text-lg font-semibold text-gray-900 mb-2">Application Review</h3>
-                              <p className="text-gray-600">We&apos;ll review your application and prerequisites within 2-3 business days.</p>
+              <p className="text-gray-600">We&apos;ll review your application and prerequisites within 2-3 business days.</p>
             </div>
 
             <div className="text-center">
               <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
                 <span className="text-2xl">📞</span>
               </div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">Contact & Assessment</h3>
-                              <p className="text-gray-600">We&apos;ll contact you to discuss your goals and conduct a brief assessment.</p>
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">Email Response</h3>
+              <p className="text-gray-600">You&apos;ll receive an email with our decision and next steps for the batch program.</p>
             </div>
 
             <div className="text-center">
               <div className="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
                 <span className="text-2xl">🎯</span>
               </div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">Program Start</h3>
-              <p className="text-gray-600">Once approved, you&apos;ll receive access to our comprehensive curriculum.</p>
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">Batch Enrollment</h3>
+              <p className="text-gray-600">If selected, you&apos;ll be enrolled in our October-November batch with personalized guidance.</p>
             </div>
           </div>
         </div>

@@ -25,7 +25,7 @@ export default function Navbar() {
   const navItems = [
     { name: 'Home', href: '/' },
     { name: 'About Us', href: '/about' },
-    { name: 'Join', href: '/join' },
+    { name: 'Apply for Online Batch', href: '/join' },
   ];
 
   const programItems = [

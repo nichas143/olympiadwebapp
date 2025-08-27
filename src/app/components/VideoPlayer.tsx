@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect } from 'react'
 import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, Button, Progress, Card, CardBody } from "@heroui/react"
-import { PlayCircleIcon, PauseIcon, SpeakerWaveIcon, SpeakerXMarkIcon, ArrowsPointingOutIcon, XMarkIcon } from '@heroicons/react/24/outline'
+import { PlayCircleIcon, PauseIcon, SpeakerWaveIcon, SpeakerXMarkIcon, ArrowsPointingOutIcon } from '@heroicons/react/24/outline'
 import ProgressTracker from './ProgressTracker'
 
 interface VideoPlayerProps {
@@ -26,7 +26,6 @@ export default function VideoPlayer({
 }: VideoPlayerProps) {
   const [isPlaying, setIsPlaying] = useState(false)
   const [progress, setProgress] = useState(0)
-  const [volume, setVolume] = useState(1)
   const [isMuted, setIsMuted] = useState(false)
   const [duration, setDuration] = useState(0)
   const [currentTime, setCurrentTime] = useState(0)

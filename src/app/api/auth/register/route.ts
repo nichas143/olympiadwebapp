@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server"
 import bcrypt from "bcryptjs"
 import connectDB  from "@/lib/mongodb"
 import { User } from "@/models/User"
-import { connect } from "http2"
+
 
 export async function POST(request: NextRequest) {
   try {

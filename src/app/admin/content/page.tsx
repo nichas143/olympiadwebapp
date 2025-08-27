@@ -2,7 +2,7 @@
 
 import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import { 
   Card, 
   CardBody, 
@@ -108,28 +108,9 @@ export default function AdminContent() {
     instructionType: 'all'
   })
 
-  const units = ['Algebra', 'Geometry', 'Number Theory', 'Combinatorics', 'Functional Equations', 'Inequalities', 'Advanced Math', 'Calculus', 'Other']
-  const contentTypes = ['video', 'pdf', 'link', 'testpaperLink']
-  const instructionTypes = ['conceptDiscussion', 'problemDiscussion']
-  const docCategories = ['Learning', 'MockTest', 'PracticeSet']
 
-  useEffect(() => {
-    if (status === 'loading') return
-    
-    if (!session) {
-      router.push('/auth/signin')
-      return
-    }
 
-    if (session.user?.role !== 'admin' && session.user?.role !== 'superadmin') {
-      router.push('/dashboard')
-      return
-    }
-    
-    fetchContent()
-  }, [session, status, router, page, filters])
-
-  const fetchContent = async () => {
+  const fetchContent = useCallback(async () => {
     try {
       setLoading(true)
       const params = new URLSearchParams({
@@ -154,7 +135,23 @@ export default function AdminContent() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [page, filters])
+
+  useEffect(() => {
+    if (status === 'loading') return
+    
+    if (!session) {
+      router.push('/auth/signin')
+      return
+    }
+
+    if (session.user?.role !== 'admin' && session.user?.role !== 'superadmin') {
+      router.push('/dashboard')
+      return
+    }
+    
+    fetchContent()
+  }, [session, status, router, fetchContent])
 
   const validateForm = () => {
     const errors: string[] = []

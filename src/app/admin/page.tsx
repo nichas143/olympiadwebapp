@@ -2,7 +2,7 @@
 
 import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import { Button, Card, CardBody, CardHeader, Tab, Tabs, Table, TableBody, TableCell, TableColumn, TableHeader, TableRow, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader, Textarea, useDisclosure, Chip, Pagination } from '@heroui/react'
 
 interface User {
@@ -38,18 +38,7 @@ export default function AdminDashboard() {
   
   const { isOpen: isRejectModalOpen, onOpen: onRejectModalOpen, onClose: onRejectModalClose } = useDisclosure()
 
-  useEffect(() => {
-    if (status === 'loading') return
-    
-    if (!session || (session.user.role !== 'admin' && session.user.role !== 'superadmin')) {
-      router.push('/auth/signin')
-      return
-    }
-    
-    fetchUsers()
-  }, [session, status, router, selectedStatus, currentPage])
-
-  const fetchUsers = async () => {
+  const fetchUsers = useCallback(async () => {
     try {
       setLoading(true)
       const params = new URLSearchParams({
@@ -69,7 +58,18 @@ export default function AdminDashboard() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [selectedStatus, currentPage])
+
+  useEffect(() => {
+    if (status === 'loading') return
+    
+    if (!session || (session.user.role !== 'admin' && session.user.role !== 'superadmin')) {
+      router.push('/auth/signin')
+      return
+    }
+    
+    fetchUsers()
+  }, [session, status, router, fetchUsers])
 
   const handleApprove = async (userId: string) => {
     try {

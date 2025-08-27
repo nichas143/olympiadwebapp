@@ -2,7 +2,7 @@
 
 import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import { Card, CardBody, CardHeader, Button, Badge, Progress, Select, SelectItem } from "@heroui/react"
 import { BookOpenIcon, CheckCircleIcon, ClockIcon, AcademicCapIcon, PlayCircleIcon } from '@heroicons/react/24/outline'
 import ContentViewer from '@/app/components/ContentViewer'
@@ -57,23 +57,10 @@ export default function PracticeProblems() {
     totalTimeSpent: 0,
     averageScore: 0
   })
-  const [selectedContent, setSelectedContent] = useState<PracticeSetWithProgress | null>(null)
+    const [selectedContent, setSelectedContent] = useState<PracticeSetWithProgress | null>(null)
   const [showContentViewer, setShowContentViewer] = useState(false)
   
-  const units = ['Algebra', 'Geometry', 'Number Theory', 'Combinatorics', 'Functional Equations', 'Inequalities', 'Advanced Math', 'Calculus', 'Other']
-  
-  useEffect(() => {
-    if (status === 'loading') return
-    
-    if (!session) {
-      router.push('/auth/signin')
-      return
-    }
-    
-    fetchPracticeSets()
-  }, [session, status, router, selectedUnit])
-
-  const fetchPracticeSets = async () => {
+  const fetchPracticeSets = useCallback(async () => {
     try {
       setLoading(true)
       
@@ -116,7 +103,18 @@ export default function PracticeProblems() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [selectedUnit])
+  
+  useEffect(() => {
+    if (status === 'loading') return
+    
+    if (!session) {
+      router.push('/auth/signin')
+      return
+    }
+    
+    fetchPracticeSets()
+  }, [session, status, router, fetchPracticeSets])
 
   const calculateStats = (sets: PracticeSetWithProgress[]) => {
     const completed = sets.filter(set => set.progress?.status === 'completed').length

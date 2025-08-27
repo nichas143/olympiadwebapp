@@ -1,9 +1,17 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@/lib/auth'
 import connectDB from '@/lib/mongodb'
-import { Achievement } from '@/models/Achievement'
+import { Achievement, IAchievement } from '@/models/Achievement'
 import { UserProgress } from '@/models/UserProgress'
 import { StudySession } from '@/models/StudySession'
+
+interface NewAchievement {
+  id: string
+  title: string
+  description: string
+  icon: string
+  points: number
+}
 
 // POST /api/achievements/check - Check and update achievements based on progress
 export async function POST(request: NextRequest) {
@@ -17,9 +25,9 @@ export async function POST(request: NextRequest) {
 
     const userId = session.user.id
     const body = await request.json()
-    const { contentId, progressData } = body
+    const { progressData } = body
 
-    const newAchievements: any[] = []
+    const newAchievements: NewAchievement[] = []
 
     // Get user's current achievements
     const userAchievements = await Achievement.find({ userId })
@@ -62,7 +70,7 @@ export async function POST(request: NextRequest) {
     consecutiveDays = currentStreak
 
     // Check each achievement type
-    for (const achievement of userAchievements) {
+    for (const achievement of userAchievements as IAchievement[]) {
       if (achievement.isUnlocked) continue // Skip already unlocked achievements
 
       let shouldUnlock = false
@@ -140,7 +148,7 @@ export async function POST(request: NextRequest) {
           achievement.isUnlocked = true
           achievement.unlockedAt = new Date()
           newAchievements.push({
-            id: achievement._id,
+            id: (achievement._id as string).toString(),
             title: achievement.title,
             description: achievement.description,
             icon: achievement.icon,
@@ -171,7 +179,7 @@ export async function POST(request: NextRequest) {
 }
 
 // GET /api/achievements/check - Get user's achievements summary
-export async function GET(request: NextRequest) {
+export async function GET(_request: NextRequest) {
   try {
     const session = await auth()
     if (!session?.user?.id) {

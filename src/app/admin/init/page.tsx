@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { Button, Card, CardBody, CardHeader, Input, Divider } from '@heroui/react'
 
@@ -22,11 +22,7 @@ export default function AdminInitPage() {
   })
   const [message, setMessage] = useState({ type: '', text: '' })
 
-  useEffect(() => {
-    checkInitStatus()
-  }, [])
-
-  const checkInitStatus = async () => {
+  const checkInitStatus = useCallback(async () => {
     try {
       const response = await fetch('/api/admin/init')
       const data = await response.json()
@@ -41,7 +37,11 @@ export default function AdminInitPage() {
       console.error('Error checking init status:', error)
       setMessage({ type: 'error', text: 'Failed to check initialization status' })
     }
-  }
+  }, [router])
+
+  useEffect(() => {
+    checkInitStatus()
+  }, [checkInitStatus])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()

@@ -90,7 +90,7 @@ export async function PATCH(
     await adminUser.save()
 
     // Remove password from response
-    const { password: _, ...updatedAdmin } = adminUser.toObject()
+    const { password, ...updatedAdmin } = adminUser.toObject()
 
     return NextResponse.json({ 
       message: 'Admin user role updated successfully',

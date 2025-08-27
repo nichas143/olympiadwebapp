@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, Button, Progress, Card, CardBody, Spinner } from "@heroui/react"
-import { DocumentIcon, ArrowDownTrayIcon, ArrowsPointingOutIcon, ChevronLeftIcon, ChevronRightIcon } from '@heroicons/react/24/outline'
+import { DocumentIcon, ArrowDownTrayIcon, ArrowsPointingOutIcon } from '@heroicons/react/24/outline'
 
 interface PDFViewerProps {
   isOpen: boolean
@@ -25,8 +25,8 @@ export default function PDFViewer({
   const [error, setError] = useState<string | null>(null)
   const [startTime, setStartTime] = useState<number>(Date.now())
   const [timeSpent, setTimeSpent] = useState(0)
-  const [currentPage, setCurrentPage] = useState(1)
-  const [totalPages, setTotalPages] = useState(0)
+  const [currentPage] = useState(1)
+  const [totalPages] = useState(0)
   const [scale, setScale] = useState(1.0)
   
   // Convert Google Drive share links to embed format

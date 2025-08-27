@@ -4,7 +4,7 @@ import connectDB from '@/lib/mongodb'
 import { Content } from '@/models/Content'
 
 // POST /api/content/seed - Add sample content (superadmin only)
-export async function POST(request: NextRequest) {
+export async function POST(_request: NextRequest) {
   try {
     const session = await auth()
     

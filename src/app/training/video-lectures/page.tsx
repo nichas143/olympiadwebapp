@@ -2,7 +2,7 @@
 
 import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import { Card, CardBody, CardHeader, Button, Select, SelectItem, Chip, Badge } from "@heroui/react"
 import { PlayCircleIcon, ClockIcon, AcademicCapIcon, BookOpenIcon, LinkIcon } from '@heroicons/react/24/outline'
 import ContentViewer from '@/app/components/ContentViewer'
@@ -34,23 +34,9 @@ export default function VideoLectures() {
   const [selectedUnit, setSelectedUnit] = useState<string>('all')
   const [selectedInstructionType, setSelectedInstructionType] = useState<string>('all')
   const [selectedContent, setSelectedContent] = useState<Content | null>(null)
-  const [showContentViewer, setShowContentViewer] = useState(false)
+    const [showContentViewer, setShowContentViewer] = useState(false)
   
-  const units = ['Algebra', 'Geometry', 'Number Theory', 'Combinatorics', 'Functional Equations', 'Inequalities', 'Advanced Math', 'Calculus', 'Other']
-  const instructionTypes = ['problemDiscussion', 'conceptDiscussion']
-  
-  useEffect(() => {
-    if (status === 'loading') return
-    
-    if (!session) {
-      router.push('/auth/signin')
-      return
-    }
-    
-    fetchContent()
-  }, [session, status, router, selectedUnit, selectedInstructionType])
-
-  const fetchContent = async () => {
+  const fetchContent = useCallback(async () => {
     try {
       setLoading(true)
       const params = new URLSearchParams()
@@ -75,7 +61,18 @@ export default function VideoLectures() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [selectedUnit, selectedInstructionType])
+  
+  useEffect(() => {
+    if (status === 'loading') return
+    
+    if (!session) {
+      router.push('/auth/signin')
+      return
+    }
+    
+    fetchContent()
+  }, [session, status, router, fetchContent])
 
   const formatDuration = (minutes: number) => {
     const hours = Math.floor(minutes / 60)
@@ -92,14 +89,7 @@ export default function VideoLectures() {
     return match ? match[1] : null
   }
 
-  const getContentTypeIcon = (type: string) => {
-    switch (type) {
-      case 'video': return <PlayCircleIcon className="h-5 w-5" />
-      case 'pdf': return <BookOpenIcon className="h-5 w-5" />
-      case 'link': return <LinkIcon className="h-5 w-5" />
-      default: return <AcademicCapIcon className="h-5 w-5" />
-    }
-  }
+
 
   const getInstructionTypeColor = (type: string) => {
     return type === 'conceptDiscussion' ? 'primary' : 'secondary'

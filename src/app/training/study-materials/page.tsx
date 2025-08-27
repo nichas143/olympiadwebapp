@@ -2,7 +2,7 @@
 
 import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import { Card, CardBody, CardHeader, Button, Select, SelectItem, Chip, Badge } from "@heroui/react"
 import { PlayCircleIcon, ClockIcon, AcademicCapIcon, BookOpenIcon, LinkIcon, DocumentIcon } from '@heroicons/react/24/outline'
 import ContentViewer from '@/app/components/ContentViewer'
@@ -37,25 +37,9 @@ export default function StudyMaterials() {
   const [selectedInstructionType, setSelectedInstructionType] = useState<string>('all')
   const [selectedDocCategory, setSelectedDocCategory] = useState<string>('all')
   const [selectedContent, setSelectedContent] = useState<Content | null>(null)
-  const [showContentViewer, setShowContentViewer] = useState(false)
+    const [showContentViewer, setShowContentViewer] = useState(false)
   
-  const units = ['Algebra', 'Geometry', 'Number Theory', 'Combinatorics', 'Functional Equations', 'Inequalities', 'Advanced Math', 'Calculus', 'Other']
-  const contentTypes = ['video', 'pdf', 'link', 'testpaperLink']
-  const instructionTypes = ['problemDiscussion', 'conceptDiscussion']
-  const docCategories = ['Learning', 'MockTest', 'PracticeSet']
-  
-  useEffect(() => {
-    if (status === 'loading') return
-    
-    if (!session) {
-      router.push('/auth/signin')
-      return
-    }
-    
-    fetchContent()
-  }, [session, status, router, selectedUnit, selectedContentType, selectedInstructionType, selectedDocCategory])
-
-  const fetchContent = async () => {
+  const fetchContent = useCallback(async () => {
     try {
       setLoading(true)
       const params = new URLSearchParams()
@@ -89,7 +73,18 @@ export default function StudyMaterials() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [selectedUnit, selectedContentType, selectedInstructionType, selectedDocCategory])
+  
+  useEffect(() => {
+    if (status === 'loading') return
+    
+    if (!session) {
+      router.push('/auth/signin')
+      return
+    }
+    
+    fetchContent()
+  }, [session, status, router, fetchContent])
 
   const formatDuration = (minutes: number) => {
     const hours = Math.floor(minutes / 60)

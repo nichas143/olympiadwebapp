@@ -78,7 +78,7 @@ export default function BlogPage() {
     { name: "Preparation", count: 1, active: false }
   ];
 
-  const recentPosts = blogPosts.slice(0, 3);
+
 
   return (
     <div className="min-h-screen bg-gray-50 py-12">

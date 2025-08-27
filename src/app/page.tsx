@@ -124,7 +124,7 @@ export default function Home() {
                   <p className="text-lg opacity-90">{program.description}</p>
                 </div>
                 <div className="p-6">
-                  <h4 className="font-semibold text-gray-900 mb-4">What's included:</h4>
+                  <h4 className="font-semibold text-gray-900 mb-4">What&apos;s included:</h4>
                   <ul className="space-y-2 mb-6">
                     {program.features.map((feature, featureIndex) => (
                       <li key={featureIndex} className="flex items-center text-gray-600">

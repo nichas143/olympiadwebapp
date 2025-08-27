@@ -364,6 +364,289 @@ export async function sendRejectionEmail(email: string, name: string, reason?: s
   }
 }
 
+// Send notification email to admin for batch program application
+export async function sendBatchProgramAdminNotification(studentData: StudentData) {
+  const prerequisitesList = Object.entries(studentData.prerequisites)
+    .filter(([, value]) => value === true)
+    .map(([key]) => key.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase()))
+    .join(', ');
+
+  const mailOptions = {
+    from: process.env.EMAIL_USER,
+    to: 'sachin.gadkar@gmail.com',
+    subject: 'New Batch Program Application - Math Olympiad',
+    html: `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+        <h2 style="color: #059669; border-bottom: 2px solid #059669; padding-bottom: 10px;">
+          🎓 New Batch Program Application
+        </h2>
+        
+        <div style="background-color: #f0fdf4; padding: 20px; border-radius: 8px; margin: 20px 0;">
+          <h3 style="color: #374151; margin-top: 0;">Student Details:</h3>
+          
+          <table style="width: 100%; border-collapse: collapse;">
+            <tr>
+              <td style="padding: 8px 0; font-weight: bold; color: #374151;">Name:</td>
+              <td style="padding: 8px 0; color: #6b7280;">${studentData.name}</td>
+            </tr>
+            <tr>
+              <td style="padding: 8px 0; font-weight: bold; color: #374151;">Class:</td>
+              <td style="padding: 8px 0; color: #6b7280;">${studentData.currentClass}</td>
+            </tr>
+            <tr>
+              <td style="padding: 8px 0; font-weight: bold; color: #374151;">School:</td>
+              <td style="padding: 8px 0; color: #6b7280;">${studentData.schoolName}</td>
+            </tr>
+            <tr>
+              <td style="padding: 8px 0; font-weight: bold; color: #374151;">Phone:</td>
+              <td style="padding: 8px 0; color: #6b7280;">${studentData.phoneNumber}</td>
+            </tr>
+            <tr>
+              <td style="padding: 8px 0; font-weight: bold; color: #374151;">Email:</td>
+              <td style="padding: 8px 0; color: #6b7280;">${studentData.email}</td>
+            </tr>
+          </table>
+        </div>
+        
+        <div style="background-color: #f0f9ff; padding: 20px; border-radius: 8px; margin: 20px 0;">
+          <h3 style="color: #374151; margin-top: 0;">Prerequisites Knowledge:</h3>
+          <p style="color: #6b7280; margin: 0;">
+            ${prerequisitesList || 'No prerequisites selected'}
+          </p>
+        </div>
+        
+        <div style="background-color: #fef3c7; padding: 15px; border-radius: 8px; margin: 20px 0;">
+          <p style="color: #92400e; margin: 0; font-size: 14px;">
+            <strong>Action Required:</strong> This is for the yearly batch program (1+1 year). Please review and contact the student within 2-3 business days.
+          </p>
+        </div>
+        
+        <div style="text-align: center; margin-top: 30px; padding-top: 20px; border-top: 1px solid #e5e7eb;">
+          <p style="color: #6b7280; font-size: 12px;">
+            This is an automated notification from the Math Olympiad Batch Program Application System.
+          </p>
+        </div>
+      </div>
+    `
+  };
+
+  try {
+    if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
+      console.error('Email credentials not configured');
+      return false;
+    }
+    
+    await transporter.sendMail(mailOptions);
+    console.log('Batch program admin notification email sent successfully');
+    return true;
+  } catch {
+    console.error('Error sending batch program admin notification email');
+    return false;
+  }
+}
+
+// Send confirmation email to student for batch program application
+export async function sendBatchProgramConfirmationEmail(studentData: StudentData) {
+  const mailOptions = {
+    from: process.env.EMAIL_USER,
+    to: studentData.email,
+    subject: 'Batch Program Application Received - Math Olympiad',
+    html: `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+        <h2 style="color: #059669; border-bottom: 2px solid #059669; padding-bottom: 10px;">
+          🎓 Batch Program Application Received!
+        </h2>
+        
+        <div style="background-color: #f0fdf4; padding: 20px; border-radius: 8px; margin: 20px 0;">
+          <p style="color: #374151; font-size: 16px; line-height: 1.6;">
+            Dear <strong>${studentData.name}</strong>,
+          </p>
+          
+          <p style="color: #374151; font-size: 16px; line-height: 1.6;">
+            Thank you for applying to our exclusive <strong>Yearly Batch Program</strong> for Math Olympiad preparation! We're excited about your interest in joining our intensive 1+1 year program.
+          </p>
+          
+          <p style="color: #374151; font-size: 16px; line-height: 1.6;">
+            We have received your application and our team will review it within <strong>2-3 business days</strong>. You will receive an email with our decision and next steps.
+          </p>
+        </div>
+        
+        <div style="background-color: #f8fafc; padding: 20px; border-radius: 8px; margin: 20px 0;">
+          <h3 style="color: #374151; margin-top: 0;">What happens next?</h3>
+          <ol style="color: #374151; line-height: 1.8;">
+            <li><strong>Application Review:</strong> We'll carefully review your application and prerequisites</li>
+            <li><strong>Email Response:</strong> You'll receive an email with our decision within 2-3 business days</li>
+            <li><strong>Batch Enrollment:</strong> If selected, you'll be enrolled in our October-November batch</li>
+          </ol>
+        </div>
+        
+        <div style="background-color: #ecfdf5; padding: 20px; border-radius: 8px; margin: 20px 0;">
+          <h3 style="color: #065f46; margin-top: 0;">Your Application Details:</h3>
+          <p style="color: #065f46; margin: 5px 0;"><strong>Name:</strong> ${studentData.name}</p>
+          <p style="color: #065f46; margin: 5px 0;"><strong>Class:</strong> ${studentData.currentClass}</p>
+          <p style="color: #065f46; margin: 5px 0;"><strong>School:</strong> ${studentData.schoolName}</p>
+          <p style="color: #065f46; margin: 5px 0;"><strong>Program:</strong> Yearly Batch Program (1+1 year)</p>
+        </div>
+        
+        <div style="text-align: center; margin-top: 30px; padding-top: 20px; border-top: 1px solid #e5e7eb;">
+          <p style="color: #6b7280; font-size: 14px;">
+            If you have any questions, please don't hesitate to contact us.
+          </p>
+          <p style="color: #6b7280; font-size: 12px;">
+            Best regards,<br>
+            Math Olympiad Batch Program Team
+          </p>
+        </div>
+      </div>
+    `
+  };
+
+  try {
+    if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
+      console.error('Email credentials not configured');
+      return false;
+    }
+    
+    await transporter.sendMail(mailOptions);
+    console.log('Batch program confirmation email sent successfully to:', studentData.email);
+    return true;
+  } catch (error) {
+    console.error('Error sending batch program confirmation email:', error);
+    return false;
+  }
+}
+
+// Send notification email to admin for online content registration
+export async function sendOnlineContentAdminNotification(userData: { name: string; email: string }) {
+  const mailOptions = {
+    from: process.env.EMAIL_USER,
+    to: 'sachin.gadkar@gmail.com',
+    subject: 'New Online Content Registration - Math Olympiad',
+    html: `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+        <h2 style="color: #2563eb; border-bottom: 2px solid #2563eb; padding-bottom: 10px;">
+          💻 New Online Content Registration
+        </h2>
+        
+        <div style="background-color: #eff6ff; padding: 20px; border-radius: 8px; margin: 20px 0;">
+          <h3 style="color: #374151; margin-top: 0;">User Details:</h3>
+          
+          <table style="width: 100%; border-collapse: collapse;">
+            <tr>
+              <td style="padding: 8px 0; font-weight: bold; color: #374151;">Name:</td>
+              <td style="padding: 8px 0; color: #6b7280;">${userData.name}</td>
+            </tr>
+            <tr>
+              <td style="padding: 8px 0; font-weight: bold; color: #374151;">Email:</td>
+              <td style="padding: 8px 0; color: #6b7280;">${userData.email}</td>
+            </tr>
+            <tr>
+              <td style="padding: 8px 0; font-weight: bold; color: #374151;">Program:</td>
+              <td style="padding: 8px 0; color: #6b7280;">Online Content Access</td>
+            </tr>
+          </table>
+        </div>
+        
+        <div style="background-color: #fef3c7; padding: 15px; border-radius: 8px; margin: 20px 0;">
+          <p style="color: #92400e; margin: 0; font-size: 14px;">
+            <strong>Action Required:</strong> This is for online content access. Please review and approve/reject the account.
+          </p>
+        </div>
+        
+        <div style="text-align: center; margin-top: 30px; padding-top: 20px; border-top: 1px solid #e5e7eb;">
+          <p style="color: #6b7280; font-size: 12px;">
+            This is an automated notification from the Math Olympiad Online Content Registration System.
+          </p>
+        </div>
+      </div>
+    `
+  };
+
+  try {
+    if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
+      console.error('Email credentials not configured');
+      return false;
+    }
+    
+    await transporter.sendMail(mailOptions);
+    console.log('Online content admin notification email sent successfully');
+    return true;
+  } catch {
+    console.error('Error sending online content admin notification email');
+    return false;
+  }
+}
+
+// Send confirmation email to user for online content registration
+export async function sendOnlineContentConfirmationEmail(userData: { name: string; email: string }) {
+  const mailOptions = {
+    from: process.env.EMAIL_USER,
+    to: userData.email,
+    subject: 'Online Content Registration Received - Math Olympiad',
+    html: `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+        <h2 style="color: #2563eb; border-bottom: 2px solid #2563eb; padding-bottom: 10px;">
+          💻 Online Content Registration Received!
+        </h2>
+        
+        <div style="background-color: #eff6ff; padding: 20px; border-radius: 8px; margin: 20px 0;">
+          <p style="color: #374151; font-size: 16px; line-height: 1.6;">
+            Dear <strong>${userData.name}</strong>,
+          </p>
+          
+          <p style="color: #374151; font-size: 16px; line-height: 1.6;">
+            Thank you for registering for <strong>Online Content Access</strong> to our Math Olympiad preparation materials! We're excited to have you join our online learning community.
+          </p>
+          
+          <p style="color: #374151; font-size: 16px; line-height: 1.6;">
+            We have received your registration and our team will review it within <strong>1-2 business days</strong>. You will receive an email once your account is approved.
+          </p>
+        </div>
+        
+        <div style="background-color: #f8fafc; padding: 20px; border-radius: 8px; margin: 20px 0;">
+          <h3 style="color: #374151; margin-top: 0;">What happens next?</h3>
+          <ol style="color: #374151; line-height: 1.8;">
+            <li><strong>Account Review:</strong> We'll review your registration for online content access</li>
+            <li><strong>Approval Email:</strong> You'll receive an email once your account is approved</li>
+            <li><strong>Start Learning:</strong> After approval, you can sign in and access all online content</li>
+          </ol>
+        </div>
+        
+        <div style="background-color: #ecfdf5; padding: 20px; border-radius: 8px; margin: 20px 0;">
+          <h3 style="color: #065f46; margin-top: 0;">Your Registration Details:</h3>
+          <p style="color: #065f46; margin: 5px 0;"><strong>Name:</strong> ${userData.name}</p>
+          <p style="color: #065f46; margin: 5px 0;"><strong>Email:</strong> ${userData.email}</p>
+          <p style="color: #065f46; margin: 5px 0;"><strong>Program:</strong> Online Content Access</p>
+        </div>
+        
+        <div style="text-align: center; margin-top: 30px; padding-top: 20px; border-top: 1px solid #e5e7eb;">
+          <p style="color: #6b7280; font-size: 14px;">
+            If you have any questions, please don't hesitate to contact us.
+          </p>
+          <p style="color: #6b7280; font-size: 12px;">
+            Best regards,<br>
+            Math Olympiad Online Content Team
+          </p>
+        </div>
+      </div>
+    `
+  };
+
+  try {
+    if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
+      console.error('Email credentials not configured');
+      return false;
+    }
+    
+    await transporter.sendMail(mailOptions);
+    console.log('Online content confirmation email sent successfully to:', userData.email);
+    return true;
+  } catch (error) {
+    console.error('Error sending online content confirmation email:', error);
+    return false;
+  }
+}
+
 // Rate limiting check (simple in-memory implementation)
 const submissionAttempts = new Map<string, { count: number; lastAttempt: number }>();
 

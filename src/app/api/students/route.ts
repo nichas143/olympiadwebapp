@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import connectDB from '@/lib/mongodb';
 import Student from '@/models/Student';
-import { sendAdminNotification, sendThankYouEmail, validateEmail, checkRateLimit } from '@/lib/email';
+import { sendBatchProgramAdminNotification, sendBatchProgramConfirmationEmail, validateEmail, checkRateLimit } from '@/lib/email';
 
 export async function POST(request: NextRequest) {
   try {
@@ -93,7 +93,7 @@ export async function POST(request: NextRequest) {
 
     // Send emails asynchronously (don't wait for them to complete)
     Promise.all([
-      sendAdminNotification({
+      sendBatchProgramAdminNotification({
         name,
         currentClass,
         schoolName,
@@ -101,7 +101,7 @@ export async function POST(request: NextRequest) {
         email,
         prerequisites
       }),
-      sendThankYouEmail({
+      sendBatchProgramConfirmationEmail({
         name,
         currentClass,
         schoolName,
@@ -123,7 +123,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json(
       { 
-        message: 'Registration successful! We will contact you soon. Please check your email for confirmation.',
+        message: 'Batch program application submitted successfully! We will review your application and contact you within 2-3 business days. Please check your email for confirmation.',
         studentId: student._id 
       },
       { status: 201 }

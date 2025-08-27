@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server"
 import bcrypt from "bcryptjs"
 import connectDB  from "@/lib/mongodb"
 import { User } from "@/models/User"
+import { sendOnlineContentAdminNotification, sendOnlineContentConfirmationEmail } from "@/lib/email"
 
 
 export async function POST(request: NextRequest) {
@@ -46,12 +47,28 @@ export async function POST(request: NextRequest) {
       status: "pending",
     })
 
+    // Send emails asynchronously (don't wait for them to complete)
+    Promise.all([
+      sendOnlineContentAdminNotification({ name, email }),
+      sendOnlineContentConfirmationEmail({ name, email })
+    ]).then(([adminEmailSent, confirmationEmailSent]) => {
+      if (!adminEmailSent) {
+        console.error('Failed to send online content admin notification email');
+      }
+      if (!confirmationEmailSent) {
+        console.error('Failed to send online content confirmation email');
+      }
+    }).catch(error => {
+      console.error('Email sending error:', error);
+      // Don't fail the registration if emails fail
+    });
+
     // Remove password from response
     const { password: _, ...userWithoutPassword } = user.toObject()
 
     return NextResponse.json(
       { 
-        message: "Registration successful! Your account is pending approval. You will receive an email once your account is approved.",
+        message: "Online content registration successful! Your account is pending approval. You will receive an email once your account is approved.",
         user: userWithoutPassword 
       },
       { status: 201 }

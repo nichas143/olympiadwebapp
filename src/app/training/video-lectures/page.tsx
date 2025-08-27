@@ -5,19 +5,25 @@ import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import { Card, CardBody, CardHeader, Button, Select, SelectItem, Chip, Badge } from "@heroui/react"
 import { PlayCircleIcon, ClockIcon, AcademicCapIcon, BookOpenIcon, LinkIcon } from '@heroicons/react/24/outline'
+import ContentViewer from '@/app/components/ContentViewer'
 
 interface Content {
   _id: string
-  unit: string
+  unit: 'Algebra' | 'Geometry' | 'Number Theory' | 'Combinatorics' | 'Functional Equations' | 'Inequalities' | 'Advanced Math' | 'Calculus' | 'Other'
   chapter: string
   topic: string
   concept: string
-  contentType: string
-  instructionType: string
+  contentType: 'pdf' | 'video' | 'link' | 'testpaperLink'
+  instructionType: 'problemDiscussion' | 'conceptDiscussion'
   duration: number
-  videoLink?: string
+  videoLink?: string | null
   description: string
+  sequenceNo: number
+  docCategory: 'Learning' | 'MockTest' | 'PracticeSet'
+  noOfProblems?: number
   createdAt: string
+  updatedAt: string
+  isActive: boolean
 }
 
 export default function VideoLectures() {
@@ -27,6 +33,8 @@ export default function VideoLectures() {
   const [loading, setLoading] = useState(true)
   const [selectedUnit, setSelectedUnit] = useState<string>('all')
   const [selectedInstructionType, setSelectedInstructionType] = useState<string>('all')
+  const [selectedContent, setSelectedContent] = useState<Content | null>(null)
+  const [showContentViewer, setShowContentViewer] = useState(false)
   
   const units = ['Algebra', 'Geometry', 'Number Theory', 'Combinatorics', 'Functional Equations', 'Inequalities', 'Advanced Math', 'Calculus', 'Other']
   const instructionTypes = ['problemDiscussion', 'conceptDiscussion']
@@ -45,9 +53,9 @@ export default function VideoLectures() {
   const fetchContent = async () => {
     try {
       setLoading(true)
-      const params = new URLSearchParams({
-        contentType: 'video'
-      })
+      const params = new URLSearchParams()
+      params.append('contentType', 'video')
+      params.append('sortBy', 'sequence') // Ensure proper sequence ordering
       
       if (selectedUnit !== 'all') {
         params.append('unit', selectedUnit)
@@ -95,6 +103,34 @@ export default function VideoLectures() {
 
   const getInstructionTypeColor = (type: string) => {
     return type === 'conceptDiscussion' ? 'primary' : 'secondary'
+  }
+
+  const handleWatchVideo = (item: Content) => {
+    setSelectedContent(item)
+    setShowContentViewer(true)
+  }
+
+  const handleProgressUpdate = async (contentId: string, progressPercentage: number, timeSpent: number) => {
+    try {
+      const response = await fetch('/api/progress', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          contentId,
+          progressPercentage,
+          timeSpent,
+          status: progressPercentage >= 100 ? 'completed' : 'in_progress'
+        }),
+      })
+
+      if (response.ok) {
+        console.log('Video progress updated successfully')
+      }
+    } catch (error) {
+      console.error('Failed to update progress:', error)
+    }
   }
 
   if (status === 'loading' || loading) {
@@ -240,12 +276,7 @@ export default function VideoLectures() {
                       size="sm"
                       variant="solid"
                       startContent={<PlayCircleIcon className="h-4 w-4" />}
-                      onPress={() => {
-                        if (item.videoLink) {
-                          window.open(item.videoLink, '_blank')
-                        }
-                      }}
-                      isDisabled={!item.videoLink}
+                      onPress={() => handleWatchVideo(item)}
                     >
                       Watch Now
                     </Button>
@@ -254,6 +285,29 @@ export default function VideoLectures() {
               </Card>
             ))}
           </div>
+        )}
+        
+        {/* Content Viewer */}
+        {selectedContent && (
+          <ContentViewer
+            isOpen={showContentViewer}
+            onClose={() => {
+              setShowContentViewer(false)
+              setSelectedContent(null)
+            }}
+            content={{
+              _id: selectedContent._id,
+              title: selectedContent.concept,
+              description: selectedContent.description,
+              contentType: selectedContent.contentType,
+              videoLink: selectedContent.videoLink,
+              concept: selectedContent.concept,
+              chapter: selectedContent.chapter,
+              topic: selectedContent.topic,
+              unit: selectedContent.unit
+            }}
+            onProgressUpdate={handleProgressUpdate}
+          />
         )}
       </div>
     </div>

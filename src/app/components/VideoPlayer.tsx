@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect } from 'react'
 import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, Button, Progress, Card, CardBody } from "@heroui/react"
 import { PlayCircleIcon, PauseIcon, SpeakerWaveIcon, SpeakerXMarkIcon, ArrowsPointingOutIcon, XMarkIcon } from '@heroicons/react/24/outline'
+import ProgressTracker from './ProgressTracker'
 
 interface VideoPlayerProps {
   isOpen: boolean
@@ -10,6 +11,7 @@ interface VideoPlayerProps {
   videoUrl: string
   title: string
   description?: string
+  contentId?: string
   onProgressUpdate?: (progressPercentage: number, timeWatched: number) => void
 }
 
@@ -19,6 +21,7 @@ export default function VideoPlayer({
   videoUrl, 
   title, 
   description,
+  contentId,
   onProgressUpdate 
 }: VideoPlayerProps) {
   const [isPlaying, setIsPlaying] = useState(false)
@@ -28,6 +31,8 @@ export default function VideoPlayer({
   const [duration, setDuration] = useState(0)
   const [currentTime, setCurrentTime] = useState(0)
   const [isFullscreen, setIsFullscreen] = useState(false)
+  const [sessionStarted, setSessionStarted] = useState(false)
+  const [watchedSegments, setWatchedSegments] = useState<Array<{ start: number; end: number }>>([])
   
   const videoRef = useRef<HTMLVideoElement>(null)
   const containerRef = useRef<HTMLDivElement>(null)
@@ -87,11 +92,35 @@ export default function VideoPlayer({
   }, [])
 
   useEffect(() => {
+    if (isOpen && contentId && !sessionStarted) {
+      // Start study session when video opens
+      ProgressTracker.startSession({
+        contentId,
+        activityType: 'video_watch',
+        sessionStart: new Date(),
+        engagementScore: 5,
+        device: ProgressTracker.getDeviceType()
+      })
+      setSessionStarted(true)
+    }
+  }, [isOpen, contentId, sessionStarted])
+
+  useEffect(() => {
     if (onProgressUpdate && duration > 0) {
       const progressPercentage = (currentTime / duration) * 100
       onProgressUpdate(progressPercentage, currentTime / 60) // Convert to minutes
+      
+      // Enhanced progress tracking
+      if (contentId) {
+        ProgressTracker.trackVideoProgress(
+          contentId,
+          currentTime,
+          duration,
+          watchedSegments
+        )
+      }
     }
-  }, [currentTime, duration, onProgressUpdate])
+  }, [currentTime, duration, onProgressUpdate, contentId, watchedSegments])
 
   const handleVideoLoad = () => {
     if (videoRef.current) {
@@ -104,6 +133,22 @@ export default function VideoPlayer({
       const current = videoRef.current.currentTime
       setCurrentTime(current)
       setProgress((current / videoRef.current.duration) * 100)
+      
+      // Track watched segments
+      if (current > 0) {
+        const lastSegment = watchedSegments[watchedSegments.length - 1]
+        if (!lastSegment || current > lastSegment.end + 5) {
+          // New segment if gap is more than 5 seconds
+          setWatchedSegments(prev => [...prev, { start: current, end: current }])
+        } else {
+          // Extend current segment
+          setWatchedSegments(prev => 
+            prev.map((seg, i) => 
+              i === prev.length - 1 ? { ...seg, end: current } : seg
+            )
+          )
+        }
+      }
     }
   }
 
@@ -243,7 +288,16 @@ export default function VideoPlayer({
           </Card>
         </ModalBody>
         <ModalFooter>
-          <Button variant="light" onPress={onClose}>
+          <Button 
+            variant="light" 
+            onPress={() => {
+              // End session when closing
+              if (contentId) {
+                ProgressTracker.endSession(contentId)
+              }
+              onClose()
+            }}
+          >
             Close
           </Button>
         </ModalFooter>

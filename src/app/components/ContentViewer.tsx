@@ -188,6 +188,7 @@ export default function ContentViewer({
         videoUrl={content.videoLink || ''}
         title={content.concept}
         description={`${content.chapter} • ${content.topic} • ${content.unit}`}
+        contentId={content._id}
         onProgressUpdate={handleProgressUpdate}
       />
 

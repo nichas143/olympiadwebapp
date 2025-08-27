@@ -21,7 +21,7 @@ export async function GET(request: NextRequest) {
     const skip = (page - 1) * limit
 
     // Build query
-    let query: any = { isActive: true }
+    const query: Record<string, unknown> = { isActive: true }
     
     if (unit) query.unit = unit
     if (contentType) query.contentType = contentType
@@ -31,7 +31,7 @@ export async function GET(request: NextRequest) {
     if (topic) query.topic = new RegExp(topic, 'i')
 
     // Determine sort order
-    let sortOrder: any
+    let sortOrder: Record<string, 1 | -1>
     switch (sortBy) {
       case 'sequence':
         sortOrder = { unit: 1, sequenceNo: 1, chapter: 1, topic: 1 }
@@ -117,13 +117,13 @@ export async function POST(request: NextRequest) {
       message: 'Content created successfully',
       content: newContent
     }, { status: 201 })
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error creating content:', error)
     
-    if (error.name === 'ValidationError') {
+    if (error instanceof Error && error.name === 'ValidationError') {
       return NextResponse.json({ 
         error: 'Validation error', 
-        details: error.errors 
+        details: (error as unknown as { errors: unknown }).errors 
       }, { status: 400 })
     }
     

@@ -6,12 +6,13 @@ import { Content } from '@/models/Content'
 // GET /api/content/[id] - Get specific content
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     await connectDB()
 
-    const content = await Content.findById(params.id)
+    const { id } = await params
+    const content = await Content.findById(id)
     if (!content) {
       return NextResponse.json({ error: 'Content not found' }, { status: 404 })
     }
@@ -26,7 +27,7 @@ export async function GET(
 // PUT /api/content/[id] - Update content (admin only)
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await auth()
@@ -39,7 +40,8 @@ export async function PUT(
 
     await connectDB()
 
-    const content = await Content.findById(params.id)
+    const { id } = await params
+    const content = await Content.findById(id)
     if (!content) {
       return NextResponse.json({ error: 'Content not found' }, { status: 404 })
     }
@@ -55,10 +57,10 @@ export async function PUT(
   } catch (error) {
     console.error('Error updating content:', error)
     
-    if (error.name === 'ValidationError') {
+    if (error instanceof Error && error.name === 'ValidationError') {
       return NextResponse.json({ 
         error: 'Validation error', 
-        details: error.errors 
+        details: (error as unknown as { errors: unknown }).errors 
       }, { status: 400 })
     }
     
@@ -69,7 +71,7 @@ export async function PUT(
 // DELETE /api/content/[id] - Delete content (admin only)
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await auth()
@@ -80,7 +82,8 @@ export async function DELETE(
 
     await connectDB()
 
-    const content = await Content.findById(params.id)
+    const { id } = await params
+    const content = await Content.findById(id)
     if (!content) {
       return NextResponse.json({ error: 'Content not found' }, { status: 404 })
     }

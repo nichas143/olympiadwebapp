@@ -241,8 +241,8 @@ export default function ManageAdminsPage() {
                               }}
                               className="min-w-32"
                             >
-                              <SelectItem key="admin" value="admin">Admin</SelectItem>
-                              <SelectItem key="superadmin" value="superadmin">Super Admin</SelectItem>
+                              <SelectItem key="admin">Admin</SelectItem>
+                              <SelectItem key="superadmin">Super Admin</SelectItem>
                             </Select>
                             <Button
                               size="sm"
@@ -307,8 +307,8 @@ export default function ManageAdminsPage() {
                   }}
                   isRequired
                 >
-                  <SelectItem key="admin" value="admin">Admin</SelectItem>
-                  <SelectItem key="superadmin" value="superadmin">Super Admin</SelectItem>
+                  <SelectItem key="admin">Admin</SelectItem>
+                  <SelectItem key="superadmin">Super Admin</SelectItem>
                 </Select>
               </div>
 

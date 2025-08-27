@@ -310,7 +310,7 @@ export default function AdminDashboard() {
             <ModalHeader>Reject User Application</ModalHeader>
             <ModalBody>
               <p className="mb-4">
-                Are you sure you want to reject <strong>{selectedUser?.name}</strong>'s application?
+                Are you sure you want to reject <strong>{selectedUser?.name}</strong>&apos;s application?
               </p>
               <Textarea
                 label="Rejection Reason (optional)"

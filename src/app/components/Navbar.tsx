@@ -5,7 +5,7 @@ import { usePathname } from 'next/navigation';
 import { useState, useEffect } from 'react';
 import { useSession, signOut } from 'next-auth/react';
 import { Button } from '@heroui/react';
-import { UserIcon, ArrowRightOnRectangleIcon } from '@heroicons/react/24/outline';
+import { UserIcon } from '@heroicons/react/24/outline';
 
 export default function Navbar() {
   const pathname = usePathname();
@@ -13,7 +13,7 @@ export default function Navbar() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isProgramDropdownOpen, setIsProgramDropdownOpen] = useState(false);
   const [isResourcesDropdownOpen, setIsResourcesDropdownOpen] = useState(false);
-  const [isTrainingDropdownOpen, setIsTrainingDropdownOpen] = useState(false);
+
   const [isUserDropdownOpen, setIsUserDropdownOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
 
@@ -43,24 +43,6 @@ export default function Navbar() {
       name: 'Sample Lessons',
       href: '/sample-lessons',
       description: 'Watch sample video lessons to experience our teaching methodology'
-    }
-  ];
-
-  const trainingItems = [
-    {
-      name: 'Video Lectures',
-      href: '/training/video-lectures',
-      description: 'Comprehensive video tutorials covering all Olympiad topics'
-    },
-    {
-      name: 'Study Materials',
-      href: '/training/study-materials',
-      description: 'PDFs, links, test papers and all study resources'
-    },
-    {
-      name: 'Practice Problems',
-      href: '/training/practice-problems',
-      description: 'Curated practice problems with detailed solutions'
     }
   ];
 

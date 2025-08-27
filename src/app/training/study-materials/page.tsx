@@ -267,7 +267,7 @@ export default function StudyMaterials() {
                       <span>{formatDuration(item.duration)}</span>
                     </div>
                     <Button 
-                      color={getContentTypeColor(item.contentType) as any} 
+                      color={getContentTypeColor(item.contentType) as "primary" | "success" | "warning" | "danger" | "secondary" | "default"} 
                       size="sm"
                       startContent={getContentTypeIcon(item.contentType)}
                       onPress={() => handleContentAction(item)}

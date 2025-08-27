@@ -109,7 +109,7 @@ export default function SignUp() {
                           <p className="font-medium">What happens next:</p>
                           <ul className="list-disc list-inside space-y-1 text-xs">
                             <li>Our OlympiaMath admin will review your application</li>
-                            <li>You'll receive a welcome email once approved</li>
+                            <li>You&apos;ll receive a welcome email once approved</li>
                             <li>After approval, you can sign in and start learning!</li>
                           </ul>
                         </div>

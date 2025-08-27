@@ -6,7 +6,7 @@ import { User } from '@/models/User'
 // DELETE /api/admin/manage-admins/[id] - Remove admin user (superadmin only)
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await auth()
@@ -17,7 +17,8 @@ export async function DELETE(
 
     await connectDB()
 
-    const adminUser = await User.findById(params.id)
+    const { id } = await params
+    const adminUser = await User.findById(id)
     if (!adminUser) {
       return NextResponse.json({ error: 'Admin user not found' }, { status: 404 })
     }
@@ -32,7 +33,7 @@ export async function DELETE(
       return NextResponse.json({ error: 'Can only delete admin users' }, { status: 400 })
     }
 
-    await User.findByIdAndDelete(params.id)
+    await User.findByIdAndDelete(id)
 
     return NextResponse.json({ 
       message: 'Admin user deleted successfully',
@@ -52,7 +53,7 @@ export async function DELETE(
 // PATCH /api/admin/manage-admins/[id] - Update admin user role (superadmin only)
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await auth()
@@ -69,7 +70,8 @@ export async function PATCH(
 
     await connectDB()
 
-    const adminUser = await User.findById(params.id)
+    const { id } = await params
+    const adminUser = await User.findById(id)
     if (!adminUser) {
       return NextResponse.json({ error: 'Admin user not found' }, { status: 404 })
     }

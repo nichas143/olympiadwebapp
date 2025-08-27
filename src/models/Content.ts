@@ -177,26 +177,32 @@ contentSchema.virtual('youtubeVideoId').get(function() {
 })
 
 // Static method to get content by unit
-contentSchema.statics.getByUnit = function(unit: string, options: any = {}) {
+contentSchema.statics.getByUnit = function(unit: string, options: {
+  sort?: Record<string, number>
+} = {}) {
   const query = { unit, isActive: true }
   return this.find(query).sort(options.sort || { sequenceNo: 1, chapter: 1, topic: 1 })
 }
 
 // Static method to get content by type
-contentSchema.statics.getByContentType = function(contentType: string, options: any = {}) {
+contentSchema.statics.getByContentType = function(contentType: string, options: {
+  sort?: Record<string, number>
+} = {}) {
   const query = { contentType, isActive: true }
   return this.find(query).sort(options.sort || { unit: 1, sequenceNo: 1, chapter: 1 })
 }
 
 // Static method to get content by document category
-contentSchema.statics.getByDocCategory = function(docCategory: string, options: any = {}) {
+contentSchema.statics.getByDocCategory = function(docCategory: string, options: {
+  sort?: Record<string, number>
+} = {}) {
   const query = { docCategory, isActive: true }
   return this.find(query).sort(options.sort || { unit: 1, sequenceNo: 1, chapter: 1 })
 }
 
 // Static method to get content in sequence order
-contentSchema.statics.getInSequence = function(unit?: string, options: any = {}) {
-  const query: any = { isActive: true }
+contentSchema.statics.getInSequence = function(unit?: string) {
+  const query: Record<string, unknown> = { isActive: true }
   if (unit) query.unit = unit
   return this.find(query).sort({ unit: 1, sequenceNo: 1, chapter: 1, topic: 1 })
 }

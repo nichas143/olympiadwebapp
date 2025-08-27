@@ -20,7 +20,7 @@ export async function GET(request: NextRequest) {
     const limit = parseInt(searchParams.get('limit') || '10')
     const skip = (page - 1) * limit
 
-    let query: any = {}
+    const query: Record<string, unknown> = {}
     if (status && ['pending', 'approved', 'rejected'].includes(status)) {
       query.status = status
     }

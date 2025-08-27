@@ -6,7 +6,7 @@ import { sendApprovalEmail } from '@/lib/email'
 
 export async function POST(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await auth()
@@ -17,7 +17,8 @@ export async function POST(
 
     await connectDB()
 
-    const user = await User.findById(params.id)
+    const { id } = await params
+    const user = await User.findById(id)
     if (!user) {
       return NextResponse.json({ error: 'User not found' }, { status: 404 })
     }

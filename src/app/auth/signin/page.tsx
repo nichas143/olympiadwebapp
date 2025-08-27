@@ -76,7 +76,7 @@ export default function SignIn() {
                 New User? Account Approval Required
               </h3>
               <div className="mt-1 text-sm text-amber-700">
-                If you just registered, please wait for admin approval. You'll receive a welcome email once your account is activated.
+                If you just registered, please wait for admin approval. You&apos;ll receive a welcome email once your account is activated.
               </div>
             </div>
           </div>
@@ -140,7 +140,7 @@ export default function SignIn() {
             
             <div className="mt-6 text-center">
               <p className="text-sm text-gray-600">
-                Don't have an account?{' '}
+                Don&apos;t have an account?{' '}
                 <Link href="/auth/signup" className="font-medium text-blue-600 hover:text-blue-500">
                   Sign up
                 </Link>

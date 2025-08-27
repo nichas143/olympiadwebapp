@@ -6,7 +6,6 @@ import { useEffect, useState } from 'react'
 import { 
   Card, 
   CardBody, 
-  CardHeader, 
   Button, 
   Input, 
   Select, 
@@ -231,9 +230,9 @@ export default function AdminContent() {
         const error = await response.json()
         alert(`Error: ${error.error}`)
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Failed to save content:', error)
-      if (error.name === 'AbortError') {
+      if (error instanceof Error && error.name === 'AbortError') {
         alert('Request timed out. Please check your internet connection and try again.')
       } else {
         alert('Failed to save content. Please try again.')

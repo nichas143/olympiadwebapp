@@ -6,11 +6,19 @@ if (!MONGODB_URI) {
   throw new Error('Please define the MONGODB_URI environment variable inside .env.local');
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-let cached: { conn: any; promise: any } = global.mongoose;
+declare global {
+  var mongoose: { conn: unknown; promise: unknown } | undefined;
+}
 
-if (!cached) {
-  cached = global.mongoose = { conn: null, promise: null };
+// Use globalThis for better compatibility
+const globalWithMongoose = globalThis as typeof globalThis & {
+  mongoose?: { conn: unknown; promise: unknown };
+};
+
+const cached: { conn: unknown; promise: unknown } = globalWithMongoose.mongoose || { conn: null, promise: null };
+
+if (!globalWithMongoose.mongoose) {
+  globalWithMongoose.mongoose = cached;
 }
 
 async function connectDB() {

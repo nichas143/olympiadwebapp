@@ -2,21 +2,33 @@
 
 import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import Link from "next/link"
-import { Button, Card, CardBody, CardHeader, Progress } from "@heroui/react"
+import { Button, Card, CardBody, CardHeader, Chip } from "@heroui/react"
 import { 
   PlayCircleIcon, 
   BookOpenIcon, 
   ChartBarIcon, 
   UserIcon,
   AcademicCapIcon,
-  ClockIcon
+  CheckCircleIcon
 } from '@heroicons/react/24/outline'
+
+interface ProgressSummary {
+  summary: Array<{
+    _id: string
+    count: number
+  }>
+  totalContent: number
+  attemptedContent: number
+  attemptRate: number
+}
 
 export default function Dashboard() {
   const { data: session, status } = useSession()
   const router = useRouter()
+  const [progressData, setProgressData] = useState<ProgressSummary | null>(null)
+  const [loading, setLoading] = useState(true)
   
   useEffect(() => {
     if (status === 'loading') return
@@ -25,9 +37,26 @@ export default function Dashboard() {
       router.push('/auth/signin')
       return
     }
+
+    // Fetch progress summary
+    const fetchProgressSummary = async () => {
+      try {
+        const response = await fetch('/api/progress?summary=true')
+        if (response.ok) {
+          const data = await response.json()
+          setProgressData(data)
+        }
+      } catch (error) {
+        console.error('Failed to fetch progress summary:', error)
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchProgressSummary()
   }, [session, status, router])
 
-  if (status === 'loading') {
+  if (status === 'loading' || loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
@@ -40,6 +69,18 @@ export default function Dashboard() {
 
   if (!session) {
     return null
+  }
+
+  const getAttemptedCount = () => {
+    if (!progressData?.summary) return 0
+    const attempted = progressData.summary.find(item => item._id === 'attempted')
+    return attempted?.count || 0
+  }
+
+  const getNotAttemptedCount = () => {
+    if (!progressData?.summary) return 0
+    const notAttempted = progressData.summary.find(item => item._id === 'not_attempted')
+    return notAttempted?.count || 0
   }
 
   return (
@@ -63,8 +104,8 @@ export default function Dashboard() {
                 <PlayCircleIcon className="h-6 w-6 text-blue-600" />
               </div>
               <div>
-                <p className="text-sm text-gray-500">Videos Watched</p>
-                <p className="text-2xl font-bold">12</p>
+                <p className="text-sm text-gray-500">Content Attempted</p>
+                <p className="text-2xl font-bold">{getAttemptedCount()}</p>
               </div>
             </CardBody>
           </Card>
@@ -75,8 +116,8 @@ export default function Dashboard() {
                 <BookOpenIcon className="h-6 w-6 text-green-600" />
               </div>
               <div>
-                <p className="text-sm text-gray-500">Lessons Completed</p>
-                <p className="text-2xl font-bold">8</p>
+                <p className="text-sm text-gray-500">Total Content</p>
+                <p className="text-2xl font-bold">{progressData?.totalContent || 0}</p>
               </div>
             </CardBody>
           </Card>
@@ -87,8 +128,8 @@ export default function Dashboard() {
                 <ChartBarIcon className="h-6 w-6 text-purple-600" />
               </div>
               <div>
-                <p className="text-sm text-gray-500">Practice Problems</p>
-                <p className="text-2xl font-bold">45</p>
+                <p className="text-sm text-gray-500">Attempt Rate</p>
+                <p className="text-2xl font-bold">{progressData?.attemptRate || 0}%</p>
               </div>
             </CardBody>
           </Card>
@@ -96,11 +137,11 @@ export default function Dashboard() {
           <Card>
             <CardBody className="flex items-center space-x-3">
               <div className="p-2 bg-orange-100 rounded-lg">
-                <ClockIcon className="h-6 w-6 text-orange-600" />
+                <CheckCircleIcon className="h-6 w-6 text-orange-600" />
               </div>
               <div>
-                <p className="text-sm text-gray-500">Study Time</p>
-                <p className="text-2xl font-bold">24h</p>
+                <p className="text-sm text-gray-500">Remaining</p>
+                <p className="text-2xl font-bold">{getNotAttemptedCount()}</p>
               </div>
             </CardBody>
           </Card>
@@ -117,12 +158,12 @@ export default function Dashboard() {
                 <div className="flex items-center space-x-3">
                   <PlayCircleIcon className="h-8 w-8 text-blue-600" />
                   <div>
-                    <h4 className="font-medium">Number Theory Basics</h4>
-                    <p className="text-sm text-gray-500">Video Lecture • 45 min</p>
+                    <h4 className="font-medium">Video Lectures</h4>
+                    <p className="text-sm text-gray-500">Watch comprehensive video tutorials</p>
                   </div>
                 </div>
-                <Button color="primary" size="sm">
-                  Continue
+                <Button color="primary" size="sm" onPress={() => router.push('/training/video-lectures')}>
+                  Browse
                 </Button>
               </div>
               
@@ -130,12 +171,12 @@ export default function Dashboard() {
                 <div className="flex items-center space-x-3">
                   <BookOpenIcon className="h-8 w-8 text-green-600" />
                   <div>
-                    <h4 className="font-medium">Algebra Fundamentals</h4>
-                    <p className="text-sm text-gray-500">Practice Set • 20 problems</p>
+                    <h4 className="font-medium">Study Materials</h4>
+                    <p className="text-sm text-gray-500">Access PDFs and practice materials</p>
                   </div>
                 </div>
-                <Button color="primary" size="sm">
-                  Start
+                <Button color="primary" size="sm" onPress={() => router.push('/training/study-materials')}>
+                  Browse
                 </Button>
               </div>
             </CardBody>
@@ -146,36 +187,35 @@ export default function Dashboard() {
               <h3 className="text-xl font-semibold">Your Progress</h3>
             </CardHeader>
             <CardBody className="space-y-4">
-              <div>
-                <div className="flex justify-between items-center mb-2">
-                  <span className="text-sm font-medium">Number Theory</span>
-                  <span className="text-sm text-gray-500">75%</span>
-                </div>
-                <Progress value={75} className="w-full" />
+              <div className="flex items-center justify-between">
+                <span className="text-sm font-medium">Content Attempted</span>
+                <Chip color="success" variant="flat" size="sm">
+                  {getAttemptedCount()} / {progressData?.totalContent || 0}
+                </Chip>
               </div>
               
-              <div>
-                <div className="flex justify-between items-center mb-2">
-                  <span className="text-sm font-medium">Algebra</span>
-                  <span className="text-sm text-gray-500">60%</span>
-                </div>
-                <Progress value={60} className="w-full" />
+              <div className="flex items-center justify-between">
+                <span className="text-sm font-medium">Attempt Rate</span>
+                <span className="text-sm text-gray-500">{progressData?.attemptRate || 0}%</span>
               </div>
               
-              <div>
-                <div className="flex justify-between items-center mb-2">
-                  <span className="text-sm font-medium">Geometry</span>
-                  <span className="text-sm text-gray-500">45%</span>
-                </div>
-                <Progress value={45} className="w-full" />
+              <div className="flex items-center justify-between">
+                <span className="text-sm font-medium">Remaining Content</span>
+                <Chip color="default" variant="flat" size="sm">
+                  {getNotAttemptedCount()} items
+                </Chip>
               </div>
               
-              <div>
-                <div className="flex justify-between items-center mb-2">
-                  <span className="text-sm font-medium">Combinatorics</span>
-                  <span className="text-sm text-gray-500">30%</span>
-                </div>
-                <Progress value={30} className="w-full" />
+              <div className="pt-2">
+                <Button 
+                  color="primary" 
+                  variant="flat" 
+                  size="sm" 
+                  className="w-full"
+                  onPress={() => router.push('/training/video-lectures')}
+                >
+                  Continue Learning
+                </Button>
               </div>
             </CardBody>
           </Card>
@@ -207,13 +247,13 @@ export default function Dashboard() {
             </Card>
           </Link>
 
-          <Link href="/training/progress">
+          <Link href="/training/study-materials">
             <Card className="hover:shadow-lg transition-shadow cursor-pointer">
               <CardBody className="text-center p-6">
                 <ChartBarIcon className="h-12 w-12 text-purple-600 mx-auto mb-4" />
-                <h3 className="text-lg font-semibold mb-2">Progress Tracking</h3>
+                <h3 className="text-lg font-semibold mb-2">Study Materials</h3>
                 <p className="text-gray-600 text-sm">
-                  Monitor your learning progress and achievements
+                  PDFs, links, and reference materials for comprehensive learning
                 </p>
               </CardBody>
             </Card>
@@ -226,18 +266,6 @@ export default function Dashboard() {
                 <h3 className="text-lg font-semibold mb-2">Mock Tests</h3>
                 <p className="text-gray-600 text-sm">
                   Simulate real Olympiad exam conditions
-                </p>
-              </CardBody>
-            </Card>
-          </Link>
-
-          <Link href="/training/study-materials">
-            <Card className="hover:shadow-lg transition-shadow cursor-pointer">
-              <CardBody className="text-center p-6">
-                <BookOpenIcon className="h-12 w-12 text-indigo-600 mx-auto mb-4" />
-                <h3 className="text-lg font-semibold mb-2">Study Materials</h3>
-                <p className="text-gray-600 text-sm">
-                  Comprehensive notes and reference materials
                 </p>
               </CardBody>
             </Card>

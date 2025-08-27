@@ -20,21 +20,21 @@ interface ContentViewerProps {
     topic: string
     unit: string
   }
-  onProgressUpdate?: (contentId: string, progressPercentage: number, timeSpent: number) => void
+  onAttemptUpdate?: (contentId: string, attempted: boolean) => void
 }
 
 export default function ContentViewer({ 
   isOpen, 
   onClose, 
   content, 
-  onProgressUpdate 
+  onAttemptUpdate 
 }: ContentViewerProps) {
   const [showVideoPlayer, setShowVideoPlayer] = useState(false)
   const [showPDFViewer, setShowPDFViewer] = useState(false)
 
-  const handleProgressUpdate = (progressPercentage: number, timeSpent: number) => {
-    if (onProgressUpdate) {
-      onProgressUpdate(content._id, progressPercentage, timeSpent)
+  const handleAttemptUpdate = (contentId: string, attempted: boolean) => {
+    if (onAttemptUpdate) {
+      onAttemptUpdate(contentId, attempted)
     }
   }
 
@@ -54,6 +54,10 @@ export default function ContentViewer({
       case 'testpaperLink':
         // Open external links in new tab
         window.open(content.videoLink, '_blank')
+        // Mark as attempted for external links
+        if (onAttemptUpdate) {
+          onAttemptUpdate(content._id, true)
+        }
         onClose()
         break
     }
@@ -189,7 +193,7 @@ export default function ContentViewer({
         title={content.concept}
         description={`${content.chapter} • ${content.topic} • ${content.unit}`}
         contentId={content._id}
-        onProgressUpdate={handleProgressUpdate}
+        onAttemptUpdate={handleAttemptUpdate}
       />
 
       {/* PDF Viewer Modal */}
@@ -202,7 +206,8 @@ export default function ContentViewer({
         pdfUrl={content.videoLink || ''}
         title={content.concept}
         description={`${content.chapter} • ${content.topic} • ${content.unit}`}
-        onProgressUpdate={handleProgressUpdate}
+        contentId={content._id}
+        onAttemptUpdate={handleAttemptUpdate}
       />
     </>
   )

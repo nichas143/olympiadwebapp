@@ -1,8 +1,8 @@
 'use client'
 
 import { useState, useRef, useEffect } from 'react'
-import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, Button, Progress, Card, CardBody } from "@heroui/react"
-import { PlayCircleIcon, PauseIcon, SpeakerWaveIcon, SpeakerXMarkIcon, ArrowsPointingOutIcon } from '@heroicons/react/24/outline'
+import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, Button, Card, CardBody, Chip } from "@heroui/react"
+import { PlayCircleIcon, PauseIcon, SpeakerWaveIcon, SpeakerXMarkIcon, ArrowsPointingOutIcon, CheckCircleIcon } from '@heroicons/react/24/outline'
 import ProgressTracker from './ProgressTracker'
 
 interface VideoPlayerProps {
@@ -12,7 +12,7 @@ interface VideoPlayerProps {
   title: string
   description?: string
   contentId?: string
-  onProgressUpdate?: (progressPercentage: number, timeWatched: number) => void
+  onAttemptUpdate?: (contentId: string, attempted: boolean) => void
 }
 
 export default function VideoPlayer({ 
@@ -22,16 +22,12 @@ export default function VideoPlayer({
   title, 
   description,
   contentId,
-  onProgressUpdate 
+  onAttemptUpdate 
 }: VideoPlayerProps) {
   const [isPlaying, setIsPlaying] = useState(false)
-  const [progress, setProgress] = useState(0)
   const [isMuted, setIsMuted] = useState(false)
-  const [duration, setDuration] = useState(0)
-  const [currentTime, setCurrentTime] = useState(0)
   const [isFullscreen, setIsFullscreen] = useState(false)
-  const [sessionStarted, setSessionStarted] = useState(false)
-  const [watchedSegments, setWatchedSegments] = useState<Array<{ start: number; end: number }>>([])
+  const [hasAttempted, setHasAttempted] = useState(false)
   
   const videoRef = useRef<HTMLVideoElement>(null)
   const containerRef = useRef<HTMLDivElement>(null)
@@ -63,10 +59,9 @@ export default function VideoPlayer({
     const rect = e.currentTarget.getBoundingClientRect()
     const clickX = e.clientX - rect.left
     const width = rect.width
-    const newTime = (clickX / width) * duration
+    const newTime = (clickX / width) * videoRef.current.duration
     
     videoRef.current.currentTime = newTime
-    setCurrentTime(newTime)
   }
 
   const toggleFullscreen = () => {
@@ -91,63 +86,23 @@ export default function VideoPlayer({
   }, [])
 
   useEffect(() => {
-    if (isOpen && contentId && !sessionStarted) {
-      // Start study session when video opens
-      ProgressTracker.startSession({
-        contentId,
-        activityType: 'video_watch',
-        sessionStart: new Date(),
-        engagementScore: 5,
-        device: ProgressTracker.getDeviceType()
-      })
-      setSessionStarted(true)
-    }
-  }, [isOpen, contentId, sessionStarted])
-
-  useEffect(() => {
-    if (onProgressUpdate && duration > 0) {
-      const progressPercentage = (currentTime / duration) * 100
-      onProgressUpdate(progressPercentage, currentTime / 60) // Convert to minutes
-      
-      // Enhanced progress tracking
-      if (contentId) {
-        ProgressTracker.trackVideoProgress(
-          contentId,
-          currentTime,
-          duration,
-          watchedSegments
-        )
+    if (isOpen && contentId && !hasAttempted) {
+      // Mark as attempted when video opens
+      ProgressTracker.markAsAttempted(contentId)
+      setHasAttempted(true)
+      if (onAttemptUpdate) {
+        onAttemptUpdate(contentId, true)
       }
     }
-  }, [currentTime, duration, onProgressUpdate, contentId, watchedSegments])
+  }, [isOpen, contentId, hasAttempted, onAttemptUpdate])
 
   const handleVideoLoad = () => {
-    if (videoRef.current) {
-      setDuration(videoRef.current.duration)
-    }
+    // Video loaded successfully
   }
 
   const handleTimeUpdate = () => {
     if (videoRef.current) {
-      const current = videoRef.current.currentTime
-      setCurrentTime(current)
-      setProgress((current / videoRef.current.duration) * 100)
-      
-      // Track watched segments
-      if (current > 0) {
-        const lastSegment = watchedSegments[watchedSegments.length - 1]
-        if (!lastSegment || current > lastSegment.end + 5) {
-          // New segment if gap is more than 5 seconds
-          setWatchedSegments(prev => [...prev, { start: current, end: current }])
-        } else {
-          // Extend current segment
-          setWatchedSegments(prev => 
-            prev.map((seg, i) => 
-              i === prev.length - 1 ? { ...seg, end: current } : seg
-            )
-          )
-        }
-      }
+      // Just track that user is watching, no detailed progress needed
     }
   }
 
@@ -165,10 +120,24 @@ export default function VideoPlayer({
     >
       <ModalContent>
         <ModalHeader className="flex flex-col gap-1">
-          <h3 className="text-lg font-semibold">{title}</h3>
-          {description && (
-            <p className="text-sm text-gray-600">{description}</p>
-          )}
+          <div className="flex items-center justify-between w-full">
+            <div>
+              <h3 className="text-lg font-semibold">{title}</h3>
+              {description && (
+                <p className="text-sm text-gray-600">{description}</p>
+              )}
+            </div>
+            {hasAttempted && (
+              <Chip
+                startContent={<CheckCircleIcon className="h-4 w-4" />}
+                color="success"
+                variant="flat"
+                size="sm"
+              >
+                Attempted
+              </Chip>
+            )}
+          </div>
         </ModalHeader>
         <ModalBody>
           <div ref={containerRef} className="relative w-full">
@@ -208,7 +177,7 @@ export default function VideoPlayer({
                   >
                     <div 
                       className="h-full bg-blue-500 rounded"
-                      style={{ width: `${progress}%` }}
+                      style={{ width: videoRef.current ? `${(videoRef.current.currentTime / videoRef.current.duration) * 100}%` : '0%' }}
                     />
                   </div>
                   
@@ -253,7 +222,7 @@ export default function VideoPlayer({
                       </Button>
                       
                       <span className="text-sm">
-                        {formatTime(currentTime)} / {formatTime(duration)}
+                        {videoRef.current ? formatTime(videoRef.current.currentTime) : '0:00'} / {videoRef.current ? formatTime(videoRef.current.duration) : '0:00'}
                       </span>
                     </div>
                     
@@ -271,31 +240,27 @@ export default function VideoPlayer({
             )}
           </div>
           
-          {/* Progress Summary */}
+          {/* Attempt Status Summary */}
           <Card>
             <CardBody>
-              <div className="flex justify-between items-center">
-                <span className="text-sm text-gray-600">Viewing Progress</span>
-                <span className="text-sm font-medium">{Math.round(progress)}%</span>
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-gray-600">Content Status</span>
+                <Chip
+                  startContent={hasAttempted ? <CheckCircleIcon className="h-4 w-4" /> : undefined}
+                  color={hasAttempted ? "success" : "default"}
+                  variant="flat"
+                  size="sm"
+                >
+                  {hasAttempted ? 'Attempted' : 'Not Attempted'}
+                </Chip>
               </div>
-              <Progress 
-                value={progress} 
-                className="mt-2"
-                color="primary"
-              />
             </CardBody>
           </Card>
         </ModalBody>
         <ModalFooter>
           <Button 
             variant="light" 
-            onPress={() => {
-              // End session when closing
-              if (contentId) {
-                ProgressTracker.endSession(contentId)
-              }
-              onClose()
-            }}
+            onPress={onClose}
           >
             Close
           </Button>

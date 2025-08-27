@@ -1,8 +1,9 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, Button, Progress, Card, CardBody, Spinner } from "@heroui/react"
-import { DocumentIcon, ArrowDownTrayIcon, ArrowsPointingOutIcon } from '@heroicons/react/24/outline'
+import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, Button, Card, CardBody, Spinner, Chip } from "@heroui/react"
+import { DocumentIcon, ArrowDownTrayIcon, ArrowsPointingOutIcon, CheckCircleIcon } from '@heroicons/react/24/outline'
+import ProgressTracker from './ProgressTracker'
 
 interface PDFViewerProps {
   isOpen: boolean
@@ -10,7 +11,8 @@ interface PDFViewerProps {
   pdfUrl: string
   title: string
   description?: string
-  onProgressUpdate?: (progressPercentage: number, timeSpent: number) => void
+  contentId?: string
+  onAttemptUpdate?: (contentId: string, attempted: boolean) => void
 }
 
 export default function PDFViewer({ 
@@ -19,14 +21,12 @@ export default function PDFViewer({
   pdfUrl, 
   title, 
   description,
-  onProgressUpdate 
+  contentId,
+  onAttemptUpdate 
 }: PDFViewerProps) {
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  const [startTime, setStartTime] = useState<number>(Date.now())
-  const [timeSpent, setTimeSpent] = useState(0)
-  const [currentPage] = useState(1)
-  const [totalPages] = useState(0)
+  const [hasAttempted, setHasAttempted] = useState(false)
   const [scale, setScale] = useState(1.0)
   
   // Convert Google Drive share links to embed format
@@ -53,36 +53,19 @@ export default function PDFViewer({
 
   useEffect(() => {
     if (isOpen) {
-      setStartTime(Date.now())
-      setTimeSpent(0)
       setIsLoading(true)
       setError(null)
-    }
-  }, [isOpen])
-
-  useEffect(() => {
-    let interval: NodeJS.Timeout
-    
-    if (isOpen) {
-      interval = setInterval(() => {
-        const currentTimeSpent = (Date.now() - startTime) / (1000 * 60) // Convert to minutes
-        setTimeSpent(currentTimeSpent)
-        
-        if (onProgressUpdate) {
-          // Calculate progress based on time spent (assuming 1 minute per page as rough estimate)
-          const estimatedProgress = totalPages > 0 ? 
-            Math.min((currentPage / totalPages) * 100, 100) : 
-            Math.min(currentTimeSpent * 10, 100) // Fallback: 10% per minute, max 100%
-          
-          onProgressUpdate(estimatedProgress, currentTimeSpent)
+      
+      // Mark as attempted when PDF opens
+      if (contentId && !hasAttempted) {
+        ProgressTracker.markAsAttempted(contentId)
+        setHasAttempted(true)
+        if (onAttemptUpdate) {
+          onAttemptUpdate(contentId, true)
         }
-      }, 10000) // Update every 10 seconds
+      }
     }
-    
-    return () => {
-      if (interval) clearInterval(interval)
-    }
-  }, [isOpen, startTime, onProgressUpdate, currentPage, totalPages])
+  }, [isOpen, contentId, hasAttempted, onAttemptUpdate])
 
   const handleDownload = () => {
     // For Google Drive, create download link
@@ -108,18 +91,6 @@ export default function PDFViewer({
     window.open(embedUrl, '_blank', 'width=1200,height=800,scrollbars=yes,resizable=yes')
   }
 
-  const formatTime = (minutes: number) => {
-    const hrs = Math.floor(minutes / 60)
-    const mins = Math.floor(minutes % 60)
-    
-    if (hrs > 0) {
-      return `${hrs}h ${mins}m`
-    }
-    return `${mins}m`
-  }
-
-  const progressPercentage = totalPages > 0 ? (currentPage / totalPages) * 100 : Math.min(timeSpent * 10, 100)
-
   return (
     <Modal 
       isOpen={isOpen} 
@@ -142,7 +113,17 @@ export default function PDFViewer({
                 <p className="text-sm text-gray-600">{description}</p>
               )}
             </div>
-            <div className="flex gap-2">
+            <div className="flex items-center gap-2">
+              {hasAttempted && (
+                <Chip
+                  startContent={<CheckCircleIcon className="h-4 w-4" />}
+                  color="success"
+                  variant="flat"
+                  size="sm"
+                >
+                  Attempted
+                </Chip>
+              )}
               <Button
                 isIconOnly
                 variant="light"
@@ -240,24 +221,19 @@ export default function PDFViewer({
             )}
           </div>
           
-          {/* Progress Summary */}
+          {/* Attempt Status Summary */}
           <Card>
             <CardBody>
-              <div className="space-y-3">
-                <div className="flex justify-between items-center">
-                  <span className="text-sm text-gray-600">Reading Progress</span>
-                  <span className="text-sm font-medium">{Math.round(progressPercentage)}%</span>
-                </div>
-                <Progress 
-                  value={progressPercentage} 
-                  color="primary"
-                />
-                <div className="flex justify-between text-sm text-gray-500">
-                  <span>Time spent: {formatTime(timeSpent)}</span>
-                  {totalPages > 0 && (
-                    <span>Page {currentPage} of {totalPages}</span>
-                  )}
-                </div>
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-gray-600">Content Status</span>
+                <Chip
+                  startContent={hasAttempted ? <CheckCircleIcon className="h-4 w-4" /> : undefined}
+                  color={hasAttempted ? "success" : "default"}
+                  variant="flat"
+                  size="sm"
+                >
+                  {hasAttempted ? 'Attempted' : 'Not Attempted'}
+                </Chip>
               </div>
             </CardBody>
           </Card>

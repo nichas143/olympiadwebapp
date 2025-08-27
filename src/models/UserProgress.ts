@@ -5,23 +5,10 @@ export interface IUserProgress extends mongoose.Document {
   userId: string // Reference to User._id
   contentId: string // Reference to Content._id
   
-  // Progress tracking
-  status: 'not_started' | 'in_progress' | 'completed' | 'skipped'
-  progressPercentage: number // 0-100
-  timeSpent: number // in minutes
+  // Simplified status tracking
+  status: 'not_attempted' | 'attempted'
   lastAccessedAt: Date
-  completedAt?: Date
-  
-  // Video-specific tracking
-  videoWatchTime?: number // in minutes, for video content
-  videoCompletionPercentage?: number // 0-100
-  
-  // Test/Practice-specific tracking
-  testScore?: number // for MockTest and PracticeSet
-  testAttempts?: number
-  correctAnswers?: number
-  totalQuestions?: number
-  testCompletedAt?: Date
+  attemptedAt?: Date
   
   // Learning path tracking
   sequencePosition: number // Position in the learning sequence
@@ -46,13 +33,10 @@ export interface IUserProgressModel extends mongoose.Model<IUserProgress> {
   getProgressSummary(userId: string): Promise<Array<{
     _id: string
     count: number
-    totalTimeSpent: number
-    avgProgress: number
   }>>
   getUnitProgress(userId: string, unit: string): Promise<Array<{
     _id: string
     count: number
-    totalTimeSpent: number
   }>>
 }
 
@@ -69,67 +53,16 @@ const userProgressSchema = new mongoose.Schema({
   },
   status: {
     type: String,
-    enum: ['not_started', 'in_progress', 'completed', 'skipped'],
-    default: 'not_started',
+    enum: ['not_attempted', 'attempted'],
+    default: 'not_attempted',
     index: true
-  },
-  progressPercentage: {
-    type: Number,
-    min: 0,
-    max: 100,
-    default: 0
-  },
-  timeSpent: {
-    type: Number,
-    min: 0,
-    default: 0
   },
   lastAccessedAt: {
     type: Date,
     default: Date.now,
     index: true
   },
-  completedAt: {
-    type: Date,
-    default: null
-  },
-  
-  // Video-specific fields
-  videoWatchTime: {
-    type: Number,
-    min: 0,
-    default: 0
-  },
-  videoCompletionPercentage: {
-    type: Number,
-    min: 0,
-    max: 100,
-    default: 0
-  },
-  
-  // Test-specific fields
-  testScore: {
-    type: Number,
-    min: 0,
-    max: 100,
-    default: null
-  },
-  testAttempts: {
-    type: Number,
-    min: 0,
-    default: 0
-  },
-  correctAnswers: {
-    type: Number,
-    min: 0,
-    default: null
-  },
-  totalQuestions: {
-    type: Number,
-    min: 0,
-    default: null
-  },
-  testCompletedAt: {
+  attemptedAt: {
     type: Date,
     default: null
   },
@@ -181,10 +114,9 @@ userProgressSchema.index({ userId: 1, isUnlocked: 1 })
 userProgressSchema.pre('save', function(next) {
   this.updatedAt = new Date()
   
-  // Auto-complete logic
-  if (this.progressPercentage >= 100 && this.status !== 'completed') {
-    this.status = 'completed'
-    this.completedAt = new Date()
+  // Set attemptedAt when status changes to attempted
+  if (this.status === 'attempted' && !this.attemptedAt) {
+    this.attemptedAt = new Date()
   }
   
   next()
@@ -209,9 +141,7 @@ userProgressSchema.statics.getProgressSummary = async function(userId: string) {
     {
       $group: {
         _id: '$status',
-        count: { $sum: 1 },
-        totalTimeSpent: { $sum: '$timeSpent' },
-        avgProgress: { $avg: '$progressPercentage' }
+        count: { $sum: 1 }
       }
     }
   ]
@@ -238,8 +168,7 @@ userProgressSchema.statics.getUnitProgress = async function(userId: string, unit
     {
       $group: {
         _id: '$status',
-        count: { $sum: 1 },
-        totalTimeSpent: { $sum: '$timeSpent' }
+        count: { $sum: 1 }
       }
     }
   ]

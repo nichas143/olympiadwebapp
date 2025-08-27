@@ -3,9 +3,8 @@ import { auth } from '@/lib/auth'
 import connectDB from '@/lib/mongodb'
 import { UserProgress } from '@/models/UserProgress'
 import { Content } from '@/models/Content'
-import { StudySession } from '@/models/StudySession'
 
-// GET /api/progress - Get user's progress data
+// GET /api/progress - Get user's attempt data
 export async function GET(request: NextRequest) {
   try {
     const session = await auth()
@@ -23,46 +22,30 @@ export async function GET(request: NextRequest) {
     const userId = session.user.id
 
     if (summary) {
-      // Return progress summary
-      const progressSummary = await UserProgress.getProgressSummary(userId)
-      const totalProgress = await UserProgress.countDocuments({ userId })
-      const completedProgress = await UserProgress.countDocuments({ 
+      // Return attempt summary
+      const attemptSummary = await UserProgress.getProgressSummary(userId)
+      const totalContent = await UserProgress.countDocuments({ userId })
+      const attemptedContent = await UserProgress.countDocuments({ 
         userId, 
-        status: 'completed' 
+        status: 'attempted' 
       })
       
-      // Get recent study sessions
-      const recentSessions = await StudySession.getUserSessions(userId, { 
-        limit: 10,
-        isActive: false 
-      })
-
-      // Calculate total study time
-      const studyTimeResult = await StudySession.aggregate([
-        { $match: { userId, isActive: false } },
-        { $group: { _id: null, totalMinutes: { $sum: '$duration' } } }
-      ])
-
-      const totalStudyTime = studyTimeResult[0]?.totalMinutes || 0
-
       return NextResponse.json({
-        summary: progressSummary,
-        totalContent: totalProgress,
-        completedContent: completedProgress,
-        completionRate: totalProgress > 0 ? Math.round((completedProgress / totalProgress) * 100) : 0,
-        totalStudyTime,
-        recentSessions
+        summary: attemptSummary,
+        totalContent,
+        attemptedContent,
+        attemptRate: totalContent > 0 ? Math.round((attemptedContent / totalContent) * 100) : 0
       })
     }
 
     if (contentId) {
-      // Get progress for specific content
+      // Get attempt status for specific content
       const progress = await UserProgress.findOne({ userId, contentId })
       return NextResponse.json({ progress })
     }
 
     if (unit) {
-      // Get progress for specific unit
+      // Get attempt status for specific unit
       const unitProgress = await UserProgress.getUnitProgress(userId, unit)
       return NextResponse.json({ unitProgress })
     }
@@ -80,7 +63,7 @@ export async function GET(request: NextRequest) {
   }
 }
 
-// POST /api/progress - Update user progress
+// POST /api/progress - Update user attempt status
 export async function POST(request: NextRequest) {
   try {
     const session = await auth()
@@ -94,14 +77,7 @@ export async function POST(request: NextRequest) {
     const body = await request.json()
     const { 
       contentId, 
-      progressPercentage, 
-      timeSpent, 
       status,
-      videoWatchTime,
-      videoCompletionPercentage,
-      testScore,
-      correctAnswers,
-      totalQuestions,
       notes,
       isBookmarked
     } = body
@@ -135,48 +111,17 @@ export async function POST(request: NextRequest) {
       })
     }
 
-    // Update progress fields
-    if (progressPercentage !== undefined) {
-      progress.progressPercentage = Math.max(progress.progressPercentage, progressPercentage)
-    }
-    
-    if (timeSpent !== undefined) {
-      progress.timeSpent += timeSpent
-    }
-
+    // Update attempt status
     if (status) {
       progress.status = status
     }
 
-    if (videoWatchTime !== undefined) {
-      progress.videoWatchTime = Math.max(progress.videoWatchTime || 0, videoWatchTime)
-    }
-
-    if (videoCompletionPercentage !== undefined) {
-      progress.videoCompletionPercentage = Math.max(
-        progress.videoCompletionPercentage || 0, 
-        videoCompletionPercentage
-      )
-    }
-
-    if (testScore !== undefined) {
-      progress.testScore = Math.max(progress.testScore || 0, testScore)
-      progress.testAttempts = (progress.testAttempts || 0) + 1
-      progress.testCompletedAt = new Date()
-    }
-
-    if (correctAnswers !== undefined) {
-      progress.correctAnswers = correctAnswers
-    }
-
-    if (totalQuestions !== undefined) {
-      progress.totalQuestions = totalQuestions
-    }
-
+    // Update notes
     if (notes !== undefined) {
       progress.notes = notes
     }
 
+    // Update bookmark status
     if (isBookmarked !== undefined) {
       progress.isBookmarked = isBookmarked
     }
@@ -188,7 +133,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ 
       success: true, 
       progress,
-      message: 'Progress updated successfully'
+      message: 'Attempt status updated successfully'
     })
 
   } catch (error) {
@@ -200,7 +145,7 @@ export async function POST(request: NextRequest) {
   }
 }
 
-// PUT /api/progress - Bulk update progress (for admin or system operations)
+// PUT /api/progress - Bulk update attempt status (for admin or system operations)
 export async function PUT(request: NextRequest) {
   try {
     const session = await auth()
@@ -242,7 +187,7 @@ export async function PUT(request: NextRequest) {
     return NextResponse.json({ 
       success: true, 
       results,
-      message: 'Bulk progress update completed'
+      message: 'Bulk attempt status update completed'
     })
 
   } catch (error) {

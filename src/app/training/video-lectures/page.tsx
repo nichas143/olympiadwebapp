@@ -4,7 +4,7 @@ import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import { useEffect, useState, useCallback } from 'react'
 import { Card, CardBody, CardHeader, Button, Select, SelectItem, Chip, Badge } from "@heroui/react"
-import { PlayCircleIcon, ClockIcon, AcademicCapIcon, BookOpenIcon, LinkIcon } from '@heroicons/react/24/outline'
+import { PlayCircleIcon, ClockIcon, AcademicCapIcon, BookOpenIcon, LinkIcon, CheckCircleIcon } from '@heroicons/react/24/outline'
 import ContentViewer from '@/app/components/ContentViewer'
 
 interface Content {
@@ -26,15 +26,19 @@ interface Content {
   isActive: boolean
 }
 
+interface ContentWithAttempt extends Content {
+  attemptStatus?: 'not_attempted' | 'attempted'
+}
+
 export default function VideoLectures() {
   const { data: session, status } = useSession()
   const router = useRouter()
-  const [content, setContent] = useState<Content[]>([])
+  const [content, setContent] = useState<ContentWithAttempt[]>([])
   const [loading, setLoading] = useState(true)
   const [selectedUnit, setSelectedUnit] = useState<string>('all')
   const [selectedInstructionType, setSelectedInstructionType] = useState<string>('all')
   const [selectedContent, setSelectedContent] = useState<Content | null>(null)
-    const [showContentViewer, setShowContentViewer] = useState(false)
+  const [showContentViewer, setShowContentViewer] = useState(false)
   
   const fetchContent = useCallback(async () => {
     try {
@@ -54,7 +58,27 @@ export default function VideoLectures() {
       const response = await fetch(`/api/content?${params}`)
       if (response.ok) {
         const data = await response.json()
-        setContent(data.content)
+        const contentWithAttempts = await Promise.all(
+          data.content.map(async (item: Content) => {
+            try {
+              const progressResponse = await fetch(`/api/progress?contentId=${item._id}`)
+              if (progressResponse.ok) {
+                const progressData = await progressResponse.json()
+                return {
+                  ...item,
+                  attemptStatus: progressData.progress?.status || 'not_attempted'
+                }
+              }
+            } catch (error) {
+              console.error('Failed to fetch attempt status:', error)
+            }
+            return {
+              ...item,
+              attemptStatus: 'not_attempted'
+            }
+          })
+        )
+        setContent(contentWithAttempts)
       }
     } catch (error) {
       console.error('Failed to fetch content:', error)
@@ -89,8 +113,6 @@ export default function VideoLectures() {
     return match ? match[1] : null
   }
 
-
-
   const getInstructionTypeColor = (type: string) => {
     return type === 'conceptDiscussion' ? 'primary' : 'secondary'
   }
@@ -100,27 +122,15 @@ export default function VideoLectures() {
     setShowContentViewer(true)
   }
 
-  const handleProgressUpdate = async (contentId: string, progressPercentage: number, timeSpent: number) => {
-    try {
-      const response = await fetch('/api/progress', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          contentId,
-          progressPercentage,
-          timeSpent,
-          status: progressPercentage >= 100 ? 'completed' : 'in_progress'
-        }),
-      })
-
-      if (response.ok) {
-        console.log('Video progress updated successfully')
-      }
-    } catch (error) {
-      console.error('Failed to update progress:', error)
-    }
+  const handleAttemptUpdate = async (contentId: string, attempted: boolean) => {
+    // Update the local state to reflect the attempt status
+    setContent(prevContent => 
+      prevContent.map(item => 
+        item._id === contentId 
+          ? { ...item, attemptStatus: attempted ? 'attempted' : 'not_attempted' }
+          : item
+      )
+    )
   }
 
   if (status === 'loading' || loading) {
@@ -247,6 +257,19 @@ export default function VideoLectures() {
                         {item.instructionType === 'conceptDiscussion' ? 'Concept' : 'Problem'}
                       </Chip>
                     </div>
+                    {/* Attempt Status Badge */}
+                    {item.attemptStatus === 'attempted' && (
+                      <div className="absolute bottom-2 right-2">
+                        <Chip
+                          size="sm"
+                          color="success"
+                          variant="solid"
+                          startContent={<CheckCircleIcon className="h-3 w-3" />}
+                        >
+                          Attempted
+                        </Chip>
+                      </div>
+                    )}
                   </div>
                 </CardHeader>
                 <CardBody>
@@ -296,7 +319,7 @@ export default function VideoLectures() {
               topic: selectedContent.topic,
               unit: selectedContent.unit
             }}
-            onProgressUpdate={handleProgressUpdate}
+            onAttemptUpdate={handleAttemptUpdate}
           />
         )}
       </div>

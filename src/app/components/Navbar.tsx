@@ -115,144 +115,103 @@ export default function Navbar() {
 
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center space-x-8">
-            {navItems.map((item) => (
-              <Link
-                key={item.name}
-                href={item.href}
-                className={mounted ? getLinkClassName(item.href, pathname === item.href) : "px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200 text-gray-700 hover:text-blue-600 hover:bg-gray-50"}
-              >
-                {item.name}
-              </Link>
-            ))}
-
-            {/* Program Dropdown */}
-            <div className="relative">
-              <button
-                onClick={() => mounted && setIsProgramDropdownOpen(!isProgramDropdownOpen)}
-                onBlur={() => mounted && setTimeout(() => setIsProgramDropdownOpen(false), 150)}
-                className={mounted ? getLinkClassName('/program', isProgramActive) : "px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200 text-gray-700 hover:text-blue-600 hover:bg-gray-50 flex items-center"}
-                disabled={!mounted}
-              >
-                <span className="flex items-center">
-                  Program
-                  <svg
-                    className={`ml-1 h-4 w-4 transition-transform duration-200 ${
-                      mounted && isProgramDropdownOpen ? 'rotate-180' : ''
-                    }`}
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
+            {/* Only show navigation items when user is NOT authenticated */}
+            {mounted && !session && (
+              <>
+                {navItems.map((item) => (
+                  <Link
+                    key={item.name}
+                    href={item.href}
+                    className={getLinkClassName(item.href, pathname === item.href)}
                   >
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                  </svg>
-                </span>
-              </button>
+                    {item.name}
+                  </Link>
+                ))}
 
-              {/* Dropdown Menu */}
-              {mounted && isProgramDropdownOpen && (
-                <div className="absolute right-0 mt-2 w-80 bg-white rounded-lg shadow-lg border border-gray-200 z-50">
-                  <div className="py-2">
-                    {programItems.map((item) => (
-                      <Link
-                        key={item.name}
-                        href={item.href}
-                        className="block px-4 py-3 hover:bg-gray-50 transition-colors duration-200"
-                        onClick={() => setIsProgramDropdownOpen(false)}
-                      >
-                        <div className="font-medium text-gray-900 mb-1">{item.name}</div>
-                        <div className="text-sm text-gray-600">{item.description}</div>
-                      </Link>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </div>
-
-            {/* Resources Dropdown */}
-            <div className="relative">
-              <button
-                onClick={() => mounted && setIsResourcesDropdownOpen(!isResourcesDropdownOpen)}
-                onBlur={() => mounted && setTimeout(() => setIsResourcesDropdownOpen(false), 150)}
-                className={mounted ? getLinkClassName('/resources', isResourcesActive) : "px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200 text-gray-700 hover:text-blue-600 hover:bg-gray-50 flex items-center"}
-                disabled={!mounted}
-              >
-                <span className="flex items-center">
-                  Resources
-                  <svg
-                    className={`ml-1 h-4 w-4 transition-transform duration-200 ${
-                      mounted && isResourcesDropdownOpen ? 'rotate-180' : ''
-                    }`}
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
+                {/* Program Dropdown */}
+                <div className="relative">
+                  <button
+                    onClick={() => setIsProgramDropdownOpen(!isProgramDropdownOpen)}
+                    onBlur={() => setTimeout(() => setIsProgramDropdownOpen(false), 150)}
+                    className={getLinkClassName('/program', isProgramActive)}
                   >
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                  </svg>
-                </span>
-              </button>
-
-              {/* Dropdown Menu */}
-              {mounted && isResourcesDropdownOpen && (
-                <div className="absolute right-0 mt-2 w-80 bg-white rounded-lg shadow-lg border border-gray-200 z-50">
-                  <div className="py-2">
-                    {resourcesItems.map((item) => (
-                      <Link
-                        key={item.name}
-                        href={item.href}
-                        className="block px-4 py-3 hover:bg-gray-50 transition-colors duration-200"
-                        onClick={() => setIsResourcesDropdownOpen(false)}
+                    <span className="flex items-center">
+                      Program
+                      <svg
+                        className={`ml-1 h-4 w-4 transition-transform duration-200 ${
+                          isProgramDropdownOpen ? 'rotate-180' : ''
+                        }`}
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
                       >
-                        <div className="font-medium text-gray-900 mb-1">{item.name}</div>
-                        <div className="text-sm text-gray-600">{item.description}</div>
-                      </Link>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </div>
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                      </svg>
+                    </span>
+                  </button>
 
-            {/* Training Dropdown */}
-            {mounted && session && (
-              <div className="relative">
-                <button
-                  onClick={() => setIsTrainingDropdownOpen(!isTrainingDropdownOpen)}
-                  onBlur={() => setTimeout(() => setIsTrainingDropdownOpen(false), 150)}
-                  className="px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200 text-gray-700 hover:text-blue-600 hover:bg-gray-50 flex items-center"
-                >
-                  Training
-                  <span className="ml-1">
-                    <svg
-                      className={`ml-1 h-4 w-4 transition-transform duration-200 ${
-                        isTrainingDropdownOpen ? 'rotate-180' : ''
-                      }`}
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                    >
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                    </svg>
-                  </span>
-                </button>
-
-                {/* Dropdown Menu */}
-                {isTrainingDropdownOpen && (
-                  <div className="absolute right-0 mt-2 w-80 bg-white rounded-lg shadow-lg border border-gray-200 z-50">
-                    <div className="py-2">
-                      {trainingItems.map((item) => (
-                        <Link
-                          key={item.name}
-                          href={item.href}
-                          className="block px-4 py-3 hover:bg-gray-50 transition-colors duration-200"
-                          onClick={() => setIsTrainingDropdownOpen(false)}
-                        >
-                          <div className="font-medium text-gray-900 mb-1">{item.name}</div>
-                          <div className="text-sm text-gray-600">{item.description}</div>
-                        </Link>
-                      ))}
+                  {/* Dropdown Menu */}
+                  {isProgramDropdownOpen && (
+                    <div className="absolute right-0 mt-2 w-80 bg-white rounded-lg shadow-lg border border-gray-200 z-50">
+                      <div className="py-2">
+                        {programItems.map((item) => (
+                          <Link
+                            key={item.name}
+                            href={item.href}
+                            className="block px-4 py-3 hover:bg-gray-50 transition-colors duration-200"
+                            onClick={() => setIsProgramDropdownOpen(false)}
+                          >
+                            <div className="font-medium text-gray-900 mb-1">{item.name}</div>
+                            <div className="text-sm text-gray-600">{item.description}</div>
+                          </Link>
+                        ))}
+                      </div>
                     </div>
-                  </div>
-                )}
-              </div>
+                  )}
+                </div>
+
+                {/* Resources Dropdown */}
+                <div className="relative">
+                  <button
+                    onClick={() => setIsResourcesDropdownOpen(!isResourcesDropdownOpen)}
+                    onBlur={() => setTimeout(() => setIsResourcesDropdownOpen(false), 150)}
+                    className={getLinkClassName('/resources', isResourcesActive)}
+                  >
+                    <span className="flex items-center">
+                      Resources
+                      <svg
+                        className={`ml-1 h-4 w-4 transition-transform duration-200 ${
+                          isResourcesDropdownOpen ? 'rotate-180' : ''
+                        }`}
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                      >
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                      </svg>
+                    </span>
+                  </button>
+
+                  {/* Dropdown Menu */}
+                  {isResourcesDropdownOpen && (
+                    <div className="absolute right-0 mt-2 w-80 bg-white rounded-lg shadow-lg border border-gray-200 z-50">
+                      <div className="py-2">
+                        {resourcesItems.map((item) => (
+                          <Link
+                            key={item.name}
+                            href={item.href}
+                            className="block px-4 py-3 hover:bg-gray-50 transition-colors duration-200"
+                            onClick={() => setIsResourcesDropdownOpen(false)}
+                          >
+                            <div className="font-medium text-gray-900 mb-1">{item.name}</div>
+                            <div className="text-sm text-gray-600">{item.description}</div>
+                          </Link>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </>
             )}
 
             {/* Authentication */}
@@ -377,72 +336,57 @@ export default function Navbar() {
       {mounted && isMobileMenuOpen && (
         <div className="md:hidden">
           <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3 bg-white border-t border-gray-200">
-            {navItems.map((item) => (
-              <Link
-                key={item.name}
-                href={item.href}
-                className={getMobileLinkClassName(item.href, pathname === item.href)}
-                onClick={() => setIsMobileMenuOpen(false)}
-              >
-                {item.name}
-              </Link>
-            ))}
-            
-            {/* Mobile Program Section */}
-            <div className="border-t border-gray-200 pt-2 mt-2">
-              <div className="px-3 py-2 text-sm font-medium text-gray-500 uppercase tracking-wider">
-                Program
-              </div>
-              {programItems.map((item) => (
-                <Link
-                  key={item.name}
-                  href={item.href}
-                  className={getMobileLinkClassName(item.href, pathname === item.href)}
-                  onClick={() => setIsMobileMenuOpen(false)}
-                >
-                  <div className="font-medium">{item.name}</div>
-                  <div className="text-sm text-gray-600 mt-1">{item.description}</div>
-                </Link>
-              ))}
-            </div>
-
-            {/* Mobile Training Section */}
-            {session && (
-              <div className="border-t border-gray-200 pt-2 mt-2">
-                <div className="px-3 py-2 text-sm font-medium text-gray-500 uppercase tracking-wider">
-                  Training
-                </div>
-                {trainingItems.map((item) => (
+            {/* Only show navigation items when user is NOT authenticated */}
+            {!session && (
+              <>
+                {navItems.map((item) => (
                   <Link
                     key={item.name}
                     href={item.href}
                     className={getMobileLinkClassName(item.href, pathname === item.href)}
                     onClick={() => setIsMobileMenuOpen(false)}
                   >
-                    <div className="font-medium">{item.name}</div>
-                    <div className="text-sm text-gray-600 mt-1">{item.description}</div>
+                    {item.name}
                   </Link>
                 ))}
-              </div>
-            )}
+                
+                {/* Mobile Program Section */}
+                <div className="border-t border-gray-200 pt-2 mt-2">
+                  <div className="px-3 py-2 text-sm font-medium text-gray-500 uppercase tracking-wider">
+                    Program
+                  </div>
+                  {programItems.map((item) => (
+                    <Link
+                      key={item.name}
+                      href={item.href}
+                      className={getMobileLinkClassName(item.href, pathname === item.href)}
+                      onClick={() => setIsMobileMenuOpen(false)}
+                    >
+                      <div className="font-medium">{item.name}</div>
+                      <div className="text-sm text-gray-600 mt-1">{item.description}</div>
+                    </Link>
+                  ))}
+                </div>
 
-            {/* Mobile Resources Section */}
-            <div className="border-t border-gray-200 pt-2 mt-2">
-              <div className="px-3 py-2 text-sm font-medium text-gray-500 uppercase tracking-wider">
-                Resources
-              </div>
-              {resourcesItems.map((item) => (
-                <Link
-                  key={item.name}
-                  href={item.href}
-                  className={getMobileLinkClassName(item.href, pathname === item.href)}
-                  onClick={() => setIsMobileMenuOpen(false)}
-                >
-                  <div className="font-medium">{item.name}</div>
-                  <div className="text-sm text-gray-600 mt-1">{item.description}</div>
-                </Link>
-              ))}
-            </div>
+                {/* Mobile Resources Section */}
+                <div className="border-t border-gray-200 pt-2 mt-2">
+                  <div className="px-3 py-2 text-sm font-medium text-gray-500 uppercase tracking-wider">
+                    Resources
+                  </div>
+                  {resourcesItems.map((item) => (
+                    <Link
+                      key={item.name}
+                      href={item.href}
+                      className={getMobileLinkClassName(item.href, pathname === item.href)}
+                      onClick={() => setIsMobileMenuOpen(false)}
+                    >
+                      <div className="font-medium">{item.name}</div>
+                      <div className="text-sm text-gray-600 mt-1">{item.description}</div>
+                    </Link>
+                  ))}
+                </div>
+              </>
+            )}
 
             {/* Mobile Authentication */}
             <div className="border-t border-gray-200 pt-2 mt-2">

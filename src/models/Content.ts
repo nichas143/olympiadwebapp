@@ -12,7 +12,7 @@ export interface IContent extends mongoose.Document {
   videoLink?: string | null
   description: string
   sequenceNo: number // Natural number for learning sequence
-  docCategory: 'Video' | 'MockTest' | 'PracticeSet'
+  docCategory: 'Learning' | 'MockTest' | 'PracticeSet'
   noOfProblems?: number // Required for MockTest and PracticeSet
   createdAt: Date
   updatedAt: Date
@@ -68,18 +68,19 @@ const contentSchema = new mongoose.Schema({
     default: null,
     validate: {
       validator: function(this: IContent, value: string | null) {
-        // If contentType is video, videoLink should be provided
-        if (this.contentType === 'video' && !value) {
+        // If docCategory is Learning, videoLink should be provided
+        if (this.docCategory === 'Learning' && !value) {
           return false
         }
         // If videoLink is provided, validate URL format
         if (value) {
-          const urlRegex = /^(https?:\/\/)?([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w \.-]*)*\/?$/
+          // More comprehensive URL validation that handles Google Drive, YouTube, etc.
+          const urlRegex = /^https?:\/\/(www\.)?([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w \.-]*)*(\?[;&a-z\d%_.~+=-]*)?(\#[-a-z\d_]*)?$/i
           return urlRegex.test(value)
         }
         return true
       },
-      message: 'Valid video link is required for video content'
+      message: 'Valid link is required for Learning category content'
     }
   },
   description: {
@@ -97,7 +98,7 @@ const contentSchema = new mongoose.Schema({
   },
   docCategory: {
     type: String,
-    enum: ['Video', 'MockTest', 'PracticeSet'],
+    enum: ['Learning', 'MockTest', 'PracticeSet'],
     required: true,
     index: true
   },
@@ -111,13 +112,13 @@ const contentSchema = new mongoose.Schema({
         if ((this.docCategory === 'MockTest' || this.docCategory === 'PracticeSet') && !value) {
           return false
         }
-        // noOfProblems should not be set for Video category
-        if (this.docCategory === 'Video' && value) {
+        // noOfProblems should not be set for Learning category
+        if (this.docCategory === 'Learning' && value) {
           return false
         }
         return true
       },
-      message: 'Number of problems is required for MockTest and PracticeSet, and should not be set for Video'
+      message: 'Number of problems is required for MockTest and PracticeSet, and should not be set for Learning'
     }
   },
   createdAt: {
@@ -200,4 +201,9 @@ contentSchema.statics.getInSequence = function(unit?: string, options: any = {})
   return this.find(query).sort({ unit: 1, sequenceNo: 1, chapter: 1, topic: 1 })
 }
 
-export const Content = mongoose.models?.Content || mongoose.model<IContent>('Content', contentSchema)
+// Clear any existing model to ensure schema updates are applied
+if (mongoose.models?.Content) {
+  delete mongoose.models.Content
+}
+
+export const Content = mongoose.model<IContent>('Content', contentSchema)

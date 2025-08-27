@@ -32,7 +32,7 @@ export async function POST(request: NextRequest) {
         videoLink: 'https://www.youtube.com/watch?v=JUzYl1TYMcU',
         description: 'Learn the Euclidean algorithm for finding the greatest common divisor of two numbers. This fundamental algorithm is essential for solving many number theory problems.',
         sequenceNo: 1,
-        docCategory: 'Video',
+        docCategory: 'Learning',
         createdBy: session.user.id,
         isActive: true
       },
@@ -47,7 +47,7 @@ export async function POST(request: NextRequest) {
         videoLink: 'https://www.youtube.com/watch?v=rUUqnZVdnMI',
         description: 'Master various techniques for factoring quadratic expressions including grouping, completing the square, and using the quadratic formula.',
         sequenceNo: 2,
-        docCategory: 'Video',
+        docCategory: 'Learning',
         createdBy: session.user.id,
         isActive: true
       },
@@ -62,7 +62,7 @@ export async function POST(request: NextRequest) {
         videoLink: 'https://www.youtube.com/watch?v=ty-zGtgtlSY',
         description: 'Understand the triangle inequality theorem and its applications in solving geometric problems and proving geometric relationships.',
         sequenceNo: 3,
-        docCategory: 'Video',
+        docCategory: 'Learning',
         createdBy: session.user.id,
         isActive: true
       },
@@ -77,7 +77,7 @@ export async function POST(request: NextRequest) {
         videoLink: 'https://www.youtube.com/watch?v=iyScoaVTYTg',
         description: 'Solve counting problems using permutations and combinations. Learn when to use each method and practice with real olympiad problems.',
         sequenceNo: 4,
-        docCategory: 'Video',
+        docCategory: 'Learning',
         createdBy: session.user.id,
         isActive: true
       },
@@ -92,7 +92,7 @@ export async function POST(request: NextRequest) {
         videoLink: 'https://www.youtube.com/watch?v=_c7-J4E_K_Q',
         description: 'Introduction to functional equations starting with the Cauchy functional equation f(x+y) = f(x) + f(y) and its properties.',
         sequenceNo: 5,
-        docCategory: 'Video',
+        docCategory: 'Learning',
         createdBy: session.user.id,
         isActive: true
       },
@@ -107,7 +107,7 @@ export async function POST(request: NextRequest) {
         videoLink: 'https://www.youtube.com/watch?v=8QQ6I2OfQW8',
         description: 'Learn the AM-GM inequality and its applications in solving optimization problems and proving other inequalities.',
         sequenceNo: 6,
-        docCategory: 'Video',
+        docCategory: 'Learning',
         createdBy: session.user.id,
         isActive: true
       },

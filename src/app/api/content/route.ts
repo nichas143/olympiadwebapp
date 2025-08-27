@@ -90,9 +90,9 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // Validate video link for video content
-    if (contentData.contentType === 'video' && !contentData.videoLink) {
-      return NextResponse.json({ error: 'Video link is required for video content' }, { status: 400 })
+    // Validate video link for Learning category
+    if (contentData.docCategory === 'Learning' && !contentData.videoLink) {
+      return NextResponse.json({ error: 'Link is required for Learning category content' }, { status: 400 })
     }
 
     // Validate noOfProblems for MockTest and PracticeSet
@@ -117,7 +117,7 @@ export async function POST(request: NextRequest) {
       message: 'Content created successfully',
       content: newContent
     }, { status: 201 })
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error creating content:', error)
     
     if (error.name === 'ValidationError') {

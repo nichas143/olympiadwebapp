@@ -85,7 +85,7 @@ const initialFormData: ContentFormData = {
   videoLink: '',
   description: '',
   sequenceNo: 1,
-  docCategory: 'Video',
+  docCategory: 'Learning',
   noOfProblems: undefined
 }
 
@@ -112,7 +112,7 @@ export default function AdminContent() {
   const units = ['Algebra', 'Geometry', 'Number Theory', 'Combinatorics', 'Functional Equations', 'Inequalities', 'Advanced Math', 'Calculus', 'Other']
   const contentTypes = ['video', 'pdf', 'link', 'testpaperLink']
   const instructionTypes = ['conceptDiscussion', 'problemDiscussion']
-  const docCategories = ['Video', 'MockTest', 'PracticeSet']
+  const docCategories = ['Learning', 'MockTest', 'PracticeSet']
 
   useEffect(() => {
     if (status === 'loading') return
@@ -157,13 +157,60 @@ export default function AdminContent() {
     }
   }
 
+  const validateForm = () => {
+    const errors: string[] = []
+    
+    // Check required fields
+    if (!formData.unit) errors.push('Unit is required')
+    if (!formData.chapter) errors.push('Chapter is required')
+    if (!formData.topic) errors.push('Topic is required')
+    if (!formData.concept) errors.push('Concept is required')
+    if (!formData.description || formData.description.length < 10) {
+      errors.push('Description must be at least 10 characters long')
+    }
+    if (formData.description.length > 2000) {
+      errors.push('Description must be less than 2000 characters')
+    }
+    if (formData.sequenceNo < 1) errors.push('Sequence number must be positive')
+    
+    // Check category-specific requirements
+    if (formData.docCategory === 'Learning' && !formData.videoLink) {
+      errors.push('Learning resource URL is required for Learning category')
+    }
+    if ((formData.docCategory === 'MockTest' || formData.docCategory === 'PracticeSet') && !formData.noOfProblems) {
+      errors.push('Number of problems is required for MockTest and PracticeSet')
+    }
+    
+    // Validate URL format if provided
+    if (formData.videoLink) {
+      const urlRegex = /^https?:\/\/(www\.)?([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w \.-]*)*(\?[;&a-z\d%_.~+=-]*)?(\#[-a-z\d_]*)?$/i
+      if (!urlRegex.test(formData.videoLink)) {
+        errors.push('Please enter a valid URL')
+      }
+    }
+    
+    return errors
+  }
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    
+    // Client-side validation
+    const validationErrors = validateForm()
+    if (validationErrors.length > 0) {
+      alert('Please fix the following errors:\n\n' + validationErrors.join('\n'))
+      return
+    }
+    
     setSubmitting(true)
 
     try {
       const url = editingId ? `/api/content/${editingId}` : '/api/content'
       const method = editingId ? 'PUT' : 'POST'
+      
+      // Create an AbortController for timeout
+      const controller = new AbortController()
+      const timeoutId = setTimeout(() => controller.abort(), 30000) // 30 second timeout
       
       const response = await fetch(url, {
         method,
@@ -171,7 +218,10 @@ export default function AdminContent() {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify(formData),
+        signal: controller.signal
       })
+      
+      clearTimeout(timeoutId)
 
       if (response.ok) {
         fetchContent()
@@ -181,9 +231,13 @@ export default function AdminContent() {
         const error = await response.json()
         alert(`Error: ${error.error}`)
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Failed to save content:', error)
-      alert('Failed to save content')
+      if (error.name === 'AbortError') {
+        alert('Request timed out. Please check your internet connection and try again.')
+      } else {
+        alert('Failed to save content. Please try again.')
+      }
     } finally {
       setSubmitting(false)
     }
@@ -401,7 +455,7 @@ export default function AdminContent() {
                       <div className="flex flex-col gap-1">
                         <Chip
                           size="sm"
-                          color={item.docCategory === 'Video' ? 'primary' : item.docCategory === 'MockTest' ? 'warning' : 'success'}
+                          color={item.docCategory === 'Learning' ? 'primary' : item.docCategory === 'MockTest' ? 'warning' : 'success'}
                           variant="flat"
                         >
                           {item.docCategory}
@@ -575,12 +629,31 @@ export default function AdminContent() {
                     />
                     
                     <Input
-                      label="Video/PDF/Link URL"
+                      label={formData.docCategory === 'Learning' ? 'Learning Resource URL' : 'Resource URL'}
                       type="url"
                       placeholder="https://..."
                       value={formData.videoLink}
                       onChange={(e) => setFormData(prev => ({ ...prev, videoLink: e.target.value }))}
-                      description={formData.contentType === 'video' ? 'YouTube, Vimeo, or other video URL' : 'Direct link to PDF or resource'}
+                      description={
+                        formData.docCategory === 'Learning' 
+                          ? 'YouTube, Vimeo, Google Drive, PDF, or other learning resource URL' 
+                          : formData.docCategory === 'MockTest'
+                            ? 'Direct link to mock test PDF or online test'
+                            : formData.docCategory === 'PracticeSet'
+                              ? 'Direct link to practice set PDF or online problems'
+                              : 'Direct link to resource'
+                      }
+                      isRequired={formData.docCategory === 'Learning'}
+                      errorMessage={
+                        formData.videoLink && formData.videoLink.length > 0 && 
+                        !/^https?:\/\/(www\.)?([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w \.-]*)*(\?[;&a-z\d%_.~+=-]*)?(\#[-a-z\d_]*)?$/i.test(formData.videoLink)
+                          ? 'Please enter a valid URL (must start with http:// or https://)'
+                          : undefined
+                      }
+                      isInvalid={
+                        Boolean(formData.videoLink && formData.videoLink.length > 0 && 
+                        !/^https?:\/\/(www\.)?([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w \.-]*)*(\?[;&a-z\d%_.~+=-]*)?(\#[-a-z\d_]*)?$/i.test(formData.videoLink))
+                      }
                     />
                     
                     <Input
@@ -602,11 +675,15 @@ export default function AdminContent() {
                         setFormData(prev => ({ 
                           ...prev, 
                           docCategory: category,
-                          noOfProblems: category === 'Video' ? undefined : prev.noOfProblems
+                          // Auto-adjust contentType based on category
+                          contentType: category === 'Learning' ? 'video' : 
+                                     category === 'MockTest' ? 'testpaperLink' : 
+                                     category === 'PracticeSet' ? 'testpaperLink' : prev.contentType,
+                          noOfProblems: category === 'Learning' ? undefined : prev.noOfProblems
                         }))
                       }}
                     >
-                      <SelectItem key="Video">Video</SelectItem>
+                      <SelectItem key="Learning">Learning</SelectItem>
                       <SelectItem key="MockTest">MockTest</SelectItem>
                       <SelectItem key="PracticeSet">PracticeSet</SelectItem>
                     </Select>
@@ -631,7 +708,18 @@ export default function AdminContent() {
                     rows={4}
                     value={formData.description}
                     onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
-                    description="Detailed description of the content and what students will learn"
+                    description={`Detailed description of the content and what students will learn (${formData.description.length}/10 minimum, 2000 maximum)`}
+                    errorMessage={
+                      formData.description.length > 0 && formData.description.length < 10 
+                        ? `Description must be at least 10 characters long (currently ${formData.description.length})` 
+                        : formData.description.length > 2000 
+                          ? `Description must be less than 2000 characters (currently ${formData.description.length})`
+                          : undefined
+                    }
+                    isInvalid={
+                      Boolean((formData.description.length > 0 && formData.description.length < 10) || 
+                      formData.description.length > 2000)
+                    }
                   />
                 </ModalBody>
                 <ModalFooter>
@@ -642,6 +730,15 @@ export default function AdminContent() {
                     color="primary" 
                     type="submit"
                     isLoading={submitting}
+                    isDisabled={
+                      submitting || 
+                      validateForm().length > 0 ||
+                      !formData.unit ||
+                      !formData.chapter ||
+                      !formData.topic ||
+                      !formData.concept ||
+                      formData.description.length < 10
+                    }
                   >
                     {editingId ? 'Update Content' : 'Add Content'}
                   </Button>

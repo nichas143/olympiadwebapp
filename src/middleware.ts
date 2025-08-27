@@ -16,11 +16,19 @@ export default auth((req) => {
     '/profile'
   ]
 
+  // Admin routes that require admin role
+  const adminRoutes = ['/admin']
+
   // Auth routes (signin, signup)
   const authRoutes = ['/auth/signin', '/auth/signup']
 
   // Check if the current path is a protected route
   const isProtectedRoute = protectedRoutes.some(route => 
+    pathname.startsWith(route)
+  )
+
+  // Check if the current path is an admin route
+  const isAdminRoute = adminRoutes.some(route => 
     pathname.startsWith(route)
   )
 
@@ -34,9 +42,20 @@ export default auth((req) => {
     return NextResponse.redirect(new URL('/auth/signin', req.url))
   }
 
-  // Redirect to dashboard if accessing auth routes while already logged in
-  if (isAuthRoute && isLoggedIn) {
+  // Redirect to signin if accessing admin route without authentication
+  if (isAdminRoute && !isLoggedIn) {
+    return NextResponse.redirect(new URL('/auth/signin', req.url))
+  }
+
+  // Redirect to dashboard if accessing admin route without admin role
+  if (isAdminRoute && isLoggedIn && req.auth?.user?.role !== 'admin') {
     return NextResponse.redirect(new URL('/dashboard', req.url))
+  }
+
+  // Redirect to appropriate dashboard based on role when accessing auth routes while logged in
+  if (isAuthRoute && isLoggedIn) {
+    const redirectUrl = req.auth?.user?.role === 'admin' ? '/admin' : '/dashboard'
+    return NextResponse.redirect(new URL(redirectUrl, req.url))
   }
 
   return NextResponse.next()

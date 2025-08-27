@@ -37,19 +37,23 @@ export async function POST(request: NextRequest) {
     // Hash password
     const hashedPassword = await bcrypt.hash(password, 12)
 
-    // Create new user
+    // Create new user with pending status
     const user = await User.create({
       name,
       email,
       password: hashedPassword,
       role: "student",
+      status: "pending",
     })
 
     // Remove password from response
     const { password: _, ...userWithoutPassword } = user.toObject()
 
     return NextResponse.json(
-      { message: "User created successfully", user: userWithoutPassword },
+      { 
+        message: "Registration successful! Your account is pending approval. You will receive an email once your account is approved.",
+        user: userWithoutPassword 
+      },
       { status: 201 }
     )
   } catch (error) {

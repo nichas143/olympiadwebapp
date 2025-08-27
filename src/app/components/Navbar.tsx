@@ -219,13 +219,23 @@ export default function Navbar() {
                 {isUserDropdownOpen && (
                   <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 z-50">
                     <div className="py-2">
-                      <Link
-                        href="/dashboard"
-                        className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
-                        onClick={() => setIsUserDropdownOpen(false)}
-                      >
-                        Dashboard
-                      </Link>
+                      {session.user?.role === 'admin' ? (
+                        <Link
+                          href="/admin"
+                          className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                          onClick={() => setIsUserDropdownOpen(false)}
+                        >
+                          Admin Panel
+                        </Link>
+                      ) : (
+                        <Link
+                          href="/dashboard"
+                          className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                          onClick={() => setIsUserDropdownOpen(false)}
+                        >
+                          Dashboard
+                        </Link>
+                      )}
                       <Link
                         href="/profile"
                         className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"

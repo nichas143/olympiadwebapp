@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { signIn, getSession } from 'next-auth/react'
 import Link from 'next/link'
 import { Button, Input, Card, CardBody, CardHeader } from "@heroui/react"
 import { EyeIcon, EyeSlashIcon } from '@heroicons/react/24/outline'
@@ -20,20 +21,23 @@ export default function SignIn() {
     setError('')
 
     try {
-      const response = await fetch('/api/auth/signin', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ email, password }),
+      const result = await signIn('credentials', {
+        email,
+        password,
+        redirect: false
       })
 
-      if (response.ok) {
-        router.push('/dashboard')
+      if (result?.error) {
+        setError('Invalid email or password')
+      } else if (result?.ok) {
+        // Get the session to check user role
+        const session = await getSession()
+        if (session?.user?.role === 'admin' || session?.user?.role === 'superadmin') {
+          router.push('/admin')
+        } else {
+          router.push('/dashboard')
+        }
         router.refresh()
-      } else {
-        const data = await response.json()
-        setError(data.error || 'Sign in failed')
       }
     } catch (error) {
       setError('An error occurred. Please try again.')

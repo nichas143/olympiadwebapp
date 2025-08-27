@@ -48,13 +48,17 @@ export default auth((req) => {
   }
 
   // Redirect to dashboard if accessing admin route without admin role
-  if (isAdminRoute && isLoggedIn && req.auth?.user?.role !== 'admin') {
-    return NextResponse.redirect(new URL('/dashboard', req.url))
+  if (isAdminRoute && isLoggedIn) {
+    const userRole = req.auth?.user?.role
+    if (userRole !== 'admin' && userRole !== 'superadmin') {
+      return NextResponse.redirect(new URL('/dashboard', req.url))
+    }
   }
 
   // Redirect to appropriate dashboard based on role when accessing auth routes while logged in
   if (isAuthRoute && isLoggedIn) {
-    const redirectUrl = req.auth?.user?.role === 'admin' ? '/admin' : '/dashboard'
+    const userRole = req.auth?.user?.role
+    const redirectUrl = (userRole === 'admin' || userRole === 'superadmin') ? '/admin' : '/dashboard'
     return NextResponse.redirect(new URL(redirectUrl, req.url))
   }
 

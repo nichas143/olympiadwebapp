@@ -1,5 +1,8 @@
-import { auth } from "@/lib/auth"
-import { redirect } from "next/navigation"
+'use client'
+
+import { useSession } from 'next-auth/react'
+import { useRouter } from 'next/navigation'
+import { useEffect } from 'react'
 import Link from "next/link"
 import { Button, Card, CardBody, CardHeader, Progress } from "@heroui/react"
 import { 
@@ -11,11 +14,32 @@ import {
   ClockIcon
 } from '@heroicons/react/24/outline'
 
-export default async function Dashboard() {
-  const session = await auth()
+export default function Dashboard() {
+  const { data: session, status } = useSession()
+  const router = useRouter()
   
+  useEffect(() => {
+    if (status === 'loading') return
+    
+    if (!session) {
+      router.push('/auth/signin')
+      return
+    }
+  }, [session, status, router])
+
+  if (status === 'loading') {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600 mx-auto"></div>
+          <p className="mt-4 text-gray-600">Loading dashboard...</p>
+        </div>
+      </div>
+    )
+  }
+
   if (!session) {
-    redirect('/auth/signin')
+    return null
   }
 
   return (

@@ -41,7 +41,7 @@ export default function AdminDashboard() {
   useEffect(() => {
     if (status === 'loading') return
     
-    if (!session || session.user.role !== 'admin') {
+    if (!session || (session.user.role !== 'admin' && session.user.role !== 'superadmin')) {
       router.push('/auth/signin')
       return
     }
@@ -133,7 +133,7 @@ export default function AdminDashboard() {
     )
   }
 
-  if (!session || session.user.role !== 'admin') {
+  if (!session || (session.user.role !== 'admin' && session.user.role !== 'superadmin')) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <Card className="max-w-md">
@@ -150,8 +150,26 @@ export default function AdminDashboard() {
     <div className="min-h-screen bg-gray-50 py-8">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">Admin Dashboard</h1>
-          <p className="mt-2 text-gray-600">Manage user registrations and approvals</p>
+          <h1 className="text-3xl font-bold text-gray-900">
+            {session.user.role === 'superadmin' ? 'Super Admin Dashboard' : 'Admin Dashboard'}
+          </h1>
+          <p className="mt-2 text-gray-600">
+            {session.user.role === 'superadmin' 
+              ? 'Manage user registrations, approvals, and admin accounts'
+              : 'Manage user registrations and approvals'
+            }
+          </p>
+          {session.user.role === 'superadmin' && (
+            <div className="mt-4 flex space-x-4">
+              <Button
+                color="secondary"
+                variant="flat"
+                onPress={() => window.open('/admin/manage-admins', '_blank')}
+              >
+                Manage Admin Accounts
+              </Button>
+            </div>
+          )}
         </div>
 
         <Card>

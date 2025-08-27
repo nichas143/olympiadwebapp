@@ -24,7 +24,7 @@ export async function GET(request: NextRequest) {
     if (summary) {
       // Return attempt summary
       const attemptSummary = await UserProgress.getProgressSummary(userId)
-      const totalContent = await UserProgress.countDocuments({ userId })
+      const totalContent = await Content.countDocuments({ isActive: true })
       const attemptedContent = await UserProgress.countDocuments({ 
         userId, 
         status: 'attempted' 

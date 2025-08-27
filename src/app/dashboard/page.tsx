@@ -44,7 +44,10 @@ export default function Dashboard() {
         const response = await fetch('/api/progress?summary=true')
         if (response.ok) {
           const data = await response.json()
+          console.log('Dashboard progress data:', data) // Debug log
           setProgressData(data)
+        } else {
+          console.error('Failed to fetch progress summary:', response.status, response.statusText)
         }
       } catch (error) {
         console.error('Failed to fetch progress summary:', error)

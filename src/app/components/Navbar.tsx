@@ -29,20 +29,22 @@ export default function Navbar() {
   const navItems = [
     { name: 'Home', href: '/' },
     { name: 'About Us', href: '/about' },
-    { name: 'Apply for Online Batch', href: '/join' },
   ];
 
-  const programItems = [
+  const liveLecturesItems = [
+    {
+      name: 'Join Live Lectures',
+      href: '/join',
+      description: 'Register for live online math olympiad classes'
+    },
     {
       name: 'Pre-requisites for Online Lectures',
       href: '/prerequisites',
       description: 'Student should know following areas before joining the class'
-    },
-    {
-      name: 'Olympiad Curriculum',
-      href: '/curriculum',
-      description: 'Following topics will be taught to the student in the course'
-    },
+    }
+  ];
+
+  const programItems = [
     {
       name: 'Online Sample Content',
       href: '/sample-lessons',
@@ -51,6 +53,11 @@ export default function Navbar() {
   ];
 
   const resourcesItems = [
+    {
+      name: 'Olympiad Curriculum',
+      href: '/curriculum',
+      description: 'Following topics will be taught to the student in the course'
+    },
     {
       name: 'Useful Links',
       href: '/resources/useful-links',
@@ -79,8 +86,9 @@ export default function Navbar() {
     return `${baseClasses} ${isActive ? 'text-blue-600 bg-blue-50' : 'text-gray-700 hover:text-blue-600 hover:bg-gray-50'}`;
   };
 
-  const isProgramActive = mounted && (pathname === '/prerequisites' || pathname === '/curriculum' || pathname === '/sample-lessons');
-  const isResourcesActive = mounted && pathname.startsWith('/resources');
+  const isLiveLecturesActive = mounted && (pathname === '/join' || pathname === '/prerequisites');
+  const isProgramActive = mounted && (pathname === '/sample-lessons');
+  const isResourcesActive = mounted && (pathname.startsWith('/resources') || pathname === '/curriculum');
   
   // Check if content is free to access
   const FREE_ACCESS = process.env.NEXT_PUBLIC_FREE_ACCESS === 'true';
@@ -141,6 +149,41 @@ export default function Navbar() {
                   </Link>
                 ))}
 
+                {/* Live Lectures Dropdown */}
+                <div className="relative">
+                  <button
+                    onClick={() => setIsProgramDropdownOpen(!isProgramDropdownOpen)}
+                    onBlur={() => setTimeout(() => setIsProgramDropdownOpen(false), 150)}
+                    className={getLinkClassName('/live-lectures', isLiveLecturesActive)}
+                  >
+                    <span className="flex items-center">
+                      Live Lectures
+                      <ChevronDownIcon className={`ml-1 h-4 w-4 transition-transform duration-200 ${
+                        isProgramDropdownOpen ? 'rotate-180' : ''
+                      }`} />
+                    </span>
+                  </button>
+
+                  {/* Dropdown Menu */}
+                  {isProgramDropdownOpen && (
+                    <div className="absolute right-0 mt-2 w-80 bg-white rounded-lg shadow-lg border border-gray-200 z-50">
+                      <div className="py-2">
+                        {liveLecturesItems.map((item) => (
+                          <Link
+                            key={item.name}
+                            href={item.href}
+                            className="block px-4 py-3 hover:bg-gray-50 transition-colors duration-200"
+                            onClick={() => setIsProgramDropdownOpen(false)}
+                          >
+                            <div className="font-medium text-gray-900 mb-1">{item.name}</div>
+                            <div className="text-sm text-gray-600">{item.description}</div>
+                          </Link>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+
                 {/* More Dropdown */}
                 <div className="relative">
                   <button
@@ -149,7 +192,7 @@ export default function Navbar() {
                     className={getLinkClassName('/more', false)}
                   >
                     <span className="flex items-center">
-                      More
+                     Online Content 
                       <ChevronDownIcon className={`ml-1 h-4 w-4 transition-transform duration-200 ${
                         isMoreDropdownOpen ? 'rotate-180' : ''
                       }`} />
@@ -451,6 +494,24 @@ export default function Navbar() {
                   </Link>
                 ))}
                 
+                {/* Mobile Live Lectures Section */}
+                <div className="border-t border-gray-200 pt-2 mt-2">
+                  <div className="px-3 py-2 text-sm font-medium text-gray-500 uppercase tracking-wider">
+                    Live Lectures
+                  </div>
+                  {liveLecturesItems.map((item) => (
+                    <Link
+                      key={item.name}
+                      href={item.href}
+                      className={getMobileLinkClassName(item.href, pathname === item.href)}
+                      onClick={() => setIsMobileMenuOpen(false)}
+                    >
+                      <div className="font-medium">{item.name}</div>
+                      <div className="text-sm text-gray-600 mt-1">{item.description}</div>
+                    </Link>
+                  ))}
+                </div>
+
                 {/* Mobile Program Section */}
                 <div className="border-t border-gray-200 pt-2 mt-2">
                   <div className="px-3 py-2 text-sm font-medium text-gray-500 uppercase tracking-wider">

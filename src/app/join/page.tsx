@@ -25,6 +25,8 @@ const formSchema = z.object({
     squaresOfNumbers: z.boolean(),
     polynomials: z.boolean(),
     polynomialDivision: z.boolean(),
+    indices: z.boolean(),
+    basicAlgebraicIdentities: z.boolean(),
     
     // Geometry
     parallelLinesAngles: z.boolean(),
@@ -82,6 +84,8 @@ export default function Join() {
         squaresOfNumbers: false,
         polynomials: false,
         polynomialDivision: false,
+        indices: false,
+        basicAlgebraicIdentities: false,
         
         // Geometry
         parallelLinesAngles: false,
@@ -166,7 +170,9 @@ export default function Join() {
         { key: 'squareRoots', label: 'Working and finding roots of 2-3 digits numbers' },
         { key: 'squaresOfNumbers', label: 'Knowing what are square of numbers' },
         { key: 'polynomials', label: 'Know what are polynomials in 1-2 variables, Monomials, working with product, addition, subtraction of polynomials' },
-        { key: 'polynomialDivision', label: 'Division of polynomials (long division) with linear divisor' }
+        { key: 'polynomialDivision', label: 'Division of polynomials (long division) with linear divisor' },
+        { key: 'indices', label: 'Indices and their properties' },
+        { key: 'basicAlgebraicIdentities', label: 'Basic algebraic identities (e.g., (a+b)², (a-b)², a²-b²)' }
       ]
     },
     {
@@ -231,6 +237,42 @@ export default function Join() {
         </div>
       </section>
 
+{/* Program details  */}
+<div className="py-16 bg-background-50">
+<div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+  <Card className="border-gray-300 text-green-900 bg-green-200 shadow-xl">
+    <CardHeader>
+      <h3 className="text-2xl font-semibold">Program Details</h3>
+    </CardHeader>
+    <CardBody>
+        <ul> 
+          <li className="flex items-center gap-2">
+            <span className="h-2 w-2 rounded-full bg-green-600"></span>
+            2 Lectures per week
+          </li>
+          <li className="flex items-center gap-2">
+            <span className="h-2 w-2 rounded-full bg-green-600"></span>
+            Each lecture of 1 Hour
+          </li>
+          <li className="flex items-center gap-2">
+            <span className="h-2 w-2 rounded-full bg-green-600"></span>
+            Each Topic covered will comprise of Assignments students have to attempt
+          </li>
+          <li className="flex items-center gap-2">
+            <span className="h-2 w-2 rounded-full bg-green-600"></span>
+            Lectures will have discussions on the assignments
+          </li>
+
+          <li className="flex items-center gap-2">
+          <span className="h-2 w-2 rounded-full bg-green-600"></span>
+            Each topic completion will be followed by a Quiz</li>
+
+        </ul>
+      
+    </CardBody>
+  </Card>
+</div>
+</div>
       {/* Registration Form */}
       <div className="py-16 bg-background-50">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -411,16 +453,16 @@ export default function Join() {
                           <div className="space-y-3 px-4">
                             
                             {category.topics.map((topic) => (
-                               <div className="flex items-start gap-3" key={topic.key}>
+                               <div className="flex items-center gap-3" key={topic.key}>
                                 <Checkbox
                                   {...register(`prerequisites.${topic.key as keyof FormData['prerequisites']}`)}
                                   size="sm"
-                                  color="primary"
+                                  color="secondary"
                                   classNames={{
-                                    base: "mt-0.5"
+                                    base: "flex-shrink-0"
                                   }}
                                 />
-                                <div className="text-black text-sm leading-relaxed">
+                                <div className="text-black text-sm leading-relaxed flex items-center">
                                   {topic.label}
                                 </div>
                                </div>

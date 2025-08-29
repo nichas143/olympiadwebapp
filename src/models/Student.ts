@@ -53,6 +53,14 @@ const studentSchema = new mongoose.Schema({
       type: Boolean,
       default: false
     },
+    indices: {
+      type: Boolean,
+      default: false
+    },
+    basicAlgebraicIdentities: {
+      type: Boolean,
+      default: false
+    },
     
     // Geometry
     parallelLinesAngles: {

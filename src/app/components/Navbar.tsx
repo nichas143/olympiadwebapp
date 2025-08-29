@@ -118,7 +118,7 @@ export default function Navbar() {
                     className={getLinkClassName('/program', isProgramActive)}
                   >
                     <span className="flex items-center">
-                      Programs
+                      More
                       <svg
                         className={`ml-1 h-4 w-4 transition-transform duration-200 ${
                           isProgramDropdownOpen ? 'rotate-180' : ''
@@ -335,7 +335,7 @@ export default function Navbar() {
                 {/* Mobile Program Section */}
                 <div className="border-t border-gray-200 pt-2 mt-2">
                   <div className="px-3 py-2 text-sm font-medium text-gray-500 uppercase tracking-wider">
-                    Programs
+                   More 
                   </div>
                   {programItems.map((item) => (
                     <Link

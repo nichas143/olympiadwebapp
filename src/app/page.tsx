@@ -55,7 +55,7 @@ export default function Home() {
     {
       title: 'Online Content Access',
       description: 'Access our comprehensive online learning platform with video lectures, practice problems, and study materials.',
-      features: ['Self-paced learning', '24/7 access to content', 'Progress tracking', 'Community forum'],
+      features: ['Self-paced learning', '24/7 access to content', 'Notes & Video lectures', 'Test Papers'],
       icon: '💻',
       ctaText: 'Sign Up for Online Access',
       ctaLink: '/auth/signup',

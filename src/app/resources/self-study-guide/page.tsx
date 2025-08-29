@@ -221,7 +221,7 @@ export default function SelfStudyGuidePage() {
     <div className="min-h-screen bg-gray-50 py-12">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
-        <div className="text-center mb-12">
+        <div className="text-center mb-12 bg-gradient-to-r from-blue-200 to-purple-200 rounded-lg p-8">
           <h1 className="text-4xl font-bold text-gray-900 mb-4">
             Self Study Guide
           </h1>
@@ -231,7 +231,7 @@ export default function SelfStudyGuidePage() {
         </div>
 
         {/* Study Paths */}
-        <div className="space-y-12 mb-16">
+        <div className="space-y-12 mb-16 bg-gradient-to-r from-blue-200 to-purple-200 rounded-lg p-8">
           <h2 className="text-3xl font-bold text-gray-900 text-center mb-8">
             Structured Learning Paths
           </h2>
@@ -290,7 +290,7 @@ export default function SelfStudyGuidePage() {
         </div>
 
         {/* Weekly Schedule */}
-        <div className="bg-white rounded-lg shadow-md p-8 mb-16">
+        <div className="bg-white rounded-lg shadow-md p-8 mb-16 bg-gradient-to-r from-blue-200 to-purple-200">
           <h2 className="text-3xl font-bold text-gray-900 text-center mb-8">
             Recommended Weekly Schedule
           </h2>

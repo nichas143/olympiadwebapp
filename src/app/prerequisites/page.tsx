@@ -106,12 +106,12 @@ export default function Prerequisites() {
   const assessmentAreas = [
     {
       title: 'Algebra Assessment',
-      topics: ['Fractions & BODMAS', 'Linear Equations', 'Polynomials', 'Square Roots'],
+      topics: ['Fractions & BODMAS', 'Linear Equations', 'Polynomials', 'Square Roots','Indices','Algebraic Identities'],
       color: 'primary'
     },
     {
       title: 'Geometry Assessment', 
-      topics: ['Angles & Triangles', 'Circles & Tangents', 'Pythagoras Theorem', 'Polygons'],
+      topics: ['Angles & Triangles', 'Circles & Tangents', 'Pythagoras Theorem', 'Polygons','Congruence in triangles','Similarity in triangles','Inscribed angles','Cyclic quadrilaterals'],
       color: 'success'
     },
     {
@@ -121,7 +121,7 @@ export default function Prerequisites() {
     },
     {
       title: 'Combinatorics Assessment',
-      topics: ['Counting Principles', 'Permutations', 'Combinations'],
+      topics: ['Counting Principles'],
       color: 'warning'
     },
     {
@@ -182,8 +182,8 @@ export default function Prerequisites() {
                 <p className="text-gray-600 mb-4 text-sm">{prereq.description}</p>
                 <ul className="space-y-2">
                   {prereq.skills.map((skill, skillIndex) => (
-                    <li key={skillIndex} className="flex items-start">
-                      <span className="text-success-500 mr-2 mt-1">•</span>
+                    <li key={skillIndex} className="flex items-center">
+                      <span className="text-green-400 mr-2">•</span>
                       <span className="text-gray-700 text-sm">{skill}</span>
                     </li>
                   ))}

@@ -48,6 +48,7 @@ export interface SubscriptionPlan {
 
 // Environment-based pricing configuration
 const IS_TESTING = process.env.NODE_ENV === 'development' || process.env.TESTING_MODE === 'true'
+const FREE_ACCESS = process.env.FREE_ACCESS === 'true'
 
 // Subscription plans configuration
 export const SUBSCRIPTION_PLANS: Record<string, SubscriptionPlan> = {
@@ -77,6 +78,9 @@ export const SUBSCRIPTION_PLANS: Record<string, SubscriptionPlan> = {
 
 // Helper function to check if we're in testing mode
 export const isTestingMode = () => IS_TESTING
+
+// Helper function to check if content is free to access
+export const isFreeAccess = () => FREE_ACCESS
 
 // Create a customer in Razorpay
 export async function createRazorpayCustomer(name: string, email: string, contact?: string) {

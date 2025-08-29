@@ -1,6 +1,9 @@
 import { auth } from "@/lib/auth"
 import { NextResponse } from "next/server"
 
+// Check if content is free to access
+const FREE_ACCESS = process.env.FREE_ACCESS === 'true'
+
 export default auth((req) => {
   const isLoggedIn = !!req.auth
   const { pathname } = req.nextUrl
@@ -68,9 +71,12 @@ export default auth((req) => {
 
   // Check subscription for premium routes
   if (isPremiumRoute && isLoggedIn) {
-    // Note: In a real implementation, you'd fetch user data here
-    // For now, we'll redirect to pricing page if trying to access premium content
-    // This check would typically be done via a database query or session data
+    // If FREE_ACCESS is enabled, allow all authenticated users
+    if (FREE_ACCESS) {
+      return NextResponse.next()
+    }
+    
+    // Otherwise, check subscription status
     const subscriptionStatus = req.auth?.user?.subscriptionStatus
     
     // If user doesn't have active subscription or trial, redirect to pricing

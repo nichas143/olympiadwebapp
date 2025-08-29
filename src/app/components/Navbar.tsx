@@ -5,7 +5,7 @@ import { usePathname } from 'next/navigation';
 import { useState, useEffect } from 'react';
 import { useSession, signOut } from 'next-auth/react';
 import { Button } from '@heroui/react';
-import { UserIcon } from '@heroicons/react/24/outline';
+import { UserIcon, ChevronDownIcon } from '@heroicons/react/24/outline';
 import { useRouter } from 'next/navigation';
 
 export default function Navbar() {
@@ -17,6 +17,7 @@ export default function Navbar() {
   const [isResourcesDropdownOpen, setIsResourcesDropdownOpen] = useState(false);
 
   const [isUserDropdownOpen, setIsUserDropdownOpen] = useState(false);
+  const [isMoreDropdownOpen, setIsMoreDropdownOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
   const [isCancellingPayment, setIsCancellingPayment] = useState(false);
 
@@ -80,6 +81,9 @@ export default function Navbar() {
 
   const isProgramActive = mounted && (pathname === '/prerequisites' || pathname === '/curriculum' || pathname === '/sample-lessons');
   const isResourcesActive = mounted && pathname.startsWith('/resources');
+  
+  // Check if content is free to access
+  const FREE_ACCESS = process.env.NEXT_PUBLIC_FREE_ACCESS === 'true';
 
   const handleSignOut = async () => {
     await signOut({ callbackUrl: '/' });
@@ -137,43 +141,58 @@ export default function Navbar() {
                   </Link>
                 ))}
 
-                {/* Program Dropdown */}
+                {/* More Dropdown */}
                 <div className="relative">
                   <button
-                    onClick={() => setIsProgramDropdownOpen(!isProgramDropdownOpen)}
-                    onBlur={() => setTimeout(() => setIsProgramDropdownOpen(false), 150)}
-                    className={getLinkClassName('/program', isProgramActive)}
+                    onClick={() => setIsMoreDropdownOpen(!isMoreDropdownOpen)}
+                    onBlur={() => setTimeout(() => setIsMoreDropdownOpen(false), 150)}
+                    className={getLinkClassName('/more', false)}
                   >
                     <span className="flex items-center">
                       More
-                      <svg
-                        className={`ml-1 h-4 w-4 transition-transform duration-200 ${
-                          isProgramDropdownOpen ? 'rotate-180' : ''
-                        }`}
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                      >
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                      </svg>
+                      <ChevronDownIcon className={`ml-1 h-4 w-4 transition-transform duration-200 ${
+                        isMoreDropdownOpen ? 'rotate-180' : ''
+                      }`} />
                     </span>
                   </button>
 
                   {/* Dropdown Menu */}
-                  {isProgramDropdownOpen && (
+                  {isMoreDropdownOpen && (
                     <div className="absolute right-0 mt-2 w-80 bg-white rounded-lg shadow-lg border border-gray-200 z-50">
                       <div className="py-2">
+                        {/* Program Items */}
                         {programItems.map((item) => (
                           <Link
                             key={item.name}
                             href={item.href}
                             className="block px-4 py-3 hover:bg-gray-50 transition-colors duration-200"
-                            onClick={() => setIsProgramDropdownOpen(false)}
+                            onClick={() => setIsMoreDropdownOpen(false)}
                           >
                             <div className="font-medium text-gray-900 mb-1">{item.name}</div>
                             <div className="text-sm text-gray-600">{item.description}</div>
                           </Link>
                         ))}
+                        
+                        <hr className="my-2" />
+                        
+                        {/* Pricing Section */}
+                        <div className="px-4 py-2">
+                          <div className="font-medium text-gray-900 mb-1">💰 Pricing Plans</div>
+                          <div className="text-sm text-gray-600 mb-2">
+                            {FREE_ACCESS ? (
+                              <span className="text-green-600 font-medium">🎉 Currently FREE Access!</span>
+                            ) : (
+                              <span>Monthly ₹300 • Yearly ₹3000</span>
+                            )}
+                          </div>
+                          <Link
+                            href="/pricing"
+                            className="inline-block px-3 py-1 bg-blue-600 text-white text-sm rounded-md hover:bg-blue-700 transition-colors"
+                            onClick={() => setIsMoreDropdownOpen(false)}
+                          >
+                            View Plans
+                          </Link>
+                        </div>
                       </div>
                     </div>
                   )}

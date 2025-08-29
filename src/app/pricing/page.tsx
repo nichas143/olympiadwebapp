@@ -5,7 +5,7 @@ import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import { Card, CardBody, CardHeader, Button, Chip, Spinner } from '@heroui/react'
 import { CheckIcon } from '@heroicons/react/24/solid'
-import { SUBSCRIPTION_PLANS, isTestingMode } from '@/lib/razorpay'
+import { SUBSCRIPTION_PLANS, isTestingMode, isFreeAccess } from '@/lib/razorpay'
 
 interface SubscriptionStatus {
   subscriptionStatus: string
@@ -80,6 +80,29 @@ const PricingPage = () => {
   const createSubscription = async (planType: string) => {
     setIsCreatingSubscription(true)
     try {
+      // In free access mode, directly activate subscription without payment
+      if (isFree) {
+        const response = await fetch('/api/subscription/activate-free', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ planType }),
+        })
+
+        if (response.ok) {
+          alert('Free subscription activated! You now have access to all content.')
+          fetchSubscriptionStatus()
+          router.push('/dashboard')
+        } else {
+          const error = await response.json()
+          alert(error.error || 'Failed to activate free subscription')
+        }
+        setIsCreatingSubscription(false)
+        return
+      }
+
+      // Normal payment flow for non-free mode
       const response = await fetch('/api/payment/create-order', {
         method: 'POST',
         headers: {
@@ -199,6 +222,7 @@ const PricingPage = () => {
   }
 
   const isTesting = isTestingMode()
+  const isFree = isFreeAccess()
   const monthlyPlan = SUBSCRIPTION_PLANS.monthly
   const yearlyPlan = SUBSCRIPTION_PLANS.yearly
 
@@ -206,10 +230,10 @@ const PricingPage = () => {
     {
       id: 'monthly',
       name: 'Monthly Plan',
-      price: monthlyPlan.amount / 100, // Convert paise to rupees
-      originalPrice: isTesting ? 300 : 399, // Show test vs production pricing
+      price: isFree ? 0 : monthlyPlan.amount / 100, // Free in free access mode
+      originalPrice: isFree ? 300 : (isTesting ? 300 : 399), // Show future pricing
       duration: 'month',
-      description: isTesting ? 'Monthly access (TEST MODE: ₹5)' : 'Monthly access to all Olympiad training materials',
+      description: isFree ? 'Monthly access (Currently FREE!)' : (isTesting ? 'Monthly access (TEST MODE: ₹5)' : 'Monthly access to all Olympiad training materials'),
       features: [
         'All video lectures (100+ hours)',
         'Comprehensive study materials',
@@ -228,10 +252,10 @@ const PricingPage = () => {
     {
       id: 'yearly',
       name: 'Yearly Plan',
-      price: yearlyPlan.amount / 100, // Convert paise to rupees
-      originalPrice: isTesting ? 60 : 3600, // Show test vs production pricing
+      price: isFree ? 0 : yearlyPlan.amount / 100, // Free in free access mode
+      originalPrice: isFree ? 3000 : (isTesting ? 60 : 3600), // Show future pricing
       duration: 'year',
-      description: isTesting ? 'Yearly access (TEST MODE: ₹50)' : 'Yearly access to all Olympiad training materials',
+      description: isFree ? 'Yearly access (Currently FREE!)' : (isTesting ? 'Yearly access (TEST MODE: ₹50)' : 'Yearly access to all Olympiad training materials'),
       features: [
         'All video lectures (100+ hours)',
         'Comprehensive study materials',
@@ -263,7 +287,16 @@ const PricingPage = () => {
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="text-center mb-12">
-          {isTesting && (
+          {isFree && (
+            <div className="bg-green-100 border border-green-400 text-green-800 px-4 py-3 rounded-lg mb-6 max-w-2xl mx-auto">
+              <div className="flex items-center justify-center">
+                <span className="text-lg">🎉</span>
+                <span className="ml-2 font-semibold">FREE ACCESS ENABLED!</span>
+              </div>
+              <p className="text-sm mt-1">All content is currently free • Pricing will be ₹300/month and ₹3000/year later</p>
+            </div>
+          )}
+          {isTesting && !isFree && (
             <div className="bg-blue-100 border border-blue-400 text-blue-800 px-4 py-3 rounded-lg mb-6 max-w-2xl mx-auto">
               <div className="flex items-center justify-center">
                 <span className="text-lg">🧪</span>

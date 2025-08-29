@@ -20,6 +20,7 @@ export default function Navbar() {
   const [isMoreDropdownOpen, setIsMoreDropdownOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
   const [isCancellingPayment, setIsCancellingPayment] = useState(false);
+  const [freeAccess, setFreeAccess] = useState(false);
 
   // Prevent hydration mismatch by only rendering after mount
   useEffect(() => {
@@ -90,8 +91,27 @@ export default function Navbar() {
   const isProgramActive = mounted && (pathname === '/sample-lessons');
   const isResourcesActive = mounted && (pathname.startsWith('/resources') || pathname === '/curriculum');
   
-  // Check if content is free to access
-  const FREE_ACCESS = process.env.NEXT_PUBLIC_FREE_ACCESS === 'true';
+  // Fetch free access status
+  useEffect(() => {
+    const fetchFreeAccessStatus = async () => {
+      try {
+        const response = await fetch('/api/free-access-status');
+        if (response.ok) {
+          const data = await response.json();
+          setFreeAccess(data.freeAccess);
+          console.log('FREE_ACCESS status:', data.freeAccess);
+        }
+      } catch (error) {
+        console.error('Error fetching free access status:', error);
+      }
+    };
+
+    if (mounted) {
+      fetchFreeAccessStatus();
+    }
+  }, [mounted]);
+  
+
 
   const handleSignOut = async () => {
     await signOut({ callbackUrl: '/' });
@@ -222,7 +242,7 @@ export default function Navbar() {
                         <div className="px-4 py-2">
                           <div className="font-medium text-gray-900 mb-1">💰 Pricing Plans</div>
                           <div className="text-sm text-gray-600 mb-2">
-                            {FREE_ACCESS ? (
+                            {freeAccess ? (
                               <span className="text-green-600 font-medium">🎉 Currently FREE Access!</span>
                             ) : (
                               <span>Monthly ₹300 • Yearly ₹3000</span>
@@ -406,7 +426,7 @@ export default function Navbar() {
                       >
                         👤 Profile
                       </Link>
-                      {(!session.user?.subscriptionStatus || 
+                      {!freeAccess && (!session.user?.subscriptionStatus || 
                         session.user?.subscriptionStatus === 'none' || 
                         session.user?.subscriptionStatus === 'expired' || 
                         session.user?.subscriptionStatus === 'cancelled') && (

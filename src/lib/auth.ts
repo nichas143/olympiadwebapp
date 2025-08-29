@@ -57,6 +57,9 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
             email: user.email as string,
             name: user.name as string,
             role: user.role as string,
+            subscriptionStatus: user.subscriptionStatus as string,
+            subscriptionPlan: user.subscriptionPlan as string,
+            subscriptionEndDate: user.subscriptionEndDate as Date,
           }
         } catch (error) {
           console.error("Auth error:", error)
@@ -70,6 +73,9 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       if (user) {
         token.role = user.role
         token.id = user.id
+        token.subscriptionStatus = user.subscriptionStatus
+        token.subscriptionPlan = user.subscriptionPlan
+        token.subscriptionEndDate = user.subscriptionEndDate
       }
       return token
     },
@@ -77,6 +83,9 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       if (token) {
         session.user.id = token.id as string
         session.user.role = token.role as string
+        session.user.subscriptionStatus = token.subscriptionStatus as string
+        session.user.subscriptionPlan = token.subscriptionPlan as string
+        session.user.subscriptionEndDate = token.subscriptionEndDate as Date
       }
       return session
     }

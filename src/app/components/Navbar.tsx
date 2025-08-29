@@ -221,8 +221,50 @@ export default function Navbar() {
                 </button>
 
                 {isUserDropdownOpen && (
-                  <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 z-50">
+                  <div className="absolute right-0 mt-2 w-64 bg-white rounded-lg shadow-lg border border-gray-200 z-50">
                     <div className="py-2">
+                      {/* Subscription Status */}
+                      <div className="px-4 py-2 border-b border-gray-100">
+                        <div className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-1">
+                          Subscription
+                        </div>
+                        {session.user?.subscriptionStatus === 'active' && (
+                          <div className="flex items-center space-x-2">
+                            <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                            <span className="text-sm text-green-600 font-medium">Active</span>
+                            {session.user?.subscriptionPlan && (
+                              <span className="text-xs text-gray-500">
+                                ({session.user.subscriptionPlan === 'annual' ? 'Annual' : 'Student'})
+                              </span>
+                            )}
+                          </div>
+                        )}
+                        {session.user?.subscriptionStatus === 'trial' && (
+                          <div className="flex items-center space-x-2">
+                            <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                            <span className="text-sm text-blue-600 font-medium">Free Trial</span>
+                          </div>
+                        )}
+                        {session.user?.subscriptionStatus === 'pending' && (
+                          <div className="flex items-center space-x-2">
+                            <div className="w-2 h-2 bg-yellow-500 rounded-full"></div>
+                            <span className="text-sm text-yellow-600 font-medium">Payment Processing</span>
+                          </div>
+                        )}
+                        {(!session.user?.subscriptionStatus || session.user?.subscriptionStatus === 'none') && (
+                          <div className="flex items-center space-x-2">
+                            <div className="w-2 h-2 bg-gray-400 rounded-full"></div>
+                            <span className="text-sm text-gray-600">No Subscription</span>
+                          </div>
+                        )}
+                        {(session.user?.subscriptionStatus === 'expired' || session.user?.subscriptionStatus === 'cancelled') && (
+                          <div className="flex items-center space-x-2">
+                            <div className="w-2 h-2 bg-red-500 rounded-full"></div>
+                            <span className="text-sm text-red-600 font-medium">Expired</span>
+                          </div>
+                        )}
+                      </div>
+
                       {(session.user?.role === 'admin' || session.user?.role === 'superadmin') ? (
                         <>
                           <Link
@@ -259,12 +301,31 @@ export default function Navbar() {
                         </Link>
                       )}
                       <Link
+                        href="/dashboard"
+                        className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                        onClick={() => setIsUserDropdownOpen(false)}
+                      >
+                        📊 Dashboard
+                      </Link>
+                      <Link
                         href="/profile"
                         className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
                         onClick={() => setIsUserDropdownOpen(false)}
                       >
-                        Profile
+                        👤 Profile
                       </Link>
+                      {(!session.user?.subscriptionStatus || 
+                        session.user?.subscriptionStatus === 'none' || 
+                        session.user?.subscriptionStatus === 'expired' || 
+                        session.user?.subscriptionStatus === 'cancelled') && (
+                        <Link
+                          href="/pricing"
+                          className="block px-4 py-2 text-sm text-blue-600 hover:bg-blue-50 font-medium"
+                          onClick={() => setIsUserDropdownOpen(false)}
+                        >
+                          🚀 Upgrade to Premium
+                        </Link>
+                      )}
                       <hr className="my-1" />
                       <button
                         onClick={handleSignOut}

@@ -15,14 +15,29 @@ export default auth((req) => {
     '/profile'
   ]
 
+  // Premium routes that require active subscription
+  const premiumRoutes = [
+    '/training/study-materials',
+    '/training/video-lectures',
+    '/training/practice-problems'
+  ]
+
   // Admin routes that require admin role
   const adminRoutes = ['/admin']
 
   // Auth routes (signin, signup)
   const authRoutes = ['/auth/signin', '/auth/signup']
 
+  // Payment and subscription routes
+  const paymentRoutes = ['/pricing', '/payment', '/subscription']
+
   // Check if the current path is a protected route
   const isProtectedRoute = protectedRoutes.some(route => 
+    pathname.startsWith(route)
+  )
+
+  // Check if the current path is a premium route
+  const isPremiumRoute = premiumRoutes.some(route => 
     pathname.startsWith(route)
   )
 
@@ -36,6 +51,11 @@ export default auth((req) => {
     pathname.startsWith(route)
   )
 
+  // Check if the current path is a payment route
+  const isPaymentRoute = paymentRoutes.some(route => 
+    pathname.startsWith(route)
+  )
+
   // Redirect to signin if accessing protected route without authentication
   if (isProtectedRoute && !isLoggedIn) {
     return NextResponse.redirect(new URL('/auth/signin', req.url))
@@ -44,6 +64,19 @@ export default auth((req) => {
   // Redirect to signin if accessing admin route without authentication
   if (isAdminRoute && !isLoggedIn) {
     return NextResponse.redirect(new URL('/auth/signin', req.url))
+  }
+
+  // Check subscription for premium routes
+  if (isPremiumRoute && isLoggedIn) {
+    // Note: In a real implementation, you'd fetch user data here
+    // For now, we'll redirect to pricing page if trying to access premium content
+    // This check would typically be done via a database query or session data
+    const subscriptionStatus = req.auth?.user?.subscriptionStatus
+    
+    // If user doesn't have active subscription or trial, redirect to pricing
+    if (!subscriptionStatus || !['trial', 'active', 'pending'].includes(subscriptionStatus)) {
+      return NextResponse.redirect(new URL('/pricing', req.url))
+    }
   }
 
   // Redirect to dashboard if accessing admin route without admin role

@@ -11,6 +11,18 @@ export interface IUser extends mongoose.Document {
   updatedAt: Date
   approvedAt?: Date
   approvedBy?: string
+  // Subscription fields
+  subscriptionStatus: 'none' | 'trial' | 'pending' | 'active' | 'expired' | 'cancelled'
+  subscriptionPlan?: 'annual' | 'student_annual'
+  subscriptionStartDate?: Date
+  subscriptionEndDate?: Date
+  trialStartDate?: Date
+  trialEndDate?: Date
+  razorpayCustomerId?: string
+  razorpaySubscriptionId?: string
+  lastPaymentDate?: Date
+  nextBillingDate?: Date
+  subscriptionAmount?: number
 }
 
 const userSchema = new mongoose.Schema({
@@ -44,6 +56,53 @@ const userSchema = new mongoose.Schema({
   },
   approvedBy: {
     type: String,
+    default: null,
+  },
+  // Subscription fields
+  subscriptionStatus: {
+    type: String,
+    enum: ['none', 'trial', 'pending', 'active', 'expired', 'cancelled'],
+    default: 'none',
+  },
+  subscriptionPlan: {
+    type: String,
+    enum: ['annual', 'student_annual'],
+    default: null,
+  },
+  subscriptionStartDate: {
+    type: Date,
+    default: null,
+  },
+  subscriptionEndDate: {
+    type: Date,
+    default: null,
+  },
+  trialStartDate: {
+    type: Date,
+    default: null,
+  },
+  trialEndDate: {
+    type: Date,
+    default: null,
+  },
+  razorpayCustomerId: {
+    type: String,
+    default: null,
+  },
+  razorpaySubscriptionId: {
+    type: String,
+    default: null,
+  },
+  lastPaymentDate: {
+    type: Date,
+    default: null,
+  },
+  nextBillingDate: {
+    type: Date,
+    default: null,
+  },
+  subscriptionAmount: {
+    type: Number,
     default: null,
   },
   createdAt: {

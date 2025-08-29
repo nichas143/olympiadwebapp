@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { Document, Page, pdfjs } from 'react-pdf'
 import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, Button, Card, CardBody, Spinner, Chip } from "@heroui/react"
 import { DocumentIcon, ArrowsPointingOutIcon, CheckCircleIcon, ChevronLeftIcon, ChevronRightIcon, MagnifyingGlassMinusIcon, MagnifyingGlassPlusIcon } from '@heroicons/react/24/outline'
@@ -39,7 +39,7 @@ export default function SecurePDFViewer({
   const isGoogleDrive = pdfUrl.includes('drive.google.com')
 
   // Get secure PDF file
-  const loadSecurePDF = async () => {
+  const loadSecurePDF = useCallback(async () => {
     if (!pdfUrl) return
 
     try {
@@ -63,7 +63,7 @@ export default function SecurePDFViewer({
       setError('Failed to load PDF. Please try again.')
       setIsLoading(false)
     }
-  }
+  }, [pdfUrl, isGoogleDrive])
 
   useEffect(() => {
     if (isOpen) {
@@ -103,7 +103,7 @@ export default function SecurePDFViewer({
         document.removeEventListener('keydown', handleKeyDown)
       }
     }
-  }, [isOpen, pdfUrl, contentId, hasAttempted, onAttemptUpdate, numPages])
+  }, [isOpen, pdfUrl, contentId, hasAttempted, onAttemptUpdate, numPages, loadSecurePDF])
 
   const onDocumentLoadSuccess = ({ numPages }: { numPages: number }) => {
     setNumPages(numPages)

@@ -1,8 +1,13 @@
 'use client'
 
 import { useState } from 'react'
+import dynamic from 'next/dynamic'
 import VideoPlayer from './VideoPlayer'
-import SecurePDFViewer from './SecurePDFViewer'
+
+const SecurePDFViewer = dynamic(() => import('./SecurePDFViewer'), {
+  ssr: false,
+  loading: () => <div className="flex items-center justify-center h-96"><div>Loading PDF Viewer...</div></div>
+})
 import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, Button, Card, CardBody } from "@heroui/react"
 import { LinkIcon, DocumentIcon, PlayCircleIcon, ArrowTopRightOnSquareIcon } from '@heroicons/react/24/outline'
 

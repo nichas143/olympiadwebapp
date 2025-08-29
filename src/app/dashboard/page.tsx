@@ -38,6 +38,20 @@ export default function Dashboard() {
       return
     }
 
+    // Clean up any stale pending payments first
+    const cleanupPendingPayments = async () => {
+      try {
+        await fetch('/api/payment/cleanup-pending', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          }
+        })
+      } catch (error) {
+        console.error('Failed to cleanup pending payments:', error)
+      }
+    }
+
     // Fetch progress summary
     const fetchProgressSummary = async () => {
       try {
@@ -56,7 +70,10 @@ export default function Dashboard() {
       }
     }
 
-    fetchProgressSummary()
+    // Run cleanup and then fetch progress
+    cleanupPendingPayments().then(() => {
+      fetchProgressSummary()
+    })
   }, [session, status, router])
 
   if (status === 'loading' || loading) {

@@ -6,16 +6,19 @@ import { useState, useEffect } from 'react';
 import { useSession, signOut } from 'next-auth/react';
 import { Button } from '@heroui/react';
 import { UserIcon } from '@heroicons/react/24/outline';
+import { useRouter } from 'next/navigation';
 
 export default function Navbar() {
   const pathname = usePathname();
   const { data: session, status } = useSession();
+  const router = useRouter();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isProgramDropdownOpen, setIsProgramDropdownOpen] = useState(false);
   const [isResourcesDropdownOpen, setIsResourcesDropdownOpen] = useState(false);
 
   const [isUserDropdownOpen, setIsUserDropdownOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
+  const [isCancellingPayment, setIsCancellingPayment] = useState(false);
 
   // Prevent hydration mismatch by only rendering after mount
   useEffect(() => {
@@ -80,6 +83,30 @@ export default function Navbar() {
 
   const handleSignOut = async () => {
     await signOut({ callbackUrl: '/' });
+  };
+
+  const handleCancelPayment = async () => {
+    setIsCancellingPayment(true);
+    try {
+      const response = await fetch('/api/payment/cancel', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        }
+      });
+      
+      if (response.ok) {
+        // Refresh the page to update subscription status
+        router.refresh();
+      } else {
+        console.error('Failed to cancel payment');
+      }
+    } catch (error) {
+      console.error('Error cancelling payment:', error);
+    } finally {
+      setIsCancellingPayment(false);
+      setIsUserDropdownOpen(false);
+    }
   };
 
   return (
@@ -328,6 +355,15 @@ export default function Navbar() {
                         >
                           🚀 Upgrade to Premium
                         </Link>
+                      )}
+                      {session.user?.subscriptionStatus === 'pending' && (
+                        <button
+                          onClick={handleCancelPayment}
+                          disabled={isCancellingPayment}
+                          className="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 font-medium disabled:opacity-50"
+                        >
+                          {isCancellingPayment ? 'Cancelling...' : '❌ Cancel Pending Payment'}
+                        </button>
                       )}
                       <hr className="my-1" />
                       <button

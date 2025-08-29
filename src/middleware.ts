@@ -74,7 +74,8 @@ export default auth((req) => {
     const subscriptionStatus = req.auth?.user?.subscriptionStatus
     
     // If user doesn't have active subscription or trial, redirect to pricing
-    if (!subscriptionStatus || !['trial', 'active', 'pending'].includes(subscriptionStatus)) {
+    // Note: 'pending' status should NOT give access - only 'active' and 'trial' should
+    if (!subscriptionStatus || !['trial', 'active'].includes(subscriptionStatus)) {
       return NextResponse.redirect(new URL('/pricing', req.url))
     }
   }

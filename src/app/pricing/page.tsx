@@ -140,8 +140,22 @@ const PricingPage = () => {
             }
           },
           modal: {
-            ondismiss: function() {
-              setIsCreatingSubscription(false)
+            ondismiss: async function() {
+              // User cancelled the payment - reset their status
+              try {
+                await fetch('/api/payment/cancel', {
+                  method: 'POST',
+                  headers: {
+                    'Content-Type': 'application/json',
+                  }
+                })
+                // Refresh subscription status
+                fetchSubscriptionStatus()
+              } catch (error) {
+                console.error('Error cancelling payment:', error)
+              } finally {
+                setIsCreatingSubscription(false)
+              }
             }
           }
         }

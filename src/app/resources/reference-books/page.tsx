@@ -11,25 +11,38 @@ export default function ReferenceBooksPage() {
           description: "Excellent introduction to mathematical problem solving with clear explanations and examples",
           topics: ["Problem Solving", "Number Theory", "Algebra", "Geometry"],
           difficulty: "Beginner to Intermediate",
-          isbn: "978-0471789017"
+          isbn: "978-0471789017",
+          image: "/book-covers/art-and-craft-problem-solving.jpg"
         },
         {
-          title: "Mathematical Olympiad Challenges",
-          author: "Titu Andreescu & Razvan Gelca",
-          publisher: "Birkhäuser",
-          description: "Collection of problems with detailed solutions, perfect for beginners",
-          topics: ["Algebra", "Geometry", "Number Theory", "Combinatorics"],
-          difficulty: "Beginner",
-          isbn: "978-0817641556"
+          title: "Mathematical Circles: Russian Experience",
+          author: "Dmitri Fomin, Sergey Genkin, and Ilia Itenberg",
+          publisher: "American Mathematical Society",
+          description: "A collection of mathematical problems and solutions from Russian mathematical circles, providing excellent training for mathematical competitions",
+          topics: ["Problem Solving", "Algebra", "Geometry", "Number Theory", "Combinatorics"],
+          difficulty: "Beginner to Intermediate",
+          isbn: "978-0821804305",
+          image: "/book-covers/mathematical-circles.jpg"
         },
         {
-          title: "Problem Solving Strategies",
-          author: "Arthur Engel",
-          publisher: "Springer",
-          description: "Comprehensive guide to problem-solving techniques with extensive examples",
-          topics: ["Problem Solving", "All Topics"],
-          difficulty: "Beginner to Advanced",
-          isbn: "978-0387982199"
+          title: "Challenges and Thrills of Pre-College Mathematics",
+          author: "V. Krishnamurthy",
+          publisher: "New Age International",
+          description: "Comprehensive textbook covering fundamental mathematical concepts with challenging problems and detailed solutions",
+          topics: ["Algebra", "Geometry", "Trigonometry", "Number Theory", "Combinatorics"],
+          difficulty: "Beginner to Intermediate",
+          isbn: "978-8122415540",
+          image: "/book-covers/challenges-thrills-mathematics.jpeg"
+        },
+        {
+          title: "Elementary Number Theory",
+          author: "David Burton",
+          publisher: "McGraw-Hill",
+          description: "Classic textbook providing a solid foundation in number theory with clear explanations and numerous examples",
+          topics: ["Number Theory", "Divisibility", "Primes", "Congruences", "Diophantine Equations"],
+          difficulty: "Beginner to Intermediate",
+          isbn: "978-0073383149",
+          image: "/book-covers/elementary-number-theory.jpg"
         }
       ]
     },
@@ -38,31 +51,34 @@ export default function ReferenceBooksPage() {
       description: "Books for students with some experience in math competitions",
       books: [
         {
-          title: "102 Combinatorial Problems",
-          author: "Titu Andreescu & Zuming Feng",
-          publisher: "Birkhäuser",
-          description: "Focused on combinatorics with detailed solutions and explanations",
-          topics: ["Combinatorics", "Counting", "Probability"],
+          title: "Problems in Plane Geometry",
+          author: "I. F. Sharygin",
+          publisher: "Mir Publishers",
+          description: "Comprehensive collection of geometric problems with detailed solutions, covering various techniques in plane geometry",
+          topics: ["Geometry", "Plane Geometry", "Geometric Constructions", "Geometric Inequalities"],
           difficulty: "Intermediate",
-          isbn: "978-0817643178"
+          isbn: "978-5030009434",
+          image: "/book-covers/problems-plane-geometry.jpeg"
         },
         {
-          title: "103 Trigonometry Problems",
-          author: "Titu Andreescu & Zuming Feng",
-          publisher: "Birkhäuser",
-          description: "Comprehensive coverage of trigonometry for math competitions",
-          topics: ["Trigonometry", "Geometry", "Algebra"],
-          difficulty: "Intermediate",
-          isbn: "978-0817643345"
+          title: "An Introduction to the Theory of Numbers",
+          author: "Ivan Niven & Herbert S. Zuckerman",
+          publisher: "Wiley",
+          description: "Rigorous introduction to number theory with proofs and applications, suitable for advanced high school and undergraduate students",
+          topics: ["Number Theory", "Divisibility", "Primes", "Congruences", "Quadratic Reciprocity"],
+          difficulty: "Intermediate to Advanced",
+          isbn: "978-0471625469",
+          image: "/book-covers/introduction-theory-numbers.jpg"
         },
         {
-          title: "104 Number Theory Problems",
-          author: "Titu Andreescu & Dorin Andrica",
-          publisher: "Birkhäuser",
-          description: "Extensive collection of number theory problems with solutions",
-          topics: ["Number Theory", "Divisibility", "Primes", "Congruences"],
+          title: "Inequalities: An Approach Through Problems",
+          author: "B. J. Venkatachala",
+          publisher: "Hindustan Book Agency",
+          description: "Systematic approach to inequalities through carefully selected problems with detailed solutions and techniques",
+          topics: ["Inequalities", "Algebra", "Analysis", "Geometric Inequalities"],
           difficulty: "Intermediate",
-          isbn: "978-0817645271"
+          isbn: "978-8185931613",
+          image: "/book-covers/inequalities-approach-problems.jpeg"
         }
       ]
     },
@@ -71,64 +87,34 @@ export default function ReferenceBooksPage() {
       description: "Books for experienced students preparing for high-level competitions",
       books: [
         {
-          title: "Problems in Mathematical Analysis",
-          author: "W. J. Kaczor & M. T. Nowak",
-          publisher: "AMS",
-          description: "Three-volume series covering real analysis problems",
-          topics: ["Real Analysis", "Calculus", "Limits", "Series"],
+          title: "Problem Solving Strategies",
+          author: "Arthur Engel",
+          publisher: "Springer",
+          description: "Comprehensive guide to problem-solving techniques with extensive examples and systematic approaches to mathematical problems",
+          topics: ["Problem Solving", "All Topics", "Advanced Techniques", "Proof Methods"],
           difficulty: "Advanced",
-          isbn: "978-0821820503"
+          isbn: "978-0387982199",
+          image: "/book-covers/problem-solving-strategies.png"
         },
         {
-          title: "A Path to Combinatorics for Undergraduates",
-          author: "Titu Andreescu & Zuming Feng",
-          publisher: "Birkhäuser",
-          description: "Advanced combinatorics with emphasis on problem-solving techniques",
-          topics: ["Combinatorics", "Graph Theory", "Generating Functions"],
+          title: "Polynomials",
+          author: "Edward J. Barbeau",
+          publisher: "Springer",
+          description: "In-depth treatment of polynomials with applications to algebra, geometry, and number theory",
+          topics: ["Polynomials", "Algebra", "Complex Numbers", "Roots and Coefficients"],
           difficulty: "Advanced",
-          isbn: "978-0817642881"
+          isbn: "978-0387406275",
+          image: "/book-covers/polynomials.jpg"
         },
         {
-          title: "Complex Numbers from A to Z",
-          author: "Titu Andreescu & Dorin Andrica",
-          publisher: "Birkhäuser",
-          description: "Comprehensive treatment of complex numbers with applications",
-          topics: ["Complex Numbers", "Geometry", "Algebra"],
+          title: "College Geometry",
+          author: "Nathan Altshiller-Court",
+          publisher: "Dover Publications",
+          description: "Comprehensive treatment of modern geometry including synthetic, analytic, and differential geometry",
+          topics: ["Geometry", "Synthetic Geometry", "Analytic Geometry", "Geometric Transformations"],
           difficulty: "Advanced",
-          isbn: "978-0817643260"
-        }
-      ]
-    },
-    {
-      category: "Specialized Topics",
-      description: "Books focusing on specific areas of mathematics",
-      books: [
-        {
-          title: "Geometric Transformations",
-          author: "I. M. Yaglom",
-          publisher: "MAA",
-          description: "Classic text on geometric transformations and their applications",
-          topics: ["Geometry", "Transformations", "Symmetry"],
-          difficulty: "Intermediate to Advanced",
-          isbn: "978-0883856086"
-        },
-        {
-          title: "Functional Equations in Mathematical Olympiads",
-          author: "Amir Hossein Parvardi",
-          publisher: "Self-published",
-          description: "Comprehensive guide to functional equations with examples",
-          topics: ["Functional Equations", "Algebra"],
-          difficulty: "Intermediate to Advanced",
-          isbn: "N/A"
-        },
-        {
-          title: "Inequalities: A Mathematical Olympiad Approach",
-          author: "Radmila Bulajich Manfrino & Juan Carlos Ortiz",
-          publisher: "Birkhäuser",
-          description: "Systematic approach to inequalities with applications",
-          topics: ["Inequalities", "Algebra", "Analysis"],
-          difficulty: "Intermediate to Advanced",
-          isbn: "978-3034600491"
+          isbn: "978-0486458052",
+          image: "/book-covers/college-geometry.jpg"
         }
       ]
     }
@@ -162,49 +148,63 @@ export default function ReferenceBooksPage() {
               
               <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
                 {category.books.map((book, bookIndex) => (
-                  <div key={bookIndex} className="border border-gray-200 rounded-lg p-6 hover:shadow-lg transition-shadow duration-200">
-                    <div className="mb-4">
-                      <h3 className="text-xl font-semibold text-gray-900 mb-2 leading-tight">
-                        {book.title}
-                      </h3>
-                      <p className="text-gray-600 font-medium">
-                        by {book.author}
-                      </p>
-                      <p className="text-sm text-gray-500">
-                        {book.publisher}
-                      </p>
+                  <div key={bookIndex} className="border border-gray-200 rounded-lg overflow-hidden hover:shadow-lg transition-shadow duration-200 bg-white">
+                    {/* Book Cover Image */}
+                    <div 
+                      className="h-48 bg-cover bg-center relative"
+                      style={{
+                        backgroundImage: `url(${book.image})`,
+                        backgroundSize: 'cover',
+                        backgroundPosition: 'center'
+                      }}
+                    >
+                      <div className="absolute inset-0 bg-black bg-opacity-20"></div>
                     </div>
                     
-                    <p className="text-gray-700 mb-4 leading-relaxed">
-                      {book.description}
-                    </p>
-                    
-                    <div className="space-y-3">
-                      <div>
-                        <span className="text-sm font-medium text-gray-900">Topics:</span>
-                        <div className="flex flex-wrap gap-1 mt-1">
-                          {book.topics.map((topic, topicIndex) => (
-                            <span 
-                              key={topicIndex}
-                              className="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-full"
-                            >
-                              {topic}
-                            </span>
-                          ))}
-                        </div>
+                    <div className="p-6">
+                      <div className="mb-4">
+                        <h3 className="text-xl font-semibold text-gray-900 mb-2 leading-tight">
+                          {book.title}
+                        </h3>
+                        <p className="text-gray-600 font-medium">
+                          by {book.author}
+                        </p>
+                        <p className="text-sm text-gray-500">
+                          {book.publisher}
+                        </p>
                       </div>
                       
-                      <div>
-                        <span className="text-sm font-medium text-gray-900">Difficulty:</span>
-                        <span className="ml-2 text-sm text-gray-700">{book.difficulty}</span>
-                      </div>
+                      <p className="text-gray-700 mb-4 leading-relaxed">
+                        {book.description}
+                      </p>
                       
-                      {book.isbn !== "N/A" && (
+                      <div className="space-y-3">
                         <div>
-                          <span className="text-sm font-medium text-gray-900">ISBN:</span>
-                          <span className="ml-2 text-sm text-gray-700 font-mono">{book.isbn}</span>
+                          <span className="text-sm font-medium text-gray-900">Topics:</span>
+                          <div className="flex flex-wrap gap-1 mt-1">
+                            {book.topics.map((topic, topicIndex) => (
+                              <span 
+                                key={topicIndex}
+                                className="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-full"
+                              >
+                                {topic}
+                              </span>
+                            ))}
+                          </div>
                         </div>
-                      )}
+                        
+                        <div>
+                          <span className="text-sm font-medium text-gray-900">Difficulty:</span>
+                          <span className="ml-2 text-sm text-gray-700">{book.difficulty}</span>
+                        </div>
+                        
+                        {book.isbn !== "N/A" && (
+                          <div>
+                            <span className="text-sm font-medium text-gray-900">ISBN:</span>
+                            <span className="ml-2 text-sm text-gray-700 font-mono">{book.isbn}</span>
+                          </div>
+                        )}
+                      </div>
                     </div>
                   </div>
                 ))}
@@ -251,6 +251,7 @@ export default function ReferenceBooksPage() {
                   <span className="text-green-600 mr-2">•</span>
                   Create a study schedule and stick to it consistently
                 </li>
+                <li className="flex items-start">These books are not exhaustive, but they are a good starting point.</li>
               </ul>
             </div>
           </div>

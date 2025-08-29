@@ -47,8 +47,7 @@ export default function SelfStudyGuidePage() {
             "Coordinate geometry basics"
           ],
           resources: [
-            "Art and Craft of Problem Solving - Chapter 5",
-            "Euclidean Geometry in Mathematical Olympiads",
+            "Art and Craft of Problem Solving - Chapter 8",
             "GeoGebra for visualization"
           ]
         }
@@ -70,7 +69,6 @@ export default function SelfStudyGuidePage() {
           ],
           resources: [
             "104 Number Theory Problems",
-            "Number Theory Through Problem Solving",
             "IMO training problems"
           ]
         },
@@ -87,7 +85,6 @@ export default function SelfStudyGuidePage() {
           resources: [
             "102 Combinatorial Problems",
             "A Path to Combinatorics for Undergraduates",
-            "Art of Problem Solving Combinatorics course"
           ]
         },
         {
@@ -103,7 +100,6 @@ export default function SelfStudyGuidePage() {
           resources: [
             "103 Trigonometry Problems",
             "Complex Numbers from A to Z",
-            "Functional Equations in Mathematical Olympiads"
           ]
         }
       ]
@@ -113,19 +109,34 @@ export default function SelfStudyGuidePage() {
       description: "For experienced students preparing for high-level competitions",
       topics: [
         {
-          name: "Real Analysis",
+          name: "Advanced Number Theory",
           duration: "4-6 months",
           content: [
-            "Limits and continuity",
-            "Differentiation and integration",
-            "Sequences and series",
-            "Convergence tests",
-            "Applications to inequalities"
+            "Quadratic reciprocity",
+            "Primitive roots and indices",
+            "Diophantine equations",
+            "Arithmetic functions",
+            "Analytic number theory basics"
           ],
           resources: [
-            "Problems in Mathematical Analysis",
-            "Calculus by Spivak",
-            "Putnam competition problems"
+            "An Introduction to the Theory of Numbers",
+            "Niven and Zuckerman - Introduction to the Theory of Numbers",
+            "IMO and Putnam problems"
+          ]
+        },
+        {
+          name: "Functional Equations",
+          duration: "3-4 months",
+          content: [
+            "Basic functional equations",
+            "Cauchy's functional equation",
+            "Polynomial functional equations",
+            "Functional inequalities",
+            "Applications to geometry"
+          ],
+          resources: [
+            "Putnam competition problems",
+            "IMO shortlist problems"
           ]
         },
         {

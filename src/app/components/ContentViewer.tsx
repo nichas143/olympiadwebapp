@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import VideoPlayer from './VideoPlayer'
-import PDFViewer from './PDFViewer'
+import SecurePDFViewer from './SecurePDFViewer'
 import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, Button, Card, CardBody } from "@heroui/react"
 import { LinkIcon, DocumentIcon, PlayCircleIcon, ArrowTopRightOnSquareIcon } from '@heroicons/react/24/outline'
 
@@ -197,7 +197,7 @@ export default function ContentViewer({
       />
 
       {/* PDF Viewer Modal */}
-      <PDFViewer
+      <SecurePDFViewer
         isOpen={showPDFViewer}
         onClose={() => {
           setShowPDFViewer(false)

@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, Button, Card, CardBody, Spinner, Chip } from "@heroui/react"
-import { DocumentIcon, ArrowDownTrayIcon, ArrowsPointingOutIcon, CheckCircleIcon } from '@heroicons/react/24/outline'
+import { DocumentIcon, ArrowsPointingOutIcon, CheckCircleIcon } from '@heroicons/react/24/outline'
 import ProgressTracker from './ProgressTracker'
 
 interface PDFViewerProps {
@@ -29,13 +29,27 @@ export default function PDFViewer({
   const [hasAttempted, setHasAttempted] = useState(false)
   const [scale, setScale] = useState(1.0)
   
-  // Convert Google Drive share links to embed format
-  const getEmbedUrl = (url: string) => {
-    // Handle Google Drive links
+  // Convert various PDF sources to secure embed URLs
+  const getEmbedUrl = async (url: string) => {
+    // Handle Google Drive links through our secure API
     if (url.includes('drive.google.com')) {
       const fileIdMatch = url.match(/\/d\/([a-zA-Z0-9-_]+)/)
       if (fileIdMatch) {
-        return `https://drive.google.com/file/d/${fileIdMatch[1]}/preview`
+        const fileId = fileIdMatch[1]
+        try {
+          // Use our secure API to get the PDF
+          const response = await fetch(`/api/pdf/secure/${fileId}`)
+          if (response.ok) {
+            const data = await response.json()
+            return data.data.secureUrl
+          } else {
+            throw new Error('Failed to access secure PDF')
+          }
+        } catch (error) {
+          console.error('Error accessing secure PDF:', error)
+          // Fallback to direct stream endpoint
+          return `/api/pdf/${fileId}`
+        }
       }
     }
     
@@ -44,17 +58,31 @@ export default function PDFViewer({
       return url.replace('?dl=0', '').replace('dropbox.com', 'dropbox.com').replace('/s/', '/scl/fi/') + '?rlkey=your_key&raw=1'
     }
     
-    // For direct PDF URLs
+    // For direct PDF URLs, use them as-is
     return url
   }
 
+  const [embedUrl, setEmbedUrl] = useState<string>('')
   const isGoogleDrive = pdfUrl.includes('drive.google.com')
-  const embedUrl = getEmbedUrl(pdfUrl)
 
   useEffect(() => {
     if (isOpen) {
       setIsLoading(true)
       setError(null)
+      
+      // Get the embed URL (async for Google Drive)
+      const loadEmbedUrl = async () => {
+        try {
+          const url = await getEmbedUrl(pdfUrl)
+          setEmbedUrl(url)
+        } catch (error) {
+          console.error('Error loading embed URL:', error)
+          setError('Failed to load PDF. Please try again.')
+          setIsLoading(false)
+        }
+      }
+      
+      loadEmbedUrl()
       
       // Mark as attempted when PDF opens
       if (contentId && !hasAttempted) {
@@ -64,28 +92,26 @@ export default function PDFViewer({
           onAttemptUpdate(contentId, true)
         }
       }
-    }
-  }, [isOpen, contentId, hasAttempted, onAttemptUpdate])
-
-  const handleDownload = () => {
-    // For Google Drive, create download link
-    if (isGoogleDrive) {
-      const fileIdMatch = pdfUrl.match(/\/d\/([a-zA-Z0-9-_]+)/)
-      if (fileIdMatch) {
-        const downloadUrl = `https://drive.google.com/uc?export=download&id=${fileIdMatch[1]}`
-        window.open(downloadUrl, '_blank')
-        return
+      
+      // Prevent keyboard shortcuts for save/print
+      const handleKeyDown = (e: KeyboardEvent) => {
+        if (e.ctrlKey || e.metaKey) {
+          if (e.key === 's' || e.key === 'p') {
+            e.preventDefault()
+            e.stopPropagation()
+          }
+        }
+      }
+      
+      document.addEventListener('keydown', handleKeyDown)
+      
+      return () => {
+        document.removeEventListener('keydown', handleKeyDown)
       }
     }
-    
-    // For direct URLs, try to download
-    const link = document.createElement('a')
-    link.href = pdfUrl
-    link.download = title + '.pdf'
-    document.body.appendChild(link)
-    link.click()
-    document.body.removeChild(link)
-  }
+  }, [isOpen, pdfUrl, contentId, hasAttempted, onAttemptUpdate])
+
+
 
   const handleFullscreen = () => {
     window.open(embedUrl, '_blank', 'width=1200,height=800,scrollbars=yes,resizable=yes')
@@ -124,15 +150,7 @@ export default function PDFViewer({
                   Attempted
                 </Chip>
               )}
-              <Button
-                isIconOnly
-                variant="light"
-                size="sm"
-                onPress={handleDownload}
-                title="Download PDF"
-              >
-                <ArrowDownTrayIcon className="h-5 w-5" />
-              </Button>
+
               <Button
                 isIconOnly
                 variant="light"
@@ -162,62 +180,70 @@ export default function PDFViewer({
                   <DocumentIcon className="h-12 w-12 text-gray-400 mx-auto mb-4" />
                   <h3 className="text-lg font-medium text-gray-900 mb-2">Unable to load PDF</h3>
                   <p className="text-gray-500 mb-4">{error}</p>
-                  <Button color="primary" onPress={handleDownload}>
-                    Download PDF instead
-                  </Button>
+                  <p className="text-gray-500">Please try refreshing the page or contact support if the issue persists.</p>
                 </div>
               </div>
             )}
             
-            {isGoogleDrive ? (
-              <iframe
-                src={embedUrl}
-                className={`w-full h-[600px] border rounded-lg ${isLoading ? 'hidden' : ''}`}
-                onLoad={() => setIsLoading(false)}
-                onError={() => {
-                  setIsLoading(false)
-                  setError('PDF could not be loaded. Please try downloading it instead.')
-                }}
-                title={title}
-              />
-            ) : (
-              <div className="relative">
-                <iframe
-                  src={`${embedUrl}#view=FitH`}
-                  className={`w-full h-[600px] border rounded-lg ${isLoading ? 'hidden' : ''}`}
-                  onLoad={() => setIsLoading(false)}
-                  onError={() => {
-                    setIsLoading(false)
-                    setError('PDF could not be loaded. Please try downloading it instead.')
-                  }}
-                  title={title}
-                />
-                
-                {/* PDF Controls (for direct PDFs) */}
-                {!isLoading && !error && (
-                  <div className="absolute top-2 right-2 bg-white bg-opacity-90 rounded-lg p-2 flex items-center gap-2">
-                    <Button
-                      isIconOnly
-                      size="sm"
-                      variant="light"
-                      onPress={() => setScale(scale * 0.9)}
-                      isDisabled={scale <= 0.5}
-                    >
-                      -
-                    </Button>
-                    <span className="text-sm font-medium">{Math.round(scale * 100)}%</span>
-                    <Button
-                      isIconOnly
-                      size="sm"
-                      variant="light"
-                      onPress={() => setScale(scale * 1.1)}
-                      isDisabled={scale >= 2.0}
-                    >
-                      +
-                    </Button>
+            {embedUrl && (
+              <>
+                {isGoogleDrive || embedUrl.startsWith('data:') ? (
+                  <iframe
+                    src={embedUrl}
+                    className={`w-full h-[600px] border rounded-lg ${isLoading ? 'hidden' : ''}`}
+                    onLoad={() => setIsLoading(false)}
+                    onError={() => {
+                      setIsLoading(false)
+                      setError('PDF could not be loaded. Please try refreshing the page.')
+                    }}
+                    title={title}
+                    sandbox="allow-same-origin allow-scripts"
+                    onContextMenu={(e) => e.preventDefault()}
+                    style={{ pointerEvents: 'auto' }}
+                  />
+                ) : (
+                  <div className="relative">
+                    <iframe
+                      src={`${embedUrl}#toolbar=0&navpanes=0&scrollbar=0&view=FitH`}
+                      className={`w-full h-[600px] border rounded-lg ${isLoading ? 'hidden' : ''}`}
+                      onLoad={() => setIsLoading(false)}
+                      onError={() => {
+                        setIsLoading(false)
+                        setError('PDF could not be loaded. Please try refreshing the page.')
+                      }}
+                      title={title}
+                      sandbox="allow-same-origin allow-scripts"
+                      onContextMenu={(e) => e.preventDefault()}
+                      style={{ pointerEvents: 'auto' }}
+                    />
+                    
+                    {/* PDF Controls (for direct PDFs) */}
+                    {!isLoading && !error && !embedUrl.startsWith('data:') && (
+                      <div className="absolute top-2 right-2 bg-white bg-opacity-90 rounded-lg p-2 flex items-center gap-2">
+                        <Button
+                          isIconOnly
+                          size="sm"
+                          variant="light"
+                          onPress={() => setScale(scale * 0.9)}
+                          isDisabled={scale <= 0.5}
+                        >
+                          -
+                        </Button>
+                        <span className="text-sm font-medium">{Math.round(scale * 100)}%</span>
+                        <Button
+                          isIconOnly
+                          size="sm"
+                          variant="light"
+                          onPress={() => setScale(scale * 1.1)}
+                          isDisabled={scale >= 2.0}
+                        >
+                          +
+                        </Button>
+                      </div>
+                    )}
                   </div>
                 )}
-              </div>
+              </>
             )}
           </div>
           
@@ -242,9 +268,7 @@ export default function PDFViewer({
           <Button variant="light" onPress={onClose}>
             Close
           </Button>
-          <Button color="primary" onPress={handleDownload}>
-            Download PDF
-          </Button>
+
         </ModalFooter>
       </ModalContent>
     </Modal>

@@ -33,7 +33,7 @@ export default function SecurePDFViewer({
   const [hasAttempted, setHasAttempted] = useState(false)
   const [numPages, setNumPages] = useState<number>(0)
   const [pageNumber, setPageNumber] = useState<number>(1)
-  const [scale, setScale] = useState<number>(1.0)
+  const [scale, setScale] = useState<number>(1.2)
   const [pdfFile, setPdfFile] = useState<string | null>(null)
 
   const isGoogleDrive = pdfUrl.includes('drive.google.com')
@@ -42,29 +42,31 @@ export default function SecurePDFViewer({
   const loadSecurePDF = async () => {
     if (!pdfUrl) return
 
-    if (isGoogleDrive) {
-      const fileIdMatch = pdfUrl.match(/\/d\/([a-zA-Z0-9-_]+)/)
-      if (fileIdMatch) {
-        const fileId = fileIdMatch[1]
-        try {
+    try {
+      setIsLoading(true)
+      setError(null)
+      
+      if (isGoogleDrive) {
+        const fileIdMatch = pdfUrl.match(/\/d\/([a-zA-Z0-9-_]+)/)
+        if (fileIdMatch) {
+          const fileId = fileIdMatch[1]
           // Use the stream endpoint for react-pdf
           const secureUrl = `/api/pdf/${fileId}`
           setPdfFile(secureUrl)
-        } catch (error) {
-          console.error('Error loading secure PDF:', error)
-          setError('Failed to load PDF. Please try again.')
         }
+      } else {
+        // For direct PDF URLs
+        setPdfFile(pdfUrl)
       }
-    } else {
-      // For direct PDF URLs
-      setPdfFile(pdfUrl)
+    } catch (error) {
+      console.error('Error loading secure PDF:', error)
+      setError('Failed to load PDF. Please try again.')
+      setIsLoading(false)
     }
   }
 
   useEffect(() => {
     if (isOpen) {
-      setIsLoading(true)
-      setError(null)
       setPageNumber(1)
       setPdfFile(null)
       
@@ -180,7 +182,7 @@ export default function SecurePDFViewer({
         </ModalHeader>
         <ModalBody>
           <div className="relative w-full">
-            {isLoading && (
+            {isLoading && !pdfFile && (
               <div className="flex items-center justify-center h-96">
                 <div className="text-center">
                   <Spinner size="lg" />
@@ -257,7 +259,7 @@ export default function SecurePDFViewer({
 
                 {/* PDF Document */}
                 <div 
-                  className="border rounded-lg overflow-auto max-h-[600px]"
+                  className="border rounded-lg overflow-auto max-h-[600px] flex justify-center"
                   onContextMenu={(e) => e.preventDefault()}
                   style={{ userSelect: 'none' }}
                 >
@@ -265,7 +267,14 @@ export default function SecurePDFViewer({
                     file={pdfFile}
                     onLoadSuccess={onDocumentLoadSuccess}
                     onLoadError={onDocumentLoadError}
-                    loading={<Spinner />}
+                    loading={
+                      <div className="flex items-center justify-center h-96 w-full">
+                        <div className="text-center">
+                          <Spinner size="lg" />
+                          <p className="mt-4 text-gray-600">Loading PDF...</p>
+                        </div>
+                      </div>
+                    }
                   >
                     <Page 
                       pageNumber={pageNumber} 
@@ -273,6 +282,7 @@ export default function SecurePDFViewer({
                       renderTextLayer={false}
                       renderAnnotationLayer={false}
                       className="shadow-lg"
+                      width={800}
                     />
                   </Document>
                 </div>

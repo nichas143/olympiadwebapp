@@ -4,7 +4,7 @@ import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import { useEffect, useState, useCallback } from 'react'
 import { Card, CardBody, CardHeader, Button, Select, SelectItem, Chip, Badge } from "@heroui/react"
-import { PlayCircleIcon, ClockIcon, AcademicCapIcon, BookOpenIcon, LinkIcon, DocumentIcon, CheckCircleIcon } from '@heroicons/react/24/outline'
+import { PlayCircleIcon, ClockIcon, AcademicCapIcon, BookOpenIcon, LinkIcon, DocumentIcon, CheckCircleIcon, XCircleIcon } from '@heroicons/react/24/outline'
 import ContentViewer from '@/app/components/ContentViewer'
 
 interface Content {
@@ -268,10 +268,11 @@ export default function StudyMaterials() {
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {content.map((item) => (
-              <Card key={item._id} className="hover:shadow-lg transition-shadow">
-                <CardHeader className="pb-0">
-                  <div className="relative">
-                    {item.contentType === 'video' && item.videoLink && getYouTubeVideoId(item.videoLink) ? (
+              <Card key={item._id} className="hover:shadow-lg transition-shadow ">
+                {/* VIDEO CONTENT LAYOUT */}
+                {item.contentType === 'video' && item.videoLink && getYouTubeVideoId(item.videoLink) ? (
+                  <CardHeader className="pb-0">
+                    <div className="relative">
                       <img
                         src={`https://img.youtube.com/vi/${getYouTubeVideoId(item.videoLink)}/maxresdefault.jpg`}
                         alt={item.concept}
@@ -281,65 +282,105 @@ export default function StudyMaterials() {
                           target.src = `https://img.youtube.com/vi/${getYouTubeVideoId(item.videoLink!)}/hqdefault.jpg`
                         }}
                       />
-                    ) : (
-                      <div className="w-full h-48 bg-gradient-to-br from-blue-100 to-purple-100 rounded-lg flex items-center justify-center">
-                        <div className="text-center">
-                          {getContentTypeIcon(item.contentType)}
-                          <p className="mt-2 text-sm font-medium text-gray-600 capitalize">{item.contentType}</p>
-                        </div>
+                      <div className="absolute top-2 right-2 bg-black bg-opacity-75 text-white px-2 py-1 rounded text-sm">
+                        {formatDuration(item.duration)}
                       </div>
-                    )}
-                    <div className="absolute top-2 right-2 bg-black bg-opacity-75 text-white px-2 py-1 rounded text-sm">
-                      {formatDuration(item.duration)}
-                    </div>
-                    <div className="absolute top-2 left-2 flex gap-1">
-                      <Chip
-                        size="sm"
-                        color={getContentTypeColor(item.contentType)}
-                        variant="flat"
-                        startContent={getContentTypeIcon(item.contentType)}
-                      >
-                        {item.contentType}
-                      </Chip>
-                    </div>
-                    <div className="absolute bottom-2 left-2">
-                      <Chip
-                        size="sm"
-                        color={getInstructionTypeColor(item.instructionType)}
-                        variant="flat"
-                      >
-                        {item.instructionType === 'conceptDiscussion' ? 'Concept' : 'Problem'}
-                      </Chip>
-                    </div>
-                    {/* Attempt Status Badge */}
-                    {item.attemptStatus === 'attempted' && (
-                      <div className="absolute bottom-2 right-2">
+                      <div className="absolute top-2 left-2 flex gap-1">
                         <Chip
                           size="sm"
-                          color="success"
-                          variant="solid"
-                          startContent={<CheckCircleIcon className="h-3 w-3" />}
+                          color={getContentTypeColor(item.contentType)}
+                          variant="flat"
+                          startContent={getContentTypeIcon(item.contentType)}
                         >
-                          Attempted
+                          {item.contentType}
                         </Chip>
                       </div>
-                    )}
-                  </div>
-                </CardHeader>
-                <CardBody>
+                      <div className="absolute bottom-2 left-2">
+                        <Chip
+                          size="sm"
+                          color={getInstructionTypeColor(item.instructionType)}
+                          variant="flat"
+                        >
+                          {item.instructionType === 'conceptDiscussion' ? 'Concept' : 'Problem'}
+                        </Chip>
+                      </div>
+                      {item.attemptStatus === 'attempted' && (
+                        <div className="absolute bottom-2 right-2">
+                          <Chip
+                            size="sm"
+                            color="success"
+                            variant="solid"
+                            startContent={<CheckCircleIcon className="h-3 w-3" />}
+                          >
+                            Attempted
+                          </Chip>
+                        </div>
+                      )}
+                    </div>
+                  </CardHeader>
+                ) : (
+                  /* PDF CONTENT LAYOUT */
+                  <CardHeader className="pb-4 bg-slate-200">
+                    {/* Clean header section for PDFs */}
+                    <div className="flex justify-between items-start mb-4">
+                      <div className="flex items-center gap-2">
+                        <Chip
+                          size="sm"
+                          color={getContentTypeColor(item.contentType)}
+                          variant="flat"
+                          startContent={getContentTypeIcon(item.contentType)}
+                        >
+                          {item.contentType}
+                        </Chip>
+                        <Chip
+                          size="sm"
+                          color={getInstructionTypeColor(item.instructionType)}
+                          variant="flat"
+                        >
+                          {item.instructionType === 'conceptDiscussion' ? 'Concept' : 'Problem'}
+                        </Chip>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        {item.attemptStatus === 'attempted' ? (
+                          <Chip
+                            size="sm"
+                            color="success"
+                            variant="solid"
+                            startContent={<CheckCircleIcon className="h-3 w-3" />}
+                          >
+                            Attempted
+                          </Chip>
+                        ) : (
+                          <Chip
+                            size="sm"
+                            color="danger"
+                            variant="solid"
+                            startContent={<XCircleIcon className="h-3 w-3" />}
+                          >
+                            Not Attempted
+                          </Chip>
+                        )}
+                        {/* <div className="bg-gray-900 text-white px-2 py-1 rounded text-sm">
+                          {formatDuration(item.duration)}
+                        </div> */}
+                      </div>
+                    </div>
+                    
+                  </CardHeader>
+                )}
+                <CardBody className="bg-slate-100">
                   <div className="flex items-center gap-2 mb-2 flex-wrap">
-                    <Badge color="primary" variant="flat">{item.unit}</Badge>
-                    <Badge color="secondary" variant="flat">{item.docCategory}</Badge>
-                    <Badge color="default" variant="flat" size="sm">#{item.sequenceNo}</Badge>
+                    <Chip color="primary" variant="flat" size="sm">{item.unit}</Chip>
+                    <Chip color="secondary" variant="flat" size="sm">{item.docCategory} #{item.sequenceNo}</Chip>
                     {item.noOfProblems && (
-                      <Badge color="warning" variant="flat" size="sm">
+                      <Chip color="warning" variant="flat" size="sm">
                         {item.noOfProblems} problems
-                      </Badge>
+                      </Chip>
                     )}
                   </div>
-                  <h3 className="text-lg font-semibold mb-1">{item.concept}</h3>
-                  <p className="text-sm text-gray-500 mb-2">{item.chapter} • {item.topic}</p>
-                  <p className="text-gray-600 text-sm mb-4 line-clamp-3">{item.description}</p>
+                  <h3 className="text-2xl text-slate-800 font-semibold mb-1">{item.concept}</h3>
+                  <p className="text-lg text-slate-600 mb-2">{item.chapter} • {item.topic}</p>
+                  <p className="text-gray-600 tracking-wide font-light text-sm mb-4 line-clamp-3">{item.description}</p>
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2 text-sm text-gray-500">
                       <ClockIcon className="h-4 w-4" />

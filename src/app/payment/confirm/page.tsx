@@ -1,11 +1,11 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, Suspense } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation'
 import { Card, CardBody, Spinner, Button } from '@heroui/react'
 import { CheckCircleIcon, XCircleIcon } from '@heroicons/react/24/solid'
 
-const PaymentConfirmPage = () => {
+function PaymentConfirmContent() {
   const searchParams = useSearchParams()
   const router = useRouter()
   const [paymentStatus, setPaymentStatus] = useState<'loading' | 'success' | 'failed'>('loading')
@@ -115,6 +115,24 @@ const PaymentConfirmPage = () => {
         </CardBody>
       </Card>
     </div>
+  )
+}
+
+const PaymentConfirmPage = () => {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center px-4">
+        <Card className="max-w-md w-full">
+          <CardBody className="text-center p-8">
+            <Spinner size="lg" className="mb-4" />
+            <h2 className="text-xl font-semibold mb-2">Loading...</h2>
+            <p className="text-gray-600">Please wait while we process your request...</p>
+          </CardBody>
+        </Card>
+      </div>
+    }>
+      <PaymentConfirmContent />
+    </Suspense>
   )
 }
 

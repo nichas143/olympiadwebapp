@@ -17,7 +17,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Verify webhook signature
-    const isValidSignature = verifyWebhookSignature(body, signature)
+    const isValidSignature = await verifyWebhookSignature(body, signature)
     if (!isValidSignature) {
       console.error('Invalid webhook signature')
       return NextResponse.json(
@@ -67,7 +67,10 @@ export async function POST(request: NextRequest) {
   }
 }
 
-async function handleSubscriptionCharged(subscription: any, payment: any) {
+async function handleSubscriptionCharged(
+  subscription: { id: string; current_end?: number },
+  payment: { created_at: number }
+) {
   try {
     console.log('Processing subscription charged event:', subscription.id)
 
@@ -78,7 +81,13 @@ async function handleSubscriptionCharged(subscription: any, payment: any) {
     }
 
     // Update user subscription status
-    const updateData: any = {
+    const updateData: {
+      subscriptionStatus: string;
+      lastPaymentDate: Date;
+      updatedAt: Date;
+      nextBillingDate?: Date;
+      subscriptionEndDate?: Date;
+    } = {
       subscriptionStatus: 'active',
       lastPaymentDate: new Date(payment.created_at * 1000),
       updatedAt: new Date()
@@ -99,7 +108,7 @@ async function handleSubscriptionCharged(subscription: any, payment: any) {
   }
 }
 
-async function handleSubscriptionCancelled(subscription: any) {
+async function handleSubscriptionCancelled(subscription: { id: string }) {
   try {
     console.log('Processing subscription cancelled event:', subscription.id)
 
@@ -121,7 +130,7 @@ async function handleSubscriptionCancelled(subscription: any) {
   }
 }
 
-async function handleSubscriptionCompleted(subscription: any) {
+async function handleSubscriptionCompleted(subscription: { id: string }) {
   try {
     console.log('Processing subscription completed event:', subscription.id)
 
@@ -143,7 +152,7 @@ async function handleSubscriptionCompleted(subscription: any) {
   }
 }
 
-async function handleSubscriptionHalted(subscription: any) {
+async function handleSubscriptionHalted(subscription: { id: string }) {
   try {
     console.log('Processing subscription halted event:', subscription.id)
 
@@ -165,7 +174,7 @@ async function handleSubscriptionHalted(subscription: any) {
   }
 }
 
-async function handlePaymentFailed(payment: any) {
+async function handlePaymentFailed(payment: { id: string; subscription_id?: string }) {
   try {
     console.log('Processing payment failed event:', payment.id)
 

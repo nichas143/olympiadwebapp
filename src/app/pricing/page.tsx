@@ -106,7 +106,11 @@ const PricingPage = () => {
           theme: {
             color: '#3B82F6'
           },
-          handler: async function (response: any) {
+          handler: async function (response: {
+            razorpay_payment_id: string;
+            razorpay_order_id: string;
+            razorpay_signature: string;
+          }) {
             // Verify payment
             try {
               const verifyResponse = await fetch('/api/payment/verify', {
@@ -146,7 +150,7 @@ const PricingPage = () => {
         const loadRazorpayScript = () => {
           return new Promise((resolve) => {
             // Check if script is already loaded
-            if ((window as any).Razorpay) {
+            if ((window as typeof window & { Razorpay?: unknown }).Razorpay) {
               resolve(true)
               return
             }
@@ -161,7 +165,7 @@ const PricingPage = () => {
 
         loadRazorpayScript().then((loaded) => {
           if (loaded) {
-            const rzp = new (window as any).Razorpay(options)
+            const rzp = new (window as typeof window & { Razorpay: new(options: unknown) => { open: () => void } }).Razorpay(options)
             rzp.open()
           } else {
             alert('Failed to load payment gateway. Please try again.')

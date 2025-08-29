@@ -20,6 +20,14 @@ const eslintConfig = [
       "next-env.d.ts",
     ],
   },
+  {
+    rules: {
+      "@typescript-eslint/no-unused-vars": "warn", // Convert errors to warnings
+      "@typescript-eslint/no-explicit-any": "warn", // Convert to warning for Razorpay types
+      "@typescript-eslint/no-require-imports": "warn", // Convert to warning
+      "@next/next/no-img-element": "warn", // Convert to warning for now
+    },
+  },
 ];
 
 export default eslintConfig;

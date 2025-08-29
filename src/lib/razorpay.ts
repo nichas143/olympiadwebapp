@@ -125,7 +125,13 @@ export async function createSubscription(customerId: string, planId: string, tot
       total_count: totalCount || 12, // 12 months for annual
       quantity: 1,
       start_at: Math.floor(Date.now() / 1000), // Start immediately
-    } as any) // Type assertion to bypass strict type checking
+    } as {
+      plan_id: string;
+      customer_id: string;
+      total_count: number;
+      quantity: number;
+      start_at: number;
+    }) // Typed object for subscription creation
     return subscription
   } catch (error) {
     console.error('Error creating subscription:', error)
@@ -134,13 +140,13 @@ export async function createSubscription(customerId: string, planId: string, tot
 }
 
 // Verify payment signature
-export function verifyPaymentSignature(
+export async function verifyPaymentSignature(
   orderId: string,
   paymentId: string,
   signature: string
-): boolean {
+): Promise<boolean> {
   try {
-    const crypto = require('crypto')
+    const crypto = await import('crypto')
     const expectedSignature = crypto
       .createHmac('sha256', process.env.RAZORPAY_KEY_SECRET!)
       .update(orderId + '|' + paymentId)
@@ -154,9 +160,9 @@ export function verifyPaymentSignature(
 }
 
 // Verify webhook signature
-export function verifyWebhookSignature(body: string, signature: string): boolean {
+export async function verifyWebhookSignature(body: string, signature: string): Promise<boolean> {
   try {
-    const crypto = require('crypto')
+    const crypto = await import('crypto')
     const expectedSignature = crypto
       .createHmac('sha256', process.env.RAZORPAY_WEBHOOK_SECRET!)
       .update(body)

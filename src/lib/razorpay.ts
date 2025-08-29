@@ -49,16 +49,25 @@ export interface SubscriptionPlan {
 // Environment-based pricing configuration
 const IS_TESTING = process.env.NODE_ENV === 'development' || process.env.TESTING_MODE === 'true'
 
-// Subscription plans configuration - Using your existing Razorpay plan
+// Subscription plans configuration
 export const SUBSCRIPTION_PLANS: Record<string, SubscriptionPlan> = {
-  monthly_test: {
-    id: 'plan_RBCUZm15JCEJxq', // Your existing Razorpay plan ID
+  monthly: {
+    id: 'monthly_plan',
     name: 'Monthly Plan',
-    amount: 500, // ₹5 in paise
+    amount: 30000, // ₹300 in paise
     currency: 'INR',
     period: 'monthly',
     interval: 1,
-    description: 'Monthly access to all content - ₹5 per month'
+    description: 'Monthly access to all Olympiad training materials'
+  },
+  yearly: {
+    id: 'yearly_plan',
+    name: 'Yearly Plan',
+    amount: 300000, // ₹3000 in paise
+    currency: 'INR',
+    period: 'yearly',
+    interval: 1,
+    description: 'Yearly access to all Olympiad training materials (Save ₹600!)'
   }
 }
 

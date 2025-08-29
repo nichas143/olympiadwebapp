@@ -185,16 +185,17 @@ const PricingPage = () => {
   }
 
   const isTesting = isTestingMode()
-  const monthlyPlan = SUBSCRIPTION_PLANS.monthly_test
+  const monthlyPlan = SUBSCRIPTION_PLANS.monthly
+  const yearlyPlan = SUBSCRIPTION_PLANS.yearly
 
   const plans = [
     {
-      id: 'monthly_test',
-      name: 'Monthly Access (Test)',
-      price: monthlyPlan.amount / 100, // Convert paise to rupees (₹5)
-      originalPrice: 299, // Show a higher original price
+      id: 'monthly',
+      name: 'Monthly Plan',
+      price: monthlyPlan.amount / 100, // Convert paise to rupees (₹300)
+      originalPrice: 399, // Show a higher original price
       duration: 'month',
-      description: 'One-time payment for 1 month access to all materials',
+      description: 'Monthly access to all Olympiad training materials',
       features: [
         'All video lectures (100+ hours)',
         'Comprehensive study materials',
@@ -203,12 +204,35 @@ const PricingPage = () => {
         'Progress tracking',
         'Priority doubt resolution',
         'Download PDFs for offline study',
-        '1 month full access',
-        'No recurring charges'
+        'Monthly billing',
+        'Cancel anytime'
+      ],
+      popular: false,
+      savings: undefined,
+      note: undefined
+    },
+    {
+      id: 'yearly',
+      name: 'Yearly Plan',
+      price: yearlyPlan.amount / 100, // Convert paise to rupees (₹3000)
+      originalPrice: 3600, // 12 months × ₹300
+      duration: 'year',
+      description: 'Yearly access to all Olympiad training materials',
+      features: [
+        'All video lectures (100+ hours)',
+        'Comprehensive study materials',
+        'Practice problems with solutions',
+        'Monthly mock tests',
+        'Progress tracking',
+        'Priority doubt resolution',
+        'Download PDFs for offline study',
+        'Yearly billing',
+        'Save ₹600 compared to monthly',
+        'Best value for serious students'
       ],
       popular: true,
-      savings: 'TESTING PRICE',
-      note: undefined // No special note for monthly plan
+      savings: 'SAVE ₹600',
+      note: 'Most Popular'
     }
   ]
 
@@ -226,12 +250,12 @@ const PricingPage = () => {
         {/* Header */}
         <div className="text-center mb-12">
           {isTesting && (
-            <div className="bg-blue-100 border border-blue-400 text-blue-800 px-4 py-3 rounded-lg mb-6 max-w-2xl mx-auto">
+            <div className="bg-green-100 border border-green-400 text-green-800 px-4 py-3 rounded-lg mb-6 max-w-2xl mx-auto">
               <div className="flex items-center justify-center">
-                <span className="text-lg">🧪</span>
-                <span className="ml-2 font-semibold">Testing Phase: Pay ₹5 for 1 month access!</span>
+                <span className="text-lg">🎯</span>
+                <span className="ml-2 font-semibold">Live Pricing: Monthly ₹300 or Yearly ₹3000!</span>
               </div>
-              <p className="text-sm mt-1">Simple one-time payment • Instant access • Perfect for testing</p>
+              <p className="text-sm mt-1">Choose your plan • Instant access • Secure payments via Razorpay</p>
             </div>
           )}
           <h1 className="text-4xl font-bold text-gray-900 mb-4">

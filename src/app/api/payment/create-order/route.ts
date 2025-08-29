@@ -21,10 +21,10 @@ export async function POST(request: NextRequest) {
 
     const { planType } = await request.json()
 
-    // For now, we only support the monthly test plan
-    if (planType !== 'monthly_test') {
+    // Validate plan type
+    if (!['monthly', 'yearly'].includes(planType)) {
       return NextResponse.json(
-        { error: 'Only monthly_test plan is supported currently' },
+        { error: 'Invalid plan type. Please select monthly or yearly plan.' },
         { status: 400 }
       )
     }

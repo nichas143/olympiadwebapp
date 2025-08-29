@@ -49,13 +49,23 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Activate subscription for 1 month
+    // Get the plan details to determine subscription duration
+    const planType = user.subscriptionPlan || 'monthly'
+    const isYearly = planType === 'yearly'
+    
+    // Activate subscription based on plan type
+    const subscriptionStartDate = new Date()
     const subscriptionEndDate = new Date()
-    subscriptionEndDate.setMonth(subscriptionEndDate.getMonth() + 1)
+    
+    if (isYearly) {
+      subscriptionEndDate.setFullYear(subscriptionEndDate.getFullYear() + 1)
+    } else {
+      subscriptionEndDate.setMonth(subscriptionEndDate.getMonth() + 1)
+    }
 
     await User.findByIdAndUpdate(user._id, {
       subscriptionStatus: 'active',
-      subscriptionStartDate: new Date(),
+      subscriptionStartDate: subscriptionStartDate,
       subscriptionEndDate: subscriptionEndDate,
       lastPaymentDate: new Date(),
       nextBillingDate: subscriptionEndDate,

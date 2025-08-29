@@ -4,7 +4,7 @@ import connectDB from '@/lib/mongodb'
 import { User } from '@/models/User'
 import { 
   createRazorpayCustomer, 
-  createSubscription,
+  createPaymentOrder,
   SUBSCRIPTION_PLANS 
 } from '@/lib/razorpay'
 
@@ -74,41 +74,46 @@ export async function POST(request: NextRequest) {
       })
     }
 
-    // Create Razorpay subscription using your existing plan
-    const subscription = await createSubscription(
-      customerId,
-      plan.id, // This is your plan_RBCUZm15JCEJxq
-      12 // Total count of billing cycles (12 months)
+    // Create payment order for monthly subscription
+    const order = await createPaymentOrder(
+      plan.amount,
+      'INR',
+      `monthly_${user._id.toString().slice(-8)}_${Date.now().toString().slice(-8)}`
     )
 
-    // Calculate dates for monthly subscription
+    // Set subscription to pending (will be activated after payment)
     const subscriptionStartDate = new Date()
     const subscriptionEndDate = new Date()
-    subscriptionEndDate.setMonth(subscriptionEndDate.getMonth() + 1) // Next month for monthly billing
+    subscriptionEndDate.setMonth(subscriptionEndDate.getMonth() + 1) // Monthly plan
 
     await User.findByIdAndUpdate(user._id, {
-      subscriptionStatus: 'active', // Subscription is created and active
+      subscriptionStatus: 'pending',
       subscriptionPlan: planType,
       subscriptionStartDate,
       subscriptionEndDate,
-      razorpaySubscriptionId: subscription.id,
       subscriptionAmount: plan.amount,
       nextBillingDate: subscriptionEndDate,
       updatedAt: new Date()
     })
 
     return NextResponse.json({
-      subscriptionId: subscription.id,
+      orderId: order.id,
+      amount: plan.amount,
+      currency: 'INR',
       planDetails: plan,
+      customerId: customerId,
+      keyId: process.env.RAZORPAY_KEY_ID,
       status: 'created',
-      message: 'Subscription created successfully! You will be charged ₹5 monthly.',
-      redirectUrl: `/payment/confirm?subscription_id=${subscription.id}&status=success`
+      user: {
+        name: user.name,
+        email: user.email
+      }
     })
 
   } catch (error) {
-    console.error('Error creating subscription:', error)
+    console.error('Error creating payment order:', error)
     return NextResponse.json(
-      { error: 'Failed to create subscription' },
+      { error: 'Failed to create payment order' },
       { status: 500 }
     )
   }

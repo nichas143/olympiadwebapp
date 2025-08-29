@@ -49,10 +49,16 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Activate subscription
+    // Activate subscription for 1 month
+    const subscriptionEndDate = new Date()
+    subscriptionEndDate.setMonth(subscriptionEndDate.getMonth() + 1)
+
     await User.findByIdAndUpdate(user._id, {
       subscriptionStatus: 'active',
+      subscriptionStartDate: new Date(),
+      subscriptionEndDate: subscriptionEndDate,
       lastPaymentDate: new Date(),
+      nextBillingDate: subscriptionEndDate,
       updatedAt: new Date()
     })
 

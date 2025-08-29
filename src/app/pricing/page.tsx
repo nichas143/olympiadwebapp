@@ -80,7 +80,7 @@ const PricingPage = () => {
   const createSubscription = async (planType: string) => {
     setIsCreatingSubscription(true)
     try {
-      const response = await fetch('/api/subscription/create', {
+      const response = await fetch('/api/payment/create-order', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -100,8 +100,8 @@ const PricingPage = () => {
           description: data.planDetails.description,
           order_id: data.orderId,
           prefill: {
-            name: session?.user?.name,
-            email: session?.user?.email,
+            name: data.user.name,
+            email: data.user.email,
           },
           theme: {
             color: '#3B82F6'
@@ -122,13 +122,17 @@ const PricingPage = () => {
               })
 
               if (verifyResponse.ok) {
-                router.push('/payment/confirm?status=success')
+                alert('Payment successful! Your subscription is now active.')
+                fetchSubscriptionStatus()
+                router.push('/dashboard')
               } else {
-                router.push('/payment/confirm?status=failed')
+                alert('Payment verification failed. Please contact support.')
               }
             } catch (error) {
               console.error('Payment verification error:', error)
-              router.push('/payment/confirm?status=failed')
+              alert('Payment verification failed. Please contact support.')
+            } finally {
+              setIsCreatingSubscription(false)
             }
           },
           modal: {
@@ -166,28 +170,27 @@ const PricingPage = () => {
         })
       } else {
         const error = await response.json()
-        alert(error.error || 'Failed to create subscription')
+        alert(error.error || 'Failed to create payment order')
         setIsCreatingSubscription(false)
       }
     } catch (error) {
-      console.error('Error creating subscription:', error)
-      alert('Failed to create subscription')
+      console.error('Error creating payment order:', error)
+      alert('Failed to create payment order')
       setIsCreatingSubscription(false)
     }
   }
 
   const isTesting = isTestingMode()
-  const annualPlan = SUBSCRIPTION_PLANS.annual
-  const studentPlan = SUBSCRIPTION_PLANS.student_annual
+  const monthlyPlan = SUBSCRIPTION_PLANS.monthly_test
 
   const plans = [
     {
-      id: 'annual',
-      name: isTesting ? 'Annual Plan (Test)' : 'Annual Plan',
-      price: annualPlan.amount / 100, // Convert paise to rupees
-      originalPrice: isTesting ? 10 : 4999,
-      duration: 'year',
-      description: 'Complete access to all Olympiad training materials',
+      id: 'monthly_test',
+      name: 'Monthly Access (Test)',
+      price: monthlyPlan.amount / 100, // Convert paise to rupees (₹5)
+      originalPrice: 299, // Show a higher original price
+      duration: 'month',
+      description: 'One-time payment for 1 month access to all materials',
       features: [
         'All video lectures (100+ hours)',
         'Comprehensive study materials',
@@ -196,32 +199,12 @@ const PricingPage = () => {
         'Progress tracking',
         'Priority doubt resolution',
         'Download PDFs for offline study',
-        '1 year validity'
+        '1 month full access',
+        'No recurring charges'
       ],
       popular: true,
-      savings: isTesting ? 'TESTING PRICE' : '20% OFF'
-    },
-    {
-      id: 'student_annual',
-      name: isTesting ? 'Student Annual Plan (Test)' : 'Student Annual Plan',
-      price: studentPlan.amount / 100, // Convert paise to rupees
-      originalPrice: isTesting ? 10 : 2999,
-      duration: 'year',
-      description: 'Special pricing for students (ID verification required)',
-      features: [
-        'All video lectures (100+ hours)',
-        'Comprehensive study materials',
-        'Practice problems with solutions',
-        'Monthly mock tests',
-        'Progress tracking',
-        'Priority doubt resolution',
-        'Download PDFs for offline study',
-        '1 year validity',
-        'Student support community'
-      ],
-      popular: false,
-      savings: isTesting ? 'TESTING PRICE' : '33% OFF',
-      note: 'Student ID verification required'
+      savings: 'TESTING PRICE',
+      note: undefined // No special note for monthly plan
     }
   ]
 
@@ -239,12 +222,12 @@ const PricingPage = () => {
         {/* Header */}
         <div className="text-center mb-12">
           {isTesting && (
-            <div className="bg-yellow-100 border border-yellow-400 text-yellow-800 px-4 py-3 rounded-lg mb-6 max-w-2xl mx-auto">
+            <div className="bg-blue-100 border border-blue-400 text-blue-800 px-4 py-3 rounded-lg mb-6 max-w-2xl mx-auto">
               <div className="flex items-center justify-center">
                 <span className="text-lg">🧪</span>
-                <span className="ml-2 font-semibold">Testing Mode: Only ₹5 for payment testing!</span>
+                <span className="ml-2 font-semibold">Testing Phase: Pay ₹5 for 1 month access!</span>
               </div>
-              <p className="text-sm mt-1">This is a testing environment. Actual pricing will be higher in production.</p>
+              <p className="text-sm mt-1">Simple one-time payment • Instant access • Perfect for testing</p>
             </div>
           )}
           <h1 className="text-4xl font-bold text-gray-900 mb-4">

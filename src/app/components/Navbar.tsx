@@ -234,7 +234,8 @@ export default function Navbar() {
                             <span className="text-sm text-green-600 font-medium">Active</span>
                             {session.user?.subscriptionPlan && (
                               <span className="text-xs text-gray-500">
-                                ({session.user.subscriptionPlan === 'annual' ? 'Annual' : 'Student'})
+                                ({session.user.subscriptionPlan === 'annual' ? 'Annual' : 
+                                  session.user.subscriptionPlan === 'student_annual' ? 'Student' : 'Monthly'})
                               </span>
                             )}
                           </div>

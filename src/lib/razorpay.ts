@@ -1,10 +1,40 @@
 import Razorpay from 'razorpay'
 
-// Initialize Razorpay instance
-const razorpay = new Razorpay({
-  key_id: process.env.RAZORPAY_KEY_ID!,
-  key_secret: process.env.RAZORPAY_KEY_SECRET!,
-})
+// Lazy initialization function for Razorpay
+function getRazorpayInstance() {
+  const keyId = process.env.RAZORPAY_KEY_ID
+  const keySecret = process.env.RAZORPAY_KEY_SECRET
+  
+  if (!keyId || !keySecret) {
+    console.error('Razorpay credentials not found. Please set RAZORPAY_KEY_ID and RAZORPAY_KEY_SECRET in your environment variables.')
+    console.log('Current env check:', {
+      keyId: keyId ? 'SET' : 'NOT SET',
+      keySecret: keySecret ? 'SET' : 'NOT SET',
+      nodeEnv: process.env.NODE_ENV
+    })
+    return null
+  }
+  
+  try {
+    return new Razorpay({
+      key_id: keyId,
+      key_secret: keySecret,
+    })
+  } catch (error) {
+    console.error('Failed to initialize Razorpay:', error)
+    return null
+  }
+}
+
+// Initialize Razorpay instance lazily
+let razorpayInstance: Razorpay | null = null
+
+function getRazorpay() {
+  if (!razorpayInstance) {
+    razorpayInstance = getRazorpayInstance()
+  }
+  return razorpayInstance
+}
 
 export interface SubscriptionPlan {
   id: string
@@ -19,25 +49,16 @@ export interface SubscriptionPlan {
 // Environment-based pricing configuration
 const IS_TESTING = process.env.NODE_ENV === 'development' || process.env.TESTING_MODE === 'true'
 
-// Subscription plans configuration
+// Subscription plans configuration - Using your existing Razorpay plan
 export const SUBSCRIPTION_PLANS: Record<string, SubscriptionPlan> = {
-  annual: {
-    id: 'annual',
-    name: 'Annual Plan',
-    amount: IS_TESTING ? 500 : 399900, // ₹5 for testing, ₹3,999 for production (in paise)
+  monthly_test: {
+    id: 'plan_RBCUZm15JCEJxq', // Your existing Razorpay plan ID
+    name: 'Monthly Plan',
+    amount: 500, // ₹5 in paise
     currency: 'INR',
-    period: 'yearly',
+    period: 'monthly',
     interval: 1,
-    description: 'Full access to all content for 1 year'
-  },
-  student_annual: {
-    id: 'student_annual',
-    name: 'Student Annual Plan',
-    amount: IS_TESTING ? 500 : 199900, // ₹5 for testing, ₹1,999 for production (in paise)
-    currency: 'INR',
-    period: 'yearly',
-    interval: 1,
-    description: 'Student discount - Full access for 1 year'
+    description: 'Monthly access to all content - ₹5 per month'
   }
 }
 
@@ -46,6 +67,11 @@ export const isTestingMode = () => IS_TESTING
 
 // Create a customer in Razorpay
 export async function createRazorpayCustomer(name: string, email: string, contact?: string) {
+  const razorpay = getRazorpay()
+  if (!razorpay) {
+    throw new Error('Razorpay not initialized. Please check your environment variables.')
+  }
+  
   try {
     const customer = await razorpay.customers.create({
       name,
@@ -62,6 +88,11 @@ export async function createRazorpayCustomer(name: string, email: string, contac
 
 // Create a subscription plan in Razorpay
 export async function createSubscriptionPlan(planDetails: SubscriptionPlan) {
+  const razorpay = getRazorpay()
+  if (!razorpay) {
+    throw new Error('Razorpay not initialized. Please check your environment variables.')
+  }
+  
   try {
     const plan = await razorpay.plans.create({
       period: planDetails.period,
@@ -82,6 +113,11 @@ export async function createSubscriptionPlan(planDetails: SubscriptionPlan) {
 
 // Create a subscription
 export async function createSubscription(customerId: string, planId: string, totalCount?: number) {
+  const razorpay = getRazorpay()
+  if (!razorpay) {
+    throw new Error('Razorpay not initialized. Please check your environment variables.')
+  }
+  
   try {
     const subscription = await razorpay.subscriptions.create({
       plan_id: planId,
@@ -89,10 +125,6 @@ export async function createSubscription(customerId: string, planId: string, tot
       total_count: totalCount || 12, // 12 months for annual
       quantity: 1,
       start_at: Math.floor(Date.now() / 1000), // Start immediately
-      notify: {
-        email: true,
-        sms: false,
-      },
     } as any) // Type assertion to bypass strict type checking
     return subscription
   } catch (error) {
@@ -139,6 +171,11 @@ export function verifyWebhookSignature(body: string, signature: string): boolean
 
 // Get subscription details
 export async function getSubscription(subscriptionId: string) {
+  const razorpay = getRazorpay()
+  if (!razorpay) {
+    throw new Error('Razorpay not initialized. Please check your environment variables.')
+  }
+  
   try {
     const subscription = await razorpay.subscriptions.fetch(subscriptionId)
     return subscription
@@ -150,6 +187,11 @@ export async function getSubscription(subscriptionId: string) {
 
 // Cancel subscription
 export async function cancelSubscription(subscriptionId: string, cancelAtCycleEnd: boolean = true) {
+  const razorpay = getRazorpay()
+  if (!razorpay) {
+    throw new Error('Razorpay not initialized. Please check your environment variables.')
+  }
+  
   try {
     const subscription = await razorpay.subscriptions.cancel(subscriptionId, cancelAtCycleEnd)
     return subscription
@@ -161,6 +203,11 @@ export async function cancelSubscription(subscriptionId: string, cancelAtCycleEn
 
 // Create payment order (for one-time payments)
 export async function createPaymentOrder(amount: number, currency: string = 'INR', receipt?: string) {
+  const razorpay = getRazorpay()
+  if (!razorpay) {
+    throw new Error('Razorpay not initialized. Please check your environment variables.')
+  }
+  
   try {
     // Ensure receipt is under 40 characters
     const defaultReceipt = `ord_${Date.now().toString().slice(-10)}`
@@ -181,6 +228,11 @@ export async function createPaymentOrder(amount: number, currency: string = 'INR
 
 // Get payment details
 export async function getPayment(paymentId: string) {
+  const razorpay = getRazorpay()
+  if (!razorpay) {
+    throw new Error('Razorpay not initialized. Please check your environment variables.')
+  }
+  
   try {
     const payment = await razorpay.payments.fetch(paymentId)
     return payment
@@ -197,4 +249,4 @@ export function generateReceiptId(prefix: string = 'pay'): string {
   return `${prefix}_${timestamp}_${random}`.slice(0, 40) // Ensure under 40 chars
 }
 
-export default razorpay
+export default getRazorpay

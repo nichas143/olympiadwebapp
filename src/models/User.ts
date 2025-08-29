@@ -13,7 +13,7 @@ export interface IUser extends mongoose.Document {
   approvedBy?: string
   // Subscription fields
   subscriptionStatus: 'none' | 'trial' | 'pending' | 'active' | 'expired' | 'cancelled'
-  subscriptionPlan?: 'annual' | 'student_annual'
+  subscriptionPlan?: 'annual' | 'student_annual' | 'monthly_test'
   subscriptionStartDate?: Date
   subscriptionEndDate?: Date
   trialStartDate?: Date
@@ -66,7 +66,7 @@ const userSchema = new mongoose.Schema({
   },
   subscriptionPlan: {
     type: String,
-    enum: ['annual', 'student_annual'],
+    enum: ['annual', 'student_annual', 'monthly_test'],
     default: null,
   },
   subscriptionStartDate: {

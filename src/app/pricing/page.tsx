@@ -192,10 +192,10 @@ const PricingPage = () => {
     {
       id: 'monthly',
       name: 'Monthly Plan',
-      price: monthlyPlan.amount / 100, // Convert paise to rupees (₹300)
-      originalPrice: 399, // Show a higher original price
+      price: monthlyPlan.amount / 100, // Convert paise to rupees
+      originalPrice: isTesting ? 300 : 399, // Show test vs production pricing
       duration: 'month',
-      description: 'Monthly access to all Olympiad training materials',
+      description: isTesting ? 'Monthly access (TEST MODE: ₹5)' : 'Monthly access to all Olympiad training materials',
       features: [
         'All video lectures (100+ hours)',
         'Comprehensive study materials',
@@ -214,10 +214,10 @@ const PricingPage = () => {
     {
       id: 'yearly',
       name: 'Yearly Plan',
-      price: yearlyPlan.amount / 100, // Convert paise to rupees (₹3000)
-      originalPrice: 3600, // 12 months × ₹300
+      price: yearlyPlan.amount / 100, // Convert paise to rupees
+      originalPrice: isTesting ? 60 : 3600, // Show test vs production pricing
       duration: 'year',
-      description: 'Yearly access to all Olympiad training materials',
+      description: isTesting ? 'Yearly access (TEST MODE: ₹50)' : 'Yearly access to all Olympiad training materials',
       features: [
         'All video lectures (100+ hours)',
         'Comprehensive study materials',
@@ -227,11 +227,11 @@ const PricingPage = () => {
         'Priority doubt resolution',
         'Download PDFs for offline study',
         'Yearly billing',
-        'Save ₹600 compared to monthly',
+        isTesting ? 'Save ₹10 compared to monthly' : 'Save ₹600 compared to monthly',
         'Best value for serious students'
       ],
       popular: true,
-      savings: 'SAVE ₹600',
+      savings: isTesting ? 'SAVE ₹10' : 'SAVE ₹600',
       note: 'Most Popular'
     }
   ]
@@ -250,12 +250,12 @@ const PricingPage = () => {
         {/* Header */}
         <div className="text-center mb-12">
           {isTesting && (
-            <div className="bg-green-100 border border-green-400 text-green-800 px-4 py-3 rounded-lg mb-6 max-w-2xl mx-auto">
+            <div className="bg-blue-100 border border-blue-400 text-blue-800 px-4 py-3 rounded-lg mb-6 max-w-2xl mx-auto">
               <div className="flex items-center justify-center">
-                <span className="text-lg">🎯</span>
-                <span className="ml-2 font-semibold">Live Pricing: Monthly ₹300 or Yearly ₹3000!</span>
+                <span className="text-lg">🧪</span>
+                <span className="ml-2 font-semibold">TEST MODE: Monthly ₹5 or Yearly ₹50!</span>
               </div>
-              <p className="text-sm mt-1">Choose your plan • Instant access • Secure payments via Razorpay</p>
+              <p className="text-sm mt-1">Using Razorpay test mode • Safe testing • No real charges</p>
             </div>
           )}
           <h1 className="text-4xl font-bold text-gray-900 mb-4">

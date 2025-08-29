@@ -1,13 +1,18 @@
 # 🎯 New Pricing Structure Implementation
 
-## ✅ **Successfully Updated: Monthly ₹300 & Yearly ₹3000 Plans**
+## ✅ **Successfully Updated: Test Mode Pricing (₹5/₹50) & Production Pricing (₹300/₹3000)**
 
-### 📊 **New Pricing Structure:**
+### 📊 **Test Mode Pricing Structure:**
 
-| Plan | Price | Duration | Savings | Features |
-|------|-------|----------|---------|----------|
-| **Monthly** | ₹300 | 1 Month | - | Full access, cancel anytime |
-| **Yearly** | ₹3000 | 1 Year | **₹600** | Full access + 17% discount |
+| Plan | Test Price | Production Price | Duration | Savings | Features |
+|------|------------|------------------|----------|---------|----------|
+| **Monthly** | ₹5 | ₹300 | 1 Month | - | Full access, cancel anytime |
+| **Yearly** | ₹50 | ₹3000 | 1 Year | **₹10/₹600** | Full access + discount |
+
+### 🧪 **Test Mode Benefits:**
+- **Safe Testing**: No real money transactions
+- **Cost Effective**: Perfect for development phase
+- **Same Experience**: Identical payment flow to production
 
 ### 🎉 **Key Benefits:**
 - **Yearly Plan**: Save ₹600 compared to monthly payments

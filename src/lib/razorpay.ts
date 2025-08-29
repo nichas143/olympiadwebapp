@@ -54,20 +54,24 @@ export const SUBSCRIPTION_PLANS: Record<string, SubscriptionPlan> = {
   monthly: {
     id: 'monthly_plan',
     name: 'Monthly Plan',
-    amount: 30000, // ₹300 in paise
+    amount: IS_TESTING ? 500 : 30000, // ₹5 in test mode, ₹300 in production
     currency: 'INR',
     period: 'monthly',
     interval: 1,
-    description: 'Monthly access to all Olympiad training materials'
+    description: IS_TESTING 
+      ? 'Monthly access to all Olympiad training materials (TEST MODE: ₹5)'
+      : 'Monthly access to all Olympiad training materials'
   },
   yearly: {
     id: 'yearly_plan',
     name: 'Yearly Plan',
-    amount: 300000, // ₹3000 in paise
+    amount: IS_TESTING ? 5000 : 300000, // ₹50 in test mode, ₹3000 in production
     currency: 'INR',
     period: 'yearly',
     interval: 1,
-    description: 'Yearly access to all Olympiad training materials (Save ₹600!)'
+    description: IS_TESTING 
+      ? 'Yearly access to all Olympiad training materials (TEST MODE: ₹50)'
+      : 'Yearly access to all Olympiad training materials (Save ₹600!)'
   }
 }
 

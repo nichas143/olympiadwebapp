@@ -5,7 +5,7 @@ import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import { Card, CardBody, CardHeader, Button, Chip, Spinner } from '@heroui/react'
 import { CheckIcon } from '@heroicons/react/24/solid'
-import { SUBSCRIPTION_PLANS, isTestingMode, isFreeAccess } from '@/lib/razorpay'
+import { SUBSCRIPTION_PLANS, isTestingMode } from '@/lib/razorpay'
 
 interface SubscriptionStatus {
   subscriptionStatus: string
@@ -30,6 +30,24 @@ const PricingPage = () => {
   const [isLoading, setIsLoading] = useState(true)
   const [isStartingTrial, setIsStartingTrial] = useState(false)
   const [isCreatingSubscription, setIsCreatingSubscription] = useState(false)
+  const [freeAccess, setFreeAccess] = useState(false)
+
+  // Fetch free access status
+  useEffect(() => {
+    const fetchFreeAccessStatus = async () => {
+      try {
+        const response = await fetch('/api/free-access-status');
+        if (response.ok) {
+          const data = await response.json();
+          setFreeAccess(data.freeAccess);
+        }
+      } catch (error) {
+        console.error('Error fetching free access status:', error);
+      }
+    };
+
+    fetchFreeAccessStatus();
+  }, []);
 
   useEffect(() => {
     if (status === 'authenticated') {
@@ -38,6 +56,14 @@ const PricingPage = () => {
       setIsLoading(false)
     }
   }, [status])
+
+  // Block pricing page for logged-in users when FREE_ACCESS=true
+  useEffect(() => {
+    if (status === 'authenticated' && freeAccess) {
+      // Redirect to dashboard if user is logged in and free access is enabled
+      router.push('/dashboard');
+    }
+  }, [status, freeAccess, router]);
 
   const fetchSubscriptionStatus = async () => {
     try {
@@ -222,7 +248,7 @@ const PricingPage = () => {
   }
 
   const isTesting = isTestingMode()
-  const isFree = isFreeAccess()
+  const isFree = freeAccess
   const monthlyPlan = SUBSCRIPTION_PLANS.monthly
   const yearlyPlan = SUBSCRIPTION_PLANS.yearly
 
@@ -274,10 +300,29 @@ const PricingPage = () => {
     }
   ]
 
-  if (isLoading) {
+  // Show loading while checking free access status
+  if (isLoading || (status === 'authenticated' && freeAccess === undefined)) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <Spinner size="lg" />
+      </div>
+    )
+  }
+
+  // Show blocking message for logged-in users during free access
+  if (status === 'authenticated' && freeAccess) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100">
+        <div className="text-center">
+          <div className="bg-green-100 border border-green-400 text-green-800 px-6 py-4 rounded-lg mb-6 max-w-md mx-auto">
+            <div className="flex items-center justify-center mb-2">
+              <span className="text-2xl">🎉</span>
+              <span className="ml-2 font-semibold text-lg">FREE ACCESS ENABLED!</span>
+            </div>
+            <p className="text-sm">You already have access to all content. Redirecting to dashboard...</p>
+          </div>
+          <Spinner size="lg" />
+        </div>
       </div>
     )
   }

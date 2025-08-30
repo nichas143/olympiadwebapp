@@ -34,6 +34,28 @@ export async function GET(request: NextRequest) {
     const total = await User.countDocuments(query)
     const totalPages = Math.ceil(total / limit)
 
+    // Get status counts for all users
+    const statusCounts = await User.aggregate([
+      {
+        $group: {
+          _id: '$status',
+          count: { $sum: 1 }
+        }
+      }
+    ])
+
+    const counts = {
+      pending: 0,
+      approved: 0,
+      rejected: 0
+    }
+
+    statusCounts.forEach((item) => {
+      if (item._id in counts) {
+        counts[item._id as keyof typeof counts] = item.count
+      }
+    })
+
     return NextResponse.json({
       users,
       pagination: {
@@ -43,7 +65,8 @@ export async function GET(request: NextRequest) {
         totalPages,
         hasNext: page < totalPages,
         hasPrev: page > 1
-      }
+      },
+      statusCounts: counts
     })
   } catch (error) {
     console.error('Error fetching users:', error)

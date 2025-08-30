@@ -14,6 +14,8 @@ interface User {
   createdAt: string
   approvedAt?: string
   approvedBy?: string
+  subscriptionStatus: 'none' | 'trial' | 'pending' | 'active' | 'expired' | 'cancelled'
+  subscriptionPlan?: 'annual' | 'student_annual' | 'monthly_test' | 'monthly' | 'yearly'
 }
 
 interface PaginationData {
@@ -35,6 +37,7 @@ export default function AdminDashboard() {
   const [selectedUser, setSelectedUser] = useState<User | null>(null)
   const [rejectionReason, setRejectionReason] = useState('')
   const [currentPage, setCurrentPage] = useState(1)
+  const [statusCounts, setStatusCounts] = useState({ pending: 0, approved: 0, rejected: 0 })
   
   const { isOpen: isRejectModalOpen, onOpen: onRejectModalOpen, onClose: onRejectModalClose } = useDisclosure()
 
@@ -52,6 +55,7 @@ export default function AdminDashboard() {
         const data = await response.json()
         setUsers(data.users)
         setPagination(data.pagination)
+        setStatusCounts(data.statusCounts || { pending: 0, approved: 0, rejected: 0 })
       }
     } catch (error) {
       console.error('Failed to fetch users:', error)
@@ -108,6 +112,28 @@ export default function AdminDashboard() {
     }
   }
 
+  const handleDelete = async (userId: string) => {
+    if (!confirm('Are you sure you want to delete this user? This action cannot be undone.')) {
+      return
+    }
+    
+    try {
+      const response = await fetch(`/api/admin/users/${userId}`, {
+        method: 'DELETE'
+      })
+      
+      if (response.ok) {
+        fetchUsers() // Refresh the list
+      } else {
+        const errorData = await response.json()
+        alert(errorData.error || 'Failed to delete user')
+      }
+    } catch (error) {
+      console.error('Failed to delete user:', error)
+      alert('Failed to delete user')
+    }
+  }
+
   const openRejectModal = (user: User) => {
     setSelectedUser(user)
     onRejectModalOpen()
@@ -120,6 +146,29 @@ export default function AdminDashboard() {
       case 'rejected': return 'danger'
       default: return 'default'
     }
+  }
+
+  const getSubscriptionDisplay = (user: User) => {
+    if (user.subscriptionStatus === 'none' || user.subscriptionStatus === 'expired') {
+      return 'Not Subscribed'
+    }
+    
+    const planMap: Record<string, string> = {
+      'monthly': 'Monthly',
+      'yearly': 'Yearly',
+      'annual': 'Annual',
+      'student_annual': 'Student Annual',
+      'monthly_test': 'Monthly Test'
+    }
+    
+    const plan = user.subscriptionPlan ? planMap[user.subscriptionPlan] || user.subscriptionPlan : 'Unknown'
+    const status = user.subscriptionStatus.charAt(0).toUpperCase() + user.subscriptionStatus.slice(1)
+    
+    return `${plan} (${status})`
+  }
+
+  const canDeleteUser = (user: User) => {
+    return user.subscriptionStatus === 'none' || user.subscriptionStatus === 'expired' || user.subscriptionStatus === 'cancelled'
   }
 
   if (status === 'loading' || loading) {
@@ -201,7 +250,7 @@ export default function AdminDashboard() {
                 <div className="flex items-center space-x-2">
                   <span>Pending</span>
                   <Chip size="sm" color="warning" variant="flat">
-                    {users.filter(u => u.status === 'pending').length}
+                    {statusCounts.pending}
                   </Chip>
                 </div>
               } />
@@ -209,7 +258,7 @@ export default function AdminDashboard() {
                 <div className="flex items-center space-x-2">
                   <span>Approved</span>
                   <Chip size="sm" color="success" variant="flat">
-                    {users.filter(u => u.status === 'approved').length}
+                    {statusCounts.approved}
                   </Chip>
                 </div>
               } />
@@ -217,80 +266,177 @@ export default function AdminDashboard() {
                 <div className="flex items-center space-x-2">
                   <span>Rejected</span>
                   <Chip size="sm" color="danger" variant="flat">
-                    {users.filter(u => u.status === 'rejected').length}
+                    {statusCounts.rejected}
                   </Chip>
                 </div>
               } />
             </Tabs>
 
-            <Table aria-label="Users table">
-              <TableHeader>
-                <TableColumn>NAME</TableColumn>
-                <TableColumn>EMAIL</TableColumn>
-                <TableColumn>STATUS</TableColumn>
-                <TableColumn>REGISTERED</TableColumn>
-                <TableColumn>ACTIONS</TableColumn>
-              </TableHeader>
-              <TableBody emptyContent="No users found">
-                {users.map((user) => (
-                  <TableRow key={user._id}>
-                    <TableCell>
-                      <div>
-                        <div className="font-medium text-gray-900">{user.name}</div>
-                        <div className="text-sm text-gray-500">{user.role}</div>
-                      </div>
-                    </TableCell>
-                    <TableCell>{user.email}</TableCell>
-                    <TableCell>
-                      <Chip 
-                        color={getStatusColor(user.status)} 
-                        variant="flat"
-                        size="sm"
-                      >
-                        {user.status.charAt(0).toUpperCase() + user.status.slice(1)}
-                      </Chip>
-                    </TableCell>
-                    <TableCell>
-                      <div className="text-sm">
-                        {new Date(user.createdAt).toLocaleDateString()}
-                      </div>
-                      <div className="text-xs text-gray-500">
-                        {new Date(user.createdAt).toLocaleTimeString()}
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex space-x-2">
-                        {user.status === 'pending' && (
-                          <>
-                            <Button
-                              size="sm"
-                              color="success"
-                              variant="flat"
-                              onPress={() => handleApprove(user._id)}
-                            >
-                              Approve
-                            </Button>
+            {selectedStatus === 'approved' ? (
+              <Table aria-label="Users table">
+                <TableHeader>
+                  <TableColumn>NAME</TableColumn>
+                  <TableColumn>EMAIL</TableColumn>
+                  <TableColumn>STATUS</TableColumn>
+                  <TableColumn>SUBSCRIPTION</TableColumn>
+                  <TableColumn>REGISTERED</TableColumn>
+                  <TableColumn>ACTIONS</TableColumn>
+                </TableHeader>
+                <TableBody emptyContent="No users found">
+                  {users.map((user) => (
+                    <TableRow key={user._id}>
+                      <TableCell>
+                        <div>
+                          <div className="font-medium text-gray-900">{user.name}</div>
+                          <div className="text-sm text-gray-500">{user.role}</div>
+                        </div>
+                      </TableCell>
+                      <TableCell>{user.email}</TableCell>
+                      <TableCell>
+                        <Chip 
+                          color={getStatusColor(user.status)} 
+                          variant="flat"
+                          size="sm"
+                        >
+                          {user.status.charAt(0).toUpperCase() + user.status.slice(1)}
+                        </Chip>
+                      </TableCell>
+                      <TableCell>
+                        <div className="text-sm">
+                          {getSubscriptionDisplay(user)}
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <div className="text-sm">
+                          {new Date(user.createdAt).toLocaleDateString()}
+                        </div>
+                        <div className="text-xs text-gray-500">
+                          {new Date(user.createdAt).toLocaleTimeString()}
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex space-x-2">
+                          {user.status === 'pending' && (
+                            <>
+                              <Button
+                                size="sm"
+                                color="success"
+                                variant="flat"
+                                onPress={() => handleApprove(user._id)}
+                              >
+                                Approve
+                              </Button>
+                              <Button
+                                size="sm"
+                                color="danger"
+                                variant="flat"
+                                onPress={() => openRejectModal(user)}
+                              >
+                                Reject
+                              </Button>
+                            </>
+                          )}
+                          {user.status === 'approved' && user.approvedAt && (
+                            <div className="text-xs text-gray-500">
+                              Approved on {new Date(user.approvedAt).toLocaleDateString()}
+                            </div>
+                          )}
+                          {canDeleteUser(user) && (
                             <Button
                               size="sm"
                               color="danger"
                               variant="flat"
-                              onPress={() => openRejectModal(user)}
+                              onPress={() => handleDelete(user._id)}
                             >
-                              Reject
+                              Delete
                             </Button>
-                          </>
-                        )}
-                        {user.status === 'approved' && user.approvedAt && (
-                          <div className="text-xs text-gray-500">
-                            Approved on {new Date(user.approvedAt).toLocaleDateString()}
-                          </div>
-                        )}
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+                          )}
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            ) : (
+              <Table aria-label="Users table">
+                <TableHeader>
+                  <TableColumn>NAME</TableColumn>
+                  <TableColumn>EMAIL</TableColumn>
+                  <TableColumn>STATUS</TableColumn>
+                  <TableColumn>REGISTERED</TableColumn>
+                  <TableColumn>ACTIONS</TableColumn>
+                </TableHeader>
+                <TableBody emptyContent="No users found">
+                  {users.map((user) => (
+                    <TableRow key={user._id}>
+                      <TableCell>
+                        <div>
+                          <div className="font-medium text-gray-900">{user.name}</div>
+                          <div className="text-sm text-gray-500">{user.role}</div>
+                        </div>
+                      </TableCell>
+                      <TableCell>{user.email}</TableCell>
+                      <TableCell>
+                        <Chip 
+                          color={getStatusColor(user.status)} 
+                          variant="flat"
+                          size="sm"
+                        >
+                          {user.status.charAt(0).toUpperCase() + user.status.slice(1)}
+                        </Chip>
+                      </TableCell>
+                      <TableCell>
+                        <div className="text-sm">
+                          {new Date(user.createdAt).toLocaleDateString()}
+                        </div>
+                        <div className="text-xs text-gray-500">
+                          {new Date(user.createdAt).toLocaleTimeString()}
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex space-x-2">
+                          {user.status === 'pending' && (
+                            <>
+                              <Button
+                                size="sm"
+                                color="success"
+                                variant="flat"
+                                onPress={() => handleApprove(user._id)}
+                              >
+                                Approve
+                              </Button>
+                              <Button
+                                size="sm"
+                                color="danger"
+                                variant="flat"
+                                onPress={() => openRejectModal(user)}
+                              >
+                                Reject
+                              </Button>
+                            </>
+                          )}
+                          {user.status === 'approved' && user.approvedAt && (
+                            <div className="text-xs text-gray-500">
+                              Approved on {new Date(user.approvedAt).toLocaleDateString()}
+                            </div>
+                          )}
+                          {canDeleteUser(user) && (
+                            <Button
+                              size="sm"
+                              color="danger"
+                              variant="flat"
+                              onPress={() => handleDelete(user._id)}
+                            >
+                              Delete
+                            </Button>
+                          )}
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            )}
 
             {pagination && pagination.totalPages > 1 && (
               <div className="flex justify-center mt-6">

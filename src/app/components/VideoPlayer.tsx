@@ -37,13 +37,53 @@ export default function VideoPlayer({
   // Debug logging
   console.log('VideoPlayer render:', { isOpen, videoUrl, title, contentId })
   
+  // State for secure video handling
+  const [secureVideoUrl, setSecureVideoUrl] = useState<string>('')
+  const [videoLoading, setVideoLoading] = useState(false)
+  const [videoError, setVideoError] = useState<string>('')
+
+  // Check if this is a YouTube URL
+  const isYouTubeUrl = videoUrl.includes('youtube.com') || videoUrl.includes('youtu.be')
+
   // Extract YouTube video ID and create embed URL
-  const getYouTubeEmbedUrl = (url: string) => {
+  const getYouTubeEmbedUrl = async (url: string) => {
     const regex = /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/
     const match = url.match(regex)
+    
     if (match) {
-      return `https://www.youtube.com/embed/${match[1]}?enablejsapi=1&rel=0&modestbranding=1`
+      const videoId = match[1]
+      
+      try {
+        // Check if this might be a private/unlisted video requiring secure access
+        setVideoLoading(true)
+        setVideoError('')
+        
+        // Try to get secure access first
+        const response = await fetch(`/api/video/secure/${videoId}`, {
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        })
+        
+        if (response.ok) {
+          const data = await response.json()
+          console.log('Secure video access granted:', data.data.title)
+          return data.data.secureEmbedUrl
+        } else {
+          // Fallback to standard embed for public videos
+          console.log('Using standard embed for public video')
+          return `https://www.youtube.com/embed/${videoId}?enablejsapi=1&rel=0&modestbranding=1`
+        }
+      } catch (error) {
+        console.error('Error accessing secure video:', error)
+        setVideoError('Failed to load video. Please try again.')
+        // Fallback to standard embed
+        return `https://www.youtube.com/embed/${videoId}?enablejsapi=1&rel=0&modestbranding=1`
+      } finally {
+        setVideoLoading(false)
+      }
     }
+    
     return url
   }
 
@@ -98,6 +138,30 @@ export default function VideoPlayer({
     }
   }, [isOpen, contentId, hasAttempted, onAttemptUpdate])
 
+  // Load secure video URL when component opens
+  useEffect(() => {
+    if (isOpen && isYouTubeUrl) {
+      const loadSecureVideo = async () => {
+        try {
+          const secureUrl = await getYouTubeEmbedUrl(videoUrl)
+          setSecureVideoUrl(secureUrl)
+        } catch (error) {
+          console.error('Failed to load secure video:', error)
+          setVideoError('Failed to load video')
+        }
+      }
+      
+      loadSecureVideo()
+    }
+    
+    // Reset states when closing
+    if (!isOpen) {
+      setSecureVideoUrl('')
+      setVideoError('')
+      setVideoLoading(false)
+    }
+  }, [isOpen, videoUrl, isYouTubeUrl])
+
   const handleVideoLoad = () => {
     // Video loaded successfully
     console.log('Video loaded successfully')
@@ -113,8 +177,6 @@ export default function VideoPlayer({
       }
     }
   }
-
-  const isYouTubeUrl = videoUrl.includes('youtube.com') || videoUrl.includes('youtu.be')
 
   return (
     <Modal 
@@ -151,14 +213,50 @@ export default function VideoPlayer({
           <div ref={containerRef} className="relative w-full">
             {isYouTubeUrl ? (
               <div className="relative w-full" style={{ paddingBottom: '56.25%' }}>
-                <iframe
-                  src={getYouTubeEmbedUrl(videoUrl)}
-                  className="absolute top-0 left-0 w-full h-full rounded-lg"
-                  frameBorder="0"
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                  allowFullScreen
-                  title={title}
-                />
+                {videoLoading && (
+                  <div className="absolute top-0 left-0 w-full h-full flex items-center justify-center bg-gray-100 rounded-lg">
+                    <div className="text-center">
+                      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-2"></div>
+                      <p className="text-sm text-gray-600">Loading secure video...</p>
+                    </div>
+                  </div>
+                )}
+                {videoError && (
+                  <div className="absolute top-0 left-0 w-full h-full flex items-center justify-center bg-red-50 rounded-lg">
+                    <div className="text-center">
+                      <p className="text-red-600 mb-2">{videoError}</p>
+                      <Button
+                        size="sm"
+                        variant="flat"
+                        color="primary"
+                        onPress={() => {
+                          setVideoError('')
+                          setVideoLoading(true)
+                          getYouTubeEmbedUrl(videoUrl).then(url => {
+                            setSecureVideoUrl(url)
+                            setVideoLoading(false)
+                          }).catch(() => {
+                            setVideoError('Failed to reload video')
+                            setVideoLoading(false)
+                          })
+                        }}
+                      >
+                        Retry
+                      </Button>
+                    </div>
+                  </div>
+                )}
+                {!videoLoading && !videoError && secureVideoUrl && (
+                  <iframe
+                    src={secureVideoUrl}
+                    className="absolute top-0 left-0 w-full h-full rounded-lg"
+                    frameBorder="0"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowFullScreen
+                    title={title}
+                    referrerPolicy="strict-origin-when-cross-origin"
+                  />
+                )}
               </div>
             ) : (
               <div className="relative">

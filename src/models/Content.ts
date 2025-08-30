@@ -18,6 +18,13 @@ export interface IContent extends mongoose.Document {
   updatedAt: Date
   createdBy?: string // Reference to the admin who created it
   isActive: boolean // For enabling/disabling content
+  
+  // Video access control fields
+  isPrivateVideo?: boolean // Whether video requires enhanced security
+  videoAccessLevel?: 'public' | 'unlisted' | 'private' // YouTube privacy level
+  allowedUserRoles?: string[] // Roles that can access this video
+  domainRestrictions?: string[] // Domains allowed to embed this video
+  requiresSubscription?: boolean // Whether active subscription is needed
 }
 
 const contentSchema = new mongoose.Schema({
@@ -138,6 +145,45 @@ const contentSchema = new mongoose.Schema({
     type: Boolean,
     default: true,
     index: true
+  },
+  
+  // Video access control fields
+  isPrivateVideo: {
+    type: Boolean,
+    default: false,
+    index: true
+  },
+  videoAccessLevel: {
+    type: String,
+    enum: ['public', 'unlisted', 'private'],
+    default: 'public'
+  },
+  allowedUserRoles: {
+    type: [String],
+    default: ['student', 'admin', 'superadmin'],
+    validate: {
+      validator: function(roles: string[]) {
+        const validRoles = ['student', 'admin', 'superadmin']
+        return roles.every(role => validRoles.includes(role))
+      },
+      message: 'Invalid user role specified'
+    }
+  },
+  domainRestrictions: {
+    type: [String],
+    default: [],
+    validate: {
+      validator: function(domains: string[]) {
+        const domainRegex = /^[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}(:[0-9]+)?$|^localhost(:[0-9]+)?$/
+        return domains.every(domain => domainRegex.test(domain))
+      },
+      message: 'Invalid domain format'
+    }
+  },
+  requiresSubscription: {
+    type: Boolean,
+    default: true,
+    index: true
   }
 })
 
@@ -149,6 +195,8 @@ contentSchema.index({ chapter: 1, topic: 1 })
 contentSchema.index({ isActive: 1, createdAt: -1 })
 contentSchema.index({ unit: 1, chapter: 1, sequenceNo: 1 })
 contentSchema.index({ docCategory: 1, sequenceNo: 1 })
+contentSchema.index({ isPrivateVideo: 1, contentType: 1 })
+contentSchema.index({ videoAccessLevel: 1, isActive: 1 })
 
 // Update the updatedAt field before saving
 contentSchema.pre('save', function(next) {

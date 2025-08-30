@@ -110,11 +110,33 @@ export default function PracticeProblems() {
   }
 
   const handleAttemptUpdate = async (contentId: string, attempted: boolean) => {
-    // Add a delay to prevent immediate re-render that resets ContentViewer state
-    // This allows the PDF/Video viewer to stay open
-    setTimeout(() => {
-      refetch()
-    }, 500)
+    try {
+      console.log('Updating progress for content:', contentId, 'attempted:', attempted)
+      
+      // Make API call to save progress
+      const response = await fetch('/api/progress', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          contentId,
+          status: attempted ? 'attempted' : 'not_attempted'
+        })
+      })
+
+      if (response.ok) {
+        const data = await response.json()
+        console.log('Progress updated successfully:', data)
+        
+        // Don't refresh content data immediately to avoid modal closing
+        // The UI will be updated when the modal is closed and reopened
+      } else {
+        console.error('Failed to update progress:', response.statusText)
+      }
+    } catch (error) {
+      console.error('Error updating progress:', error)
+    }
   }
 
   if (status === 'loading' || loading) {
@@ -311,6 +333,10 @@ export default function PracticeProblems() {
             onClose={() => {
               setShowContentViewer(false)
               setSelectedContent(null)
+              // Refresh content data when modal closes to update attempt status
+              setTimeout(() => {
+                refetch()
+              }, 100)
             }}
             content={{
               _id: selectedContent._id,

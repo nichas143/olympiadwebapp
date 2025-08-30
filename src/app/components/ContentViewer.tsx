@@ -55,12 +55,17 @@ export default function ContentViewer({
   }, [isOpen, pendingAttemptUpdate, onAttemptUpdate])
 
   const handleAttemptUpdate = useCallback((contentId: string, attempted: boolean) => {
-    console.log('Content marked as attempted, storing for later:', contentId)
+    console.log('Content marked as attempted:', contentId)
     
-    // Store the attempt update for when the modal closes instead of updating parent immediately
-    // This completely prevents parent re-renders while modal is open
+    // For immediate UI feedback, we'll update the parent immediately
+    // but also store for backup when modal closes
     setPendingAttemptUpdate({ contentId, attempted })
-  }, [])
+    
+    // Immediate update for better UX (without refreshing the modal)
+    if (onAttemptUpdate) {
+      onAttemptUpdate(contentId, attempted)
+    }
+  }, [onAttemptUpdate])
 
   const handleOpenContent = useCallback(() => {
     if (!content.videoLink) {

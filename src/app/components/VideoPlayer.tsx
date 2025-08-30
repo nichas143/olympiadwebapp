@@ -1,6 +1,14 @@
 'use client'
 
 import { useState, useRef, useEffect } from 'react'
+
+// YouTube API type declarations
+declare global {
+  interface Window {
+    YT: any
+    onYouTubeIframeAPIReady: () => void
+  }
+}
 import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, Button, Card, CardBody, Chip } from "@heroui/react"
 import { PlayCircleIcon, PauseIcon, SpeakerWaveIcon, SpeakerXMarkIcon, CheckCircleIcon } from '@heroicons/react/24/outline'
 // import ProgressTracker from './ProgressTracker' // Unused for now
@@ -35,12 +43,27 @@ export default function VideoPlayer({
   const containerRef = useRef<HTMLDivElement>(null)
   
   // Debug logging
-  console.log('VideoPlayer render:', { isOpen, videoUrl, title, contentId })
+  console.log('VideoPlayer render:', { 
+    isOpen, 
+    videoUrl, 
+    title, 
+    contentId, 
+    hasOnAttemptUpdate: !!onAttemptUpdate,
+    hasAttempted,
+    initialAttemptStatus 
+  })
   
   // State for secure video handling
   const [secureVideoUrl, setSecureVideoUrl] = useState<string>('')
   const [videoLoading, setVideoLoading] = useState(false)
   const [videoError, setVideoError] = useState<string>('')
+
+  // YouTube player tracking
+  const [youtubePlayer, setYoutubePlayer] = useState<any>(null)
+  const [watchTime, setWatchTime] = useState(0)
+  const progressCheckInterval = useRef<NodeJS.Timeout | null>(null)
+  const isTrackingStarted = useRef<boolean>(false)
+  const hasCalledAttemptUpdate = useRef<boolean>(false)
 
   // Check if this is a YouTube URL
   const isYouTubeUrl = videoUrl.includes('youtube.com') || videoUrl.includes('youtu.be')
@@ -132,11 +155,13 @@ export default function VideoPlayer({
   // }, [])
 
   useEffect(() => {
-    if (isOpen && contentId && !hasAttempted) {
-      // Don't mark as attempted immediately when video opens
-      console.log('Video player opened')
+    if (isOpen && contentId) {
+      // Reset attempted status based on initialAttemptStatus when video opens
+      setHasAttempted(initialAttemptStatus)
+      hasCalledAttemptUpdate.current = false
+      console.log('Video player opened for contentId:', contentId, 'initialAttemptStatus:', initialAttemptStatus)
     }
-  }, [isOpen, contentId, hasAttempted, onAttemptUpdate])
+  }, [isOpen, contentId, initialAttemptStatus])
 
   // Load secure video URL when component opens
   useEffect(() => {
@@ -159,8 +184,195 @@ export default function VideoPlayer({
       setSecureVideoUrl('')
       setVideoError('')
       setVideoLoading(false)
+      setWatchTime(0)
+      
+      // Clear any progress tracking intervals
+      if (progressCheckInterval.current) {
+        clearInterval(progressCheckInterval.current)
+        progressCheckInterval.current = null
+      }
+      
+      // Reset tracking flags
+      isTrackingStarted.current = false
+      hasCalledAttemptUpdate.current = false
     }
   }, [isOpen, videoUrl, isYouTubeUrl])
+
+  // YouTube iframe API integration for progress tracking
+  useEffect(() => {
+    if (!isOpen || !isYouTubeUrl || !secureVideoUrl) return
+
+    console.log('🎬 Setting up video tracking for contentId:', contentId)
+
+    // Define fallback tracking function first
+    const startFallbackTracking = () => {
+      // Prevent multiple tracking instances
+      if (isTrackingStarted.current) {
+        console.log('⚠️ Tracking already started, skipping duplicate')
+        return
+      }
+      
+      console.log('🔄 Starting fallback tracking for video')
+      isTrackingStarted.current = true
+      
+      // Clear any existing interval first
+      if (progressCheckInterval.current) {
+        clearInterval(progressCheckInterval.current)
+        progressCheckInterval.current = null
+      }
+      
+      // Primary tracking: check if user is still viewing the video every 3 seconds
+      progressCheckInterval.current = setInterval(() => {
+        if (isOpen && contentId && onAttemptUpdate) {
+          setWatchTime(prev => {
+            const newTime = prev + 3
+            console.log('⏱️ Video tracking - watch time:', newTime, 'seconds')
+            
+            // Mark as attempted after 10 seconds (only if not already attempted)
+            if (newTime >= 10 && !hasAttempted && !hasCalledAttemptUpdate.current) {
+              console.log('🎯 Video watched for 10+ seconds, marking as attempted')
+              setHasAttempted(true)
+              hasCalledAttemptUpdate.current = true
+              
+              // Use setTimeout to avoid React render cycle issues
+              setTimeout(() => {
+                onAttemptUpdate(contentId, true)
+              }, 0)
+              
+              // Clear interval once attempted
+              if (progressCheckInterval.current) {
+                clearInterval(progressCheckInterval.current)
+                progressCheckInterval.current = null
+              }
+            }
+            return newTime
+          })
+        } else {
+          console.log('⏹️ Video tracking stopped - conditions not met')
+        }
+      }, 3000) // Check every 3 seconds for faster response
+    }
+
+    // Always start fallback tracking immediately as primary method
+    // This ensures tracking works regardless of YouTube API status
+    if (contentId && onAttemptUpdate) {
+      console.log('▶️ Starting immediate fallback tracking (primary method)')
+      startFallbackTracking()
+    }
+
+    // Load YouTube iframe API as secondary enhancement
+    const loadYouTubeAPI = () => {
+      if (window.YT && window.YT.Player) {
+        initializeYouTubePlayer()
+        return
+      }
+
+      // Load YouTube API if not already loaded
+      if (!document.querySelector('script[src*="youtube.com/iframe_api"]')) {
+        const tag = document.createElement('script')
+        tag.src = 'https://www.youtube.com/iframe_api'
+        const firstScriptTag = document.getElementsByTagName('script')[0]
+        firstScriptTag.parentNode?.insertBefore(tag, firstScriptTag)
+      }
+
+      // Set up callback for when API is ready
+      window.onYouTubeIframeAPIReady = initializeYouTubePlayer
+    }
+
+    const initializeYouTubePlayer = () => {
+      // Wait a bit for iframe to be ready
+      setTimeout(() => {
+        const iframeId = `youtube-player-${contentId || 'default'}`
+        const iframe = document.getElementById(iframeId)
+        
+        if (iframe && window.YT && window.YT.Player) {
+          try {
+            const player = new window.YT.Player(iframeId, {
+              events: {
+                onStateChange: handleYouTubeStateChange,
+                onReady: handleYouTubeReady
+              }
+            })
+            setYoutubePlayer(player)
+            console.log('YouTube player initialized successfully')
+          } catch (error) {
+            console.error('Error initializing YouTube player:', error)
+            // Fallback to interval-based tracking
+            startFallbackTracking()
+          }
+        } else {
+          console.log('YouTube API not ready or iframe not found, using fallback tracking')
+          // Fallback to interval-based tracking
+          startFallbackTracking()
+        }
+      }, 1500) // Increased timeout to ensure iframe is fully loaded
+    }
+
+    loadYouTubeAPI()
+
+    return () => {
+      if (progressCheckInterval.current) {
+        clearInterval(progressCheckInterval.current)
+        progressCheckInterval.current = null
+      }
+      isTrackingStarted.current = false
+      hasCalledAttemptUpdate.current = false
+    }
+  }, [isOpen, isYouTubeUrl, secureVideoUrl, contentId])
+
+  const handleYouTubeReady = (event: any) => {
+    console.log('YouTube player ready')
+  }
+
+  const handleYouTubeStateChange = (event: any) => {
+    console.log('YouTube state change:', event.data, 'contentId:', contentId, 'hasAttempted:', hasAttempted)
+    
+    if (!contentId || !onAttemptUpdate || hasAttempted) {
+      console.log('Skipping state change handling - missing data or already attempted')
+      return
+    }
+
+    // YouTube player states:
+    // -1 (unstarted), 0 (ended), 1 (playing), 2 (paused), 3 (buffering), 5 (video cued)
+    
+    if (event.data === 1) { // Playing
+      console.log('YouTube video started playing - starting progress tracking')
+      
+      // Start tracking watch time
+      if (!progressCheckInterval.current) {
+        progressCheckInterval.current = setInterval(() => {
+          if (youtubePlayer && youtubePlayer.getCurrentTime) {
+            try {
+              const currentTime = youtubePlayer.getCurrentTime()
+              console.log('YouTube current time:', currentTime)
+              
+              if (currentTime >= 10 && !hasCalledAttemptUpdate.current) {
+                console.log('🎯 Video watched for 10+ seconds via YouTube API, marking as attempted')
+                setHasAttempted(true)
+                hasCalledAttemptUpdate.current = true
+                
+                // Use setTimeout to avoid React render cycle issues
+                setTimeout(() => {
+                  onAttemptUpdate(contentId, true)
+                }, 0)
+                
+                // Clear interval once attempted
+                if (progressCheckInterval.current) {
+                  clearInterval(progressCheckInterval.current)
+                  progressCheckInterval.current = null
+                }
+              }
+            } catch (error) {
+              console.error('Error getting YouTube current time:', error)
+            }
+          }
+        }, 2000) // Check every 2 seconds
+      }
+    } else if (event.data === 2 || event.data === 0) { // Paused or ended
+      // Keep tracking but don't clear interval yet
+      console.log('YouTube video paused/ended, state:', event.data)
+    }
+  }
 
   const handleVideoLoad = () => {
     // Video loaded successfully
@@ -197,7 +409,7 @@ export default function VideoPlayer({
                 <p className="text-sm text-gray-600">{description}</p>
               )}
             </div>
-            {hasAttempted && (
+            {(hasAttempted || initialAttemptStatus) && (
               <Chip
                 startContent={<CheckCircleIcon className="h-4 w-4" />}
                 color="success"
@@ -205,6 +417,15 @@ export default function VideoPlayer({
                 size="sm"
               >
                 Attempted
+              </Chip>
+            )}
+            {!hasAttempted && !initialAttemptStatus && watchTime > 0 && (
+              <Chip
+                color="warning"
+                variant="flat"
+                size="sm"
+              >
+                Watching... {Math.floor(watchTime)}s
               </Chip>
             )}
           </div>
@@ -248,6 +469,7 @@ export default function VideoPlayer({
                 )}
                 {!videoLoading && !videoError && secureVideoUrl && (
                   <iframe
+                    id={`youtube-player-${contentId || 'default'}`}
                     src={secureVideoUrl}
                     className="absolute top-0 left-0 w-full h-full rounded-lg"
                     frameBorder="0"

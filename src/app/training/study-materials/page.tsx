@@ -215,16 +215,16 @@ export default function StudyMaterials() {
             selectedKeys={[selectedUnit]}
             onSelectionChange={(keys) => setSelectedUnit(Array.from(keys)[0] as string)}
           >
-            <SelectItem key="all">All Units</SelectItem>
-            <SelectItem key="Algebra">Algebra</SelectItem>
-            <SelectItem key="Geometry">Geometry</SelectItem>
-            <SelectItem key="Number Theory">Number Theory</SelectItem>
-            <SelectItem key="Combinatorics">Combinatorics</SelectItem>
-            <SelectItem key="Functional Equations">Functional Equations</SelectItem>
-            <SelectItem key="Inequalities">Inequalities</SelectItem>
-            <SelectItem key="Advanced Math">Advanced Math</SelectItem>
-            <SelectItem key="Calculus">Calculus</SelectItem>
-            <SelectItem key="Other">Other</SelectItem>
+            <SelectItem key="all" className='text-black'>All Units</SelectItem>
+            <SelectItem key="Algebra" className='text-black'>Algebra</SelectItem>
+            <SelectItem key="Geometry" className='text-black'>Geometry</SelectItem>
+            <SelectItem key="Number Theory" className='text-black'>Number Theory</SelectItem>
+            <SelectItem key="Combinatorics" className='text-black'>Combinatorics</SelectItem>
+            <SelectItem key="Functional Equations" className='text-black'>Functional Equations</SelectItem>
+            <SelectItem key="Inequalities" className='text-black'>Inequalities</SelectItem>
+            <SelectItem key="Advanced Math" className='text-black'>Advanced Math</SelectItem>
+            <SelectItem key="Calculus" className='text-black'>Calculus</SelectItem>
+            <SelectItem key="Other" className='text-black'>Other</SelectItem>
           </Select>
           
           <Select
@@ -233,11 +233,11 @@ export default function StudyMaterials() {
             selectedKeys={[selectedContentType]}
             onSelectionChange={(keys) => setSelectedContentType(Array.from(keys)[0] as string)}
           >
-            <SelectItem key="all">All Types</SelectItem>
-            <SelectItem key="video">Videos</SelectItem>
-            <SelectItem key="pdf">PDFs</SelectItem>
-            <SelectItem key="link">Links</SelectItem>
-            <SelectItem key="testpaperLink">Test Papers</SelectItem>
+            <SelectItem key="all" className='text-black'>All Types</SelectItem>
+            <SelectItem key="video" className='text-black'>Videos</SelectItem>
+            <SelectItem key="pdf" className='text-black'>PDFs</SelectItem>
+            <SelectItem key="link" className='text-black'>Links</SelectItem>
+            <SelectItem key="testpaperLink" className='text-black'>Test Papers</SelectItem>
           </Select>
           
           <Select
@@ -246,9 +246,9 @@ export default function StudyMaterials() {
             selectedKeys={[selectedInstructionType]}
             onSelectionChange={(keys) => setSelectedInstructionType(Array.from(keys)[0] as string)}
           >
-            <SelectItem key="all">All Types</SelectItem>
-            <SelectItem key="conceptDiscussion">Concept Discussion</SelectItem>
-            <SelectItem key="problemDiscussion">Problem Discussion</SelectItem>
+            <SelectItem key="all" className='text-black'>All Types</SelectItem>
+            <SelectItem key="conceptDiscussion" className='text-black'>Concept Discussion</SelectItem>
+            <SelectItem key="problemDiscussion" className='text-black'>Problem Discussion</SelectItem>
           </Select>
           
           <Select
@@ -257,10 +257,10 @@ export default function StudyMaterials() {
             selectedKeys={[selectedDocCategory]}
             onSelectionChange={(keys) => setSelectedDocCategory(Array.from(keys)[0] as string)}
           >
-            <SelectItem key="all">All Categories</SelectItem>
-            <SelectItem key="Learning">Learning</SelectItem>
-            <SelectItem key="MockTest">Mock Test</SelectItem>
-            <SelectItem key="PracticeSet">Practice Set</SelectItem>
+            <SelectItem key="all" className='text-black'>All Categories</SelectItem>
+            <SelectItem key="Learning" className='text-black'>Learning</SelectItem>
+            <SelectItem key="MockTest" className='text-black'>Mock Test</SelectItem>
+            <SelectItem key="PracticeSet" className='text-black'>Practice Set</SelectItem>
           </Select>
         </div>
 

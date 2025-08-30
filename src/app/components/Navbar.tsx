@@ -21,6 +21,10 @@ export default function Navbar() {
   const [mounted, setMounted] = useState(false);
   const [isCancellingPayment, setIsCancellingPayment] = useState(false);
   const [freeAccess, setFreeAccess] = useState(false);
+  const [subscriptionInfo, setSubscriptionInfo] = useState<{
+    trialInfo?: { daysLeft: number; isExpired: boolean };
+    subscriptionInfo?: { daysLeft: number; plan?: string; isExpired: boolean };
+  } | null>(null);
 
   // Prevent hydration mismatch by only rendering after mount
   useEffect(() => {
@@ -111,10 +115,51 @@ export default function Navbar() {
     }
   }, [mounted]);
   
+  // Fetch subscription status
+  useEffect(() => {
+    const fetchSubscriptionStatus = async () => {
+      try {
+        const response = await fetch('/api/subscription/status');
+        if (response.ok) {
+          const data = await response.json();
+          setSubscriptionInfo({
+            trialInfo: data.trialInfo,
+            subscriptionInfo: data.subscriptionInfo
+          });
+        }
+      } catch (error) {
+        console.error('Error fetching subscription status:', error);
+      }
+    };
+
+    if (mounted && session) {
+      fetchSubscriptionStatus();
+      
+      // Refresh subscription status every 5 minutes
+      const interval = setInterval(fetchSubscriptionStatus, 5 * 60 * 1000);
+      
+      return () => clearInterval(interval);
+    }
+  }, [mounted, session]);
 
 
   const handleSignOut = async () => {
     await signOut({ callbackUrl: '/' });
+  };
+
+  const refreshSubscriptionStatus = async () => {
+    try {
+      const response = await fetch('/api/subscription/status');
+      if (response.ok) {
+        const data = await response.json();
+        setSubscriptionInfo({
+          trialInfo: data.trialInfo,
+          subscriptionInfo: data.subscriptionInfo
+        });
+      }
+    } catch (error) {
+      console.error('Error refreshing subscription status:', error);
+    }
   };
 
   const handleCancelPayment = async () => {
@@ -128,8 +173,8 @@ export default function Navbar() {
       });
       
       if (response.ok) {
-        // Refresh the page to update subscription status
-        router.refresh();
+        // Refresh subscription status instead of full page refresh
+        await refreshSubscriptionStatus();
       } else {
         console.error('Failed to cancel payment');
       }
@@ -349,12 +394,32 @@ export default function Navbar() {
                                   session.user.subscriptionPlan === 'monthly' ? 'Monthly' : 'Plan'})
                               </span>
                             )}
+                            {subscriptionInfo?.subscriptionInfo?.daysLeft !== undefined && (
+                              <span className={`text-xs ${
+                                subscriptionInfo.subscriptionInfo.daysLeft <= 7 
+                                  ? 'text-orange-600 font-medium' 
+                                  : 'text-gray-500'
+                              }`}>
+                                ({subscriptionInfo.subscriptionInfo.daysLeft} days left
+                                {subscriptionInfo.subscriptionInfo.daysLeft <= 7 && ' ⚠️'})
+                              </span>
+                            )}
                           </div>
                         )}
                         {session.user?.subscriptionStatus === 'trial' && (
                           <div className="flex items-center space-x-2">
                             <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
                             <span className="text-sm text-blue-600 font-medium">Free Trial</span>
+                            {subscriptionInfo?.trialInfo?.daysLeft !== undefined && (
+                              <span className={`text-xs ${
+                                subscriptionInfo.trialInfo.daysLeft <= 3 
+                                  ? 'text-orange-600 font-medium' 
+                                  : 'text-gray-500'
+                              }`}>
+                                ({subscriptionInfo.trialInfo.daysLeft} days left
+                                {subscriptionInfo.trialInfo.daysLeft <= 3 && ' ⚠️'})
+                              </span>
+                            )}
                           </div>
                         )}
                         {session.user?.subscriptionStatus === 'pending' && (
@@ -430,6 +495,28 @@ export default function Navbar() {
                         session.user?.subscriptionStatus === 'none' || 
                         session.user?.subscriptionStatus === 'expired' || 
                         session.user?.subscriptionStatus === 'cancelled') && (
+                        <Link
+                          href="/pricing"
+                          className="block px-4 py-2 text-sm text-blue-600 hover:bg-blue-50 font-medium"
+                          onClick={() => setIsUserDropdownOpen(false)}
+                        >
+                          🚀 Upgrade to Premium
+                        </Link>
+                      )}
+                      {!freeAccess && session.user?.subscriptionStatus === 'active' && 
+                        subscriptionInfo?.subscriptionInfo?.daysLeft !== undefined && 
+                        subscriptionInfo.subscriptionInfo.daysLeft <= 7 && (
+                        <Link
+                          href="/pricing"
+                          className="block px-4 py-2 text-sm text-orange-600 hover:bg-orange-50 font-medium"
+                          onClick={() => setIsUserDropdownOpen(false)}
+                        >
+                          🔄 Renew Subscription
+                        </Link>
+                      )}
+                      {session.user?.subscriptionStatus === 'trial' && 
+                        subscriptionInfo?.trialInfo?.daysLeft !== undefined && 
+                        subscriptionInfo.trialInfo.daysLeft <= 3 && (
                         <Link
                           href="/pricing"
                           className="block px-4 py-2 text-sm text-blue-600 hover:bg-blue-50 font-medium"

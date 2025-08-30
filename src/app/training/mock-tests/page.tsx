@@ -184,16 +184,16 @@ export default function MockTests() {
             onSelectionChange={(keys) => setSelectedUnit(Array.from(keys)[0] as string)}
             className="max-w-xs"
           >
-            <SelectItem key="all">All Units</SelectItem>
-            <SelectItem key="Algebra">Algebra</SelectItem>
-            <SelectItem key="Geometry">Geometry</SelectItem>
-            <SelectItem key="Number Theory">Number Theory</SelectItem>
-            <SelectItem key="Combinatorics">Combinatorics</SelectItem>
-            <SelectItem key="Functional Equations">Functional Equations</SelectItem>
-            <SelectItem key="Inequalities">Inequalities</SelectItem>
-            <SelectItem key="Advanced Math">Advanced Math</SelectItem>
-            <SelectItem key="Calculus">Calculus</SelectItem>
-            <SelectItem key="Other">Other</SelectItem>
+            <SelectItem key="all" className='text-black'>All Units</SelectItem>
+            <SelectItem key="Algebra" className='text-black'>Algebra</SelectItem>
+            <SelectItem key="Geometry" className='text-black'>Geometry</SelectItem>
+            <SelectItem key="Number Theory" className='text-black'>Number Theory</SelectItem>
+            <SelectItem key="Combinatorics" className='text-black'>Combinatorics</SelectItem>
+            <SelectItem key="Functional Equations" className='text-black'>Functional Equations</SelectItem>
+            <SelectItem key="Inequalities" className='text-black'>Inequalities</SelectItem>
+            <SelectItem key="Advanced Math" className='text-black'>Advanced Math</SelectItem>
+            <SelectItem key="Calculus" className='text-black'>Calculus</SelectItem>
+            <SelectItem key="Other" className='text-black'>Other</SelectItem>
           </Select>
         </div>
 

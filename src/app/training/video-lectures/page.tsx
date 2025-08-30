@@ -191,9 +191,9 @@ export default function VideoLectures() {
             selectedKeys={[selectedInstructionType]}
             onSelectionChange={(keys) => setSelectedInstructionType(Array.from(keys)[0] as string)}
           >
-            <SelectItem key="all">All Types</SelectItem>
-            <SelectItem key="conceptDiscussion">Concept Discussion</SelectItem>
-            <SelectItem key="problemDiscussion">Problem Discussion</SelectItem>
+            <SelectItem key="all" className='text-black'>All Types</SelectItem>
+            <SelectItem key="conceptDiscussion" className='text-black'>Concept Discussion</SelectItem>
+            <SelectItem key="problemDiscussion" className='text-black'>Problem Discussion</SelectItem>
           </Select>
         </div>
 

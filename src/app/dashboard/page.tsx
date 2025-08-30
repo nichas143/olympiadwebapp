@@ -2,7 +2,7 @@
 
 import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
-import { useEffect, useState } from 'react'
+import { useEffect } from 'react'
 import Link from "next/link"
 import { Button, Card, CardBody, CardHeader, Chip } from "@heroui/react"
 import { 
@@ -13,6 +13,7 @@ import {
   AcademicCapIcon,
   CheckCircleIcon
 } from '@heroicons/react/24/outline'
+import { useCachedDashboard } from '@/hooks/useCachedDashboard'
 
 interface ProgressSummary {
   summary: Array<{
@@ -27,8 +28,9 @@ interface ProgressSummary {
 export default function Dashboard() {
   const { data: session, status } = useSession()
   const router = useRouter()
-  const [progressData, setProgressData] = useState<ProgressSummary | null>(null)
-  const [loading, setLoading] = useState(true)
+  
+  // Use cached dashboard hook
+  const { progressData, loading, error, refetch, lastUpdated } = useCachedDashboard()
   
   useEffect(() => {
     if (status === 'loading') return
@@ -37,43 +39,6 @@ export default function Dashboard() {
       router.push('/auth/signin')
       return
     }
-
-    // Clean up any stale pending payments first
-    const cleanupPendingPayments = async () => {
-      try {
-        await fetch('/api/payment/cleanup-pending', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          }
-        })
-      } catch (error) {
-        console.error('Failed to cleanup pending payments:', error)
-      }
-    }
-
-    // Fetch progress summary
-    const fetchProgressSummary = async () => {
-      try {
-        const response = await fetch('/api/progress?summary=true')
-        if (response.ok) {
-          const data = await response.json()
-          console.log('Dashboard progress data:', data) // Debug log
-          setProgressData(data)
-        } else {
-          console.error('Failed to fetch progress summary:', response.status, response.statusText)
-        }
-      } catch (error) {
-        console.error('Failed to fetch progress summary:', error)
-      } finally {
-        setLoading(false)
-      }
-    }
-
-    // Run cleanup and then fetch progress
-    cleanupPendingPayments().then(() => {
-      fetchProgressSummary()
-    })
   }, [session, status, router])
 
   if (status === 'loading' || loading) {
@@ -82,6 +47,11 @@ export default function Dashboard() {
         <div className="text-center">
           <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600 mx-auto"></div>
           <p className="mt-4 text-gray-600">Loading dashboard...</p>
+          {lastUpdated && (
+            <p className="mt-2 text-sm text-gray-500">
+              Last updated: {lastUpdated.toLocaleTimeString()}
+            </p>
+          )}
         </div>
       </div>
     )
@@ -89,6 +59,23 @@ export default function Dashboard() {
 
   if (!session) {
     return null
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="text-red-600 text-xl mb-4">Error loading dashboard</div>
+          <p className="text-gray-600 mb-4">{error}</p>
+          <button 
+            onClick={refetch}
+            className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+          >
+            Retry
+          </button>
+        </div>
+      </div>
+    )
   }
 
   const getAttemptedCount = () => {
@@ -114,6 +101,17 @@ export default function Dashboard() {
           <p className="mt-2 text-gray-600">
             Continue your Olympiad preparation journey
           </p>
+          {lastUpdated && (
+            <p className="mt-1 text-sm text-gray-500">
+              Last updated: {lastUpdated.toLocaleTimeString()} • 
+              <button 
+                onClick={refetch}
+                className="ml-2 text-blue-600 hover:text-blue-700 underline"
+              >
+                Refresh
+              </button>
+            </p>
+          )}
         </div>
 
         {/* Stats Cards */}

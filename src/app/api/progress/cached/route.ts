@@ -7,7 +7,7 @@ import { UserProgress } from '@/models/UserProgress'
 export const revalidate = 60 // Revalidate every 1 minute for progress data
 export const dynamic = 'force-dynamic'
 
-// GET /api/progress/cached - Get cached progress for multiple content items
+// GET /api/progress/cached - Get cached progress for multiple content items or summary
 export async function GET(request: NextRequest) {
   try {
     const session = await auth()
@@ -18,10 +18,41 @@ export async function GET(request: NextRequest) {
     await connectDB()
 
     const { searchParams } = new URL(request.url)
+    const summary = searchParams.get('summary')
     const contentIds = searchParams.get('contentIds') // Comma-separated list of content IDs
 
+    // Handle summary request
+    if (summary === 'true') {
+      // Get progress summary for dashboard
+      const summaryData = await UserProgress.aggregate([
+        { $match: { userId: session.user.id } },
+        { $group: { _id: '$status', count: { $sum: 1 } } }
+      ])
+
+      // Get total content count
+      const { Content } = await import('@/models/Content')
+      const totalContent = await Content.countDocuments({ isActive: true })
+
+      // Calculate attempt rate
+      const attemptedCount = summaryData.find(item => item._id === 'attempted')?.count || 0
+      const attemptRate = totalContent > 0 ? Math.round((attemptedCount / totalContent) * 100) : 0
+
+      return NextResponse.json({
+        summary: summaryData,
+        totalContent,
+        attemptedContent: attemptedCount,
+        attemptRate,
+        cachedAt: new Date().toISOString()
+      }, {
+        headers: {
+          'Cache-Control': 'private, s-maxage=300, stale-while-revalidate=600', // 5 min cache, 10 min stale
+        }
+      })
+    }
+
+    // Handle individual content progress
     if (!contentIds) {
-      return NextResponse.json({ error: 'Content IDs are required' }, { status: 400 })
+      return NextResponse.json({ error: 'Content IDs are required for individual progress' }, { status: 400 })
     }
 
     const contentIdArray = contentIds.split(',').filter(id => id.trim())
@@ -30,23 +61,23 @@ export async function GET(request: NextRequest) {
     const progressRecords = await UserProgress.find({
       userId: session.user.id,
       contentId: { $in: contentIdArray }
-    }).select('contentId status completedAt')
+    }).select('contentId status attemptedAt')
 
     // Create a map for quick lookup
     const progressMap = new Map()
     progressRecords.forEach(record => {
       progressMap.set(record.contentId.toString(), {
         status: record.status,
-        completedAt: record.completedAt
+        attemptedAt: record.attemptedAt
       })
     })
 
     // Create response object with progress for each content ID
-    const progressData = {}
+    const progressData: Record<string, { status: string; attemptedAt: Date | null }> = {}
     contentIdArray.forEach(contentId => {
       progressData[contentId] = progressMap.get(contentId) || {
         status: 'not_attempted',
-        completedAt: null
+        attemptedAt: null
       }
     })
 

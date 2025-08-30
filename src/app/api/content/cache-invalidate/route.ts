@@ -16,6 +16,7 @@ export async function POST(request: NextRequest) {
     revalidatePath('/training/practice-problems')
     revalidatePath('/training/mock-tests')
     revalidatePath('/training/video-lectures')
+    revalidatePath('/dashboard')
     revalidatePath('/api/content/cached')
     revalidatePath('/api/progress/cached')
 

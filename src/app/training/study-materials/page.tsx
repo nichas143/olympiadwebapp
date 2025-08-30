@@ -108,8 +108,11 @@ export default function StudyMaterials() {
   }
 
   const handleAttemptUpdate = async (contentId: string, attempted: boolean) => {
-    // Refetch content to update attempt status
-    refetch()
+    // Add a delay to prevent immediate re-render that resets ContentViewer state
+    // This allows the PDF/Video viewer to stay open
+    setTimeout(() => {
+      refetch()
+    }, 500)
   }
 
   const handleImageError = (contentId: string) => {

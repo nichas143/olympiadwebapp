@@ -48,7 +48,7 @@ export function useCachedDashboard(): CachedDashboardResult {
       setError(null)
 
       // Cancel previous request if it exists
-      if (abortControllerRef.current) {
+      if (abortControllerRef.current && !abortControllerRef.current.signal.aborted) {
         abortControllerRef.current.abort()
       }
       abortControllerRef.current = new AbortController()
@@ -63,7 +63,10 @@ export function useCachedDashboard(): CachedDashboardResult {
           signal: abortControllerRef.current.signal
         })
       } catch (error) {
-        console.error('Failed to cleanup pending payments:', error)
+        // Only log if it's not an abort error
+        if (!(error instanceof Error && error.name === 'AbortError')) {
+          console.error('Failed to cleanup pending payments:', error)
+        }
       }
 
       // Fetch progress summary from cached API
@@ -111,8 +114,13 @@ export function useCachedDashboard(): CachedDashboardResult {
   // Cleanup on unmount
   useEffect(() => {
     return () => {
-      if (abortControllerRef.current) {
-        abortControllerRef.current.abort()
+      if (abortControllerRef.current && !abortControllerRef.current.signal.aborted) {
+        try {
+          abortControllerRef.current.abort()
+        } catch (error) {
+          // Ignore abort errors during cleanup
+          console.debug('Abort during cleanup:', error)
+        }
       }
     }
   }, [])

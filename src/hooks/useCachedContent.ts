@@ -16,7 +16,6 @@ interface Content {
   noOfProblems?: number
   createdAt: string
   updatedAt: string
-  createdBy?: string
   isActive: boolean
 }
 
@@ -29,9 +28,11 @@ interface CachedContentOptions {
   contentType?: string
   instructionType?: string
   docCategory?: string
-  sortBy?: string
-  page?: number
+  chapter?: string
+  topic?: string
+  sortBy?: 'sequence' | 'newest' | 'alphabetical'
   limit?: number
+  page?: number
 }
 
 interface CachedContentResult {
@@ -64,7 +65,7 @@ export function useCachedContent(options: CachedContentOptions = {}): CachedCont
   }, [])
 
   // Fetch content with caching
-  const fetchContent = useCallback(async (opts: CachedContentOptions = {}) => {
+  const fetchContent = useCallback(async (opts: CachedContentOptions) => {
     const cacheKey = createCacheKey(opts)
     const now = Date.now()
     
@@ -83,7 +84,7 @@ export function useCachedContent(options: CachedContentOptions = {}): CachedCont
       setError(null)
 
       // Cancel previous request if it exists
-      if (abortControllerRef.current) {
+      if (abortControllerRef.current && !abortControllerRef.current.signal.aborted) {
         abortControllerRef.current.abort()
       }
       abortControllerRef.current = new AbortController()
@@ -128,27 +129,27 @@ export function useCachedContent(options: CachedContentOptions = {}): CachedCont
       }
 
       // Combine content with progress data
-      const contentWithAttempts = contentData.content.map((item: Content) => ({
+      const contentWithProgress: ContentWithAttempt[] = contentData.content.map((item: Content) => ({
         ...item,
-        attemptStatus: (progressData[item._id]?.status || 'not_attempted') as 'not_attempted' | 'attempted'
+        attemptStatus: progressData[item._id]?.status || 'not_attempted'
       }))
 
       // Update state
-      setContent(contentWithAttempts)
+      setContent(contentWithProgress)
       setLastUpdated(new Date())
 
       // Cache the result
       contentCache.set(cacheKey, {
-        data: contentWithAttempts,
+        data: contentWithProgress,
         timestamp: now,
-        ttl: 5 * 60 * 1000 // 5 minutes TTL
+        ttl: 5 * 60 * 1000 // 5 minutes TTL for content data
       })
 
     } catch (err) {
       if (err instanceof Error && err.name === 'AbortError') {
         return // Request was cancelled
       }
-      console.error('Error fetching cached content:', err)
+      console.error('Error fetching content:', err)
       setError(err instanceof Error ? err.message : 'Failed to fetch content')
     } finally {
       setLoading(false)
@@ -163,8 +164,13 @@ export function useCachedContent(options: CachedContentOptions = {}): CachedCont
   // Cleanup on unmount
   useEffect(() => {
     return () => {
-      if (abortControllerRef.current) {
-        abortControllerRef.current.abort()
+      if (abortControllerRef.current && !abortControllerRef.current.signal.aborted) {
+        try {
+          abortControllerRef.current.abort()
+        } catch (error) {
+          // Ignore abort errors during cleanup
+          console.debug('Abort during cleanup:', error)
+        }
       }
     }
   }, [])

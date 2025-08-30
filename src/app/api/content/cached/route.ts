@@ -10,6 +10,11 @@ export const dynamic = 'force-dynamic' // Force dynamic rendering for authentica
 // GET /api/content/cached - Get cached content with filtering
 export async function GET(request: NextRequest) {
   try {
+    const session = await auth()
+    if (!session?.user?.id) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
     await connectDB()
 
     const { searchParams } = new URL(request.url)
@@ -75,9 +80,9 @@ export async function GET(request: NextRequest) {
       cachedAt: new Date().toISOString()
     }, {
       headers: {
-        'Cache-Control': 'public, s-maxage=300, stale-while-revalidate=600', // 5 min cache, 10 min stale
-        'CDN-Cache-Control': 'public, s-maxage=300',
-        'Vercel-CDN-Cache-Control': 'public, s-maxage=300'
+        'Cache-Control': 'private, s-maxage=300, stale-while-revalidate=600', // Changed to private for authenticated requests
+        'CDN-Cache-Control': 'private, s-maxage=300',
+        'Vercel-CDN-Cache-Control': 'private, s-maxage=300'
       }
     })
   } catch (error) {

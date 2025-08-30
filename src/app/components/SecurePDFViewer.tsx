@@ -38,6 +38,9 @@ export default function SecurePDFViewer({
 
   const isGoogleDrive = pdfUrl.includes('drive.google.com')
 
+  // Debug logging
+  console.log('SecurePDFViewer render:', { isOpen, pdfUrl, title, contentId })
+
   // Get secure PDF file
   const loadSecurePDF = useCallback(async () => {
     if (!pdfUrl) return
@@ -72,14 +75,9 @@ export default function SecurePDFViewer({
       
       loadSecurePDF()
       
-      // Mark as attempted when PDF opens
-      if (contentId && !hasAttempted) {
-        ProgressTracker.markAsAttempted(contentId)
-        setHasAttempted(true)
-        if (onAttemptUpdate) {
-          onAttemptUpdate(contentId, true)
-        }
-      }
+      // Don't mark as attempted immediately when PDF opens
+      // Only mark when user actually views the PDF
+      console.log('PDF viewer opened, waiting for user interaction')
       
       // Prevent keyboard shortcuts for save/print
       const handleKeyDown = (e: KeyboardEvent) => {
@@ -109,6 +107,8 @@ export default function SecurePDFViewer({
     setNumPages(numPages)
     setIsLoading(false)
     setError(null)
+    
+    console.log('PDF loaded successfully')
   }
 
   const onDocumentLoadError = (error: Error) => {
@@ -132,6 +132,13 @@ export default function SecurePDFViewer({
 
   const changeScale = (newScale: number) => {
     setScale(Math.max(0.5, Math.min(2.0, newScale)))
+  }
+
+  const handleRetry = () => {
+    setError(null)
+    setIsLoading(true)
+    setPdfFile(null)
+    loadSecurePDF()
   }
 
   return (
@@ -197,7 +204,13 @@ export default function SecurePDFViewer({
                   <DocumentIcon className="h-12 w-12 text-gray-400 mx-auto mb-4" />
                   <h3 className="text-lg font-medium text-gray-900 mb-2">Unable to load PDF</h3>
                   <p className="text-gray-500 mb-4">{error}</p>
-                  <p className="text-gray-500">Please try refreshing the page or contact support if the issue persists.</p>
+                  <Button 
+                    variant="flat" 
+                    color="primary" 
+                    onPress={handleRetry}
+                  >
+                    Retry
+                  </Button>
                 </div>
               </div>
             )}

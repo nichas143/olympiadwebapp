@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import dynamic from 'next/dynamic'
 import VideoPlayer from './VideoPlayer'
 
@@ -28,45 +28,76 @@ interface ContentViewerProps {
   onAttemptUpdate?: (contentId: string, attempted: boolean) => void
 }
 
+type ViewerMode = 'selector' | 'video' | 'pdf'
+
 export default function ContentViewer({ 
   isOpen, 
   onClose, 
   content, 
   onAttemptUpdate 
 }: ContentViewerProps) {
-  const [showVideoPlayer, setShowVideoPlayer] = useState(false)
-  const [showPDFViewer, setShowPDFViewer] = useState(false)
+  const [viewerMode, setViewerMode] = useState<ViewerMode>('selector')
+  const [hasInitialized, setHasInitialized] = useState(false)
 
-  const handleAttemptUpdate = (contentId: string, attempted: boolean) => {
-    if (onAttemptUpdate) {
-      onAttemptUpdate(contentId, attempted)
+  // Initialize state only once when modal opens
+  useEffect(() => {
+    if (isOpen && !hasInitialized) {
+      setViewerMode('selector')
+      setHasInitialized(true)
+      console.log('ContentViewer initialized')
+    } else if (!isOpen && hasInitialized) {
+      setHasInitialized(false)
+      console.log('ContentViewer reset')
     }
-  }
+  }, [isOpen, hasInitialized])
 
-  const handleOpenContent = () => {
+  const handleAttemptUpdate = useCallback((contentId: string, attempted: boolean) => {
+    // Don't call onAttemptUpdate to prevent parent re-renders
+    console.log('Attempt update received but not propagating to prevent re-render')
+  }, [])
+
+  const handleOpenContent = useCallback(() => {
     if (!content.videoLink) {
+      console.log('Content has no videoLink:', content)
       return
     }
 
+    console.log('Opening content:', {
+      contentType: content.contentType,
+      videoLink: content.videoLink,
+      contentId: content._id
+    })
+
     switch (content.contentType) {
       case 'video':
-        setShowVideoPlayer(true)
+        console.log('Setting viewer mode to video')
+        setViewerMode('video')
         break
       case 'pdf':
-        setShowPDFViewer(true)
+        console.log('Setting viewer mode to pdf')
+        setViewerMode('pdf')
         break
       case 'link':
       case 'testpaperLink':
+        console.log('Opening external link:', content.videoLink)
         // Open external links in new tab
         window.open(content.videoLink, '_blank')
-        // Mark as attempted for external links
+        // Mark as attempted for external links immediately
         if (onAttemptUpdate) {
           onAttemptUpdate(content._id, true)
         }
         onClose()
         break
+      default:
+        console.log('Unknown content type:', content.contentType)
     }
-  }
+  }, [content, onAttemptUpdate, onClose])
+
+  const handleCloseViewer = useCallback(() => {
+    console.log('Closing viewer, returning to selector')
+    setViewerMode('selector')
+    onClose()
+  }, [onClose])
 
   const getContentTypeIcon = () => {
     switch (content.contentType) {
@@ -112,108 +143,134 @@ export default function ContentViewer({
     }
   }
 
-  return (
-    <>
-      {/* Main Content Selector Modal */}
-      <Modal 
-        isOpen={isOpen && !showVideoPlayer && !showPDFViewer} 
-        onClose={onClose}
-        size="2xl"
-      >
-        <ModalContent>
-          <ModalHeader>
-            <div className="flex items-center gap-3">
-              {getContentTypeIcon()}
-              <div>
-                <h3 className="text-xl font-semibold">{content.concept}</h3>
-                <p className="text-sm text-gray-500">{getContentTypeText()}</p>
+  // Debug logging
+  console.log('ContentViewer render state:', {
+    isOpen,
+    viewerMode,
+    hasInitialized,
+    contentType: content.contentType
+  })
+
+  // If not open, don't render anything
+  if (!isOpen) {
+    return null
+  }
+
+  // Render based on viewer mode
+  switch (viewerMode) {
+    case 'video':
+      console.log('Rendering VideoPlayer')
+      return (
+        <VideoPlayer
+          isOpen={true}
+          onClose={handleCloseViewer}
+          videoUrl={content.videoLink || ''}
+          title={content.concept}
+          description={`${content.chapter} • ${content.topic} • ${content.unit}`}
+          contentId={content._id}
+          onAttemptUpdate={handleAttemptUpdate}
+        />
+      )
+
+    case 'pdf':
+      console.log('Rendering SecurePDFViewer')
+      return (
+        <SecurePDFViewer
+          isOpen={true}
+          onClose={handleCloseViewer}
+          pdfUrl={content.videoLink || ''}
+          title={content.concept}
+          description={`${content.chapter} • ${content.topic} • ${content.unit}`}
+          contentId={content._id}
+          onAttemptUpdate={handleAttemptUpdate}
+        />
+      )
+
+    case 'selector':
+    default:
+      console.log('Rendering selector modal')
+      return (
+        <Modal 
+          isOpen={true} 
+          onClose={onClose}
+          size="2xl"
+        >
+          <ModalContent>
+            <ModalHeader>
+              <div className="flex items-center gap-3">
+                {getContentTypeIcon()}
+                <div>
+                  <h3 className="text-xl font-semibold">{content.concept}</h3>
+                  <p className="text-sm text-gray-500">{getContentTypeText()}</p>
+                </div>
               </div>
-            </div>
-          </ModalHeader>
-          <ModalBody>
-            <div className="space-y-4">
-              <Card>
-                <CardBody>
-                  <div className="space-y-3">
-                    <div>
-                      <span className="text-sm font-medium text-gray-500">Unit:</span>
-                      <span className="ml-2 text-sm">{content.unit}</span>
-                    </div>
-                    <div>
-                      <span className="text-sm font-medium text-gray-500">Chapter:</span>
-                      <span className="ml-2 text-sm">{content.chapter}</span>
-                    </div>
-                    <div>
-                      <span className="text-sm font-medium text-gray-500">Topic:</span>
-                      <span className="ml-2 text-sm">{content.topic}</span>
-                    </div>
-                  </div>
-                </CardBody>
-              </Card>
-              
-              <div>
-                <h4 className="text-sm font-medium text-gray-700 mb-2">Description</h4>
-                <p className="text-gray-600 text-sm leading-relaxed">{content.description}</p>
-              </div>
-              
-              {!content.videoLink && (
-                <Card className="border-orange-200 bg-orange-50">
+            </ModalHeader>
+            <ModalBody>
+              <div className="space-y-4">
+                <Card>
                   <CardBody>
-                    <p className="text-orange-800 text-sm">
-                      ⚠️ Content link is not available. Please contact your instructor.
-                    </p>
+                    <div className="space-y-3">
+                      <div>
+                        <span className="text-sm font-medium text-gray-500">Unit:</span>
+                        <span className="ml-2 text-sm">{content.unit}</span>
+                      </div>
+                      <div>
+                        <span className="text-sm font-medium text-gray-500">Chapter:</span>
+                        <span className="ml-2 text-sm">{content.chapter}</span>
+                      </div>
+                      <div>
+                        <span className="text-sm font-medium text-gray-500">Topic:</span>
+                        <span className="ml-2 text-sm">{content.topic}</span>
+                      </div>
+                      <div>
+                        <span className="text-sm font-medium text-gray-500">Content Type:</span>
+                        <span className="ml-2 text-sm">{content.contentType}</span>
+                      </div>
+                      {content.videoLink && (
+                        <div>
+                          <span className="text-sm font-medium text-gray-500">URL:</span>
+                          <span className="ml-2 text-sm text-blue-600 break-all">{content.videoLink}</span>
+                        </div>
+                      )}
+                    </div>
                   </CardBody>
                 </Card>
-              )}
-            </div>
-          </ModalBody>
-          <ModalFooter>
-            <Button variant="light" onPress={onClose}>
-              Cancel
-            </Button>
-            <Button 
-              color="primary" 
-              onPress={handleOpenContent}
-              isDisabled={!content.videoLink}
-              startContent={
-                content.contentType === 'link' || content.contentType === 'testpaperLink' ? 
-                  <ArrowTopRightOnSquareIcon className="h-4 w-4" /> : 
-                  undefined
-              }
-            >
-              {getActionButtonText()}
-            </Button>
-          </ModalFooter>
-        </ModalContent>
-      </Modal>
-
-      {/* Video Player Modal */}
-      <VideoPlayer
-        isOpen={showVideoPlayer}
-        onClose={() => {
-          setShowVideoPlayer(false)
-          onClose()
-        }}
-        videoUrl={content.videoLink || ''}
-        title={content.concept}
-        description={`${content.chapter} • ${content.topic} • ${content.unit}`}
-        contentId={content._id}
-        onAttemptUpdate={handleAttemptUpdate}
-      />
-
-      {/* PDF Viewer Modal */}
-      <SecurePDFViewer
-        isOpen={showPDFViewer}
-        onClose={() => {
-          setShowPDFViewer(false)
-          onClose()
-        }}
-        pdfUrl={content.videoLink || ''}
-        title={content.concept}
-        description={`${content.chapter} • ${content.topic} • ${content.unit}`}
-        contentId={content._id}
-        onAttemptUpdate={handleAttemptUpdate}
-      />
-    </>
-  )
+                
+                <div>
+                  <h4 className="text-sm font-medium text-gray-700 mb-2">Description</h4>
+                  <p className="text-gray-600 text-sm leading-relaxed">{content.description}</p>
+                </div>
+                
+                {!content.videoLink && (
+                  <Card className="border-orange-200 bg-orange-50">
+                    <CardBody>
+                      <p className="text-orange-800 text-sm">
+                        ⚠️ Content link is not available. Please contact your instructor.
+                      </p>
+                    </CardBody>
+                  </Card>
+                )}
+              </div>
+            </ModalBody>
+            <ModalFooter>
+              <Button variant="light" onPress={onClose}>
+                Cancel
+              </Button>
+              <Button 
+                color="primary" 
+                onPress={handleOpenContent}
+                isDisabled={!content.videoLink}
+                startContent={
+                  content.contentType === 'link' || content.contentType === 'testpaperLink' ? 
+                    <ArrowTopRightOnSquareIcon className="h-4 w-4" /> : 
+                    undefined
+                }
+              >
+                {getActionButtonText()}
+              </Button>
+            </ModalFooter>
+          </ModalContent>
+        </Modal>
+      )
+  }
 }

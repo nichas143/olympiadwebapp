@@ -45,7 +45,7 @@ export async function GET(request: NextRequest) {
         cachedAt: new Date().toISOString()
       }, {
         headers: {
-          'Cache-Control': 'private, s-maxage=300, stale-while-revalidate=600', // 5 min cache, 10 min stale
+          'Cache-Control': 'private, s-maxage=300, stale-while-revalidate=600', // Changed to private
         }
       })
     }
@@ -86,7 +86,7 @@ export async function GET(request: NextRequest) {
       cachedAt: new Date().toISOString()
     }, {
       headers: {
-        'Cache-Control': 'private, s-maxage=60, stale-while-revalidate=120', // 1 min cache, 2 min stale
+        'Cache-Control': 'private, s-maxage=60, stale-while-revalidate=120', // Changed to private
       }
     })
   } catch (error) {

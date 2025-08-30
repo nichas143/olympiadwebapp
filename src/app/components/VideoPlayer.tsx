@@ -32,6 +32,9 @@ export default function VideoPlayer({
   const videoRef = useRef<HTMLVideoElement>(null)
   const containerRef = useRef<HTMLDivElement>(null)
   
+  // Debug logging
+  console.log('VideoPlayer render:', { isOpen, videoUrl, title, contentId })
+  
   // Extract YouTube video ID and create embed URL
   const getYouTubeEmbedUrl = (url: string) => {
     const regex = /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/
@@ -87,22 +90,19 @@ export default function VideoPlayer({
 
   useEffect(() => {
     if (isOpen && contentId && !hasAttempted) {
-      // Mark as attempted when video opens
-      ProgressTracker.markAsAttempted(contentId)
-      setHasAttempted(true)
-      if (onAttemptUpdate) {
-        onAttemptUpdate(contentId, true)
-      }
+      // Don't mark as attempted immediately when video opens
+      console.log('Video player opened')
     }
   }, [isOpen, contentId, hasAttempted, onAttemptUpdate])
 
   const handleVideoLoad = () => {
     // Video loaded successfully
+    console.log('Video loaded successfully')
   }
 
   const handleTimeUpdate = () => {
     if (videoRef.current) {
-      // Just track that user is watching, no detailed progress needed
+      // Just track that user is watching, no attempt marking
     }
   }
 

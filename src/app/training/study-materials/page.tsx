@@ -2,11 +2,12 @@
 
 import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
-import { useEffect, useState, useCallback } from 'react'
+import { useEffect, useState } from 'react'
 import Image from 'next/image'
 import { Card, CardBody, CardHeader, Select, SelectItem, Chip } from "@heroui/react"
 import { PlayCircleIcon, ClockIcon, AcademicCapIcon, BookOpenIcon, LinkIcon, DocumentIcon, CheckCircleIcon, XCircleIcon } from '@heroicons/react/24/outline'
 import ContentViewer from '@/app/components/ContentViewer'
+import { useCachedContent } from '@/hooks/useCachedContent'
 
 interface Content {
   _id: string
@@ -35,8 +36,6 @@ interface ContentWithAttempt extends Content {
 export default function StudyMaterials() {
   const { data: session, status } = useSession()
   const router = useRouter()
-  const [content, setContent] = useState<ContentWithAttempt[]>([])
-  const [loading, setLoading] = useState(true)
   const [selectedUnit, setSelectedUnit] = useState<string>('all')
   const [selectedContentType, setSelectedContentType] = useState<string>('all')
   const [selectedInstructionType, setSelectedInstructionType] = useState<string>('all')
@@ -44,62 +43,16 @@ export default function StudyMaterials() {
   const [selectedContent, setSelectedContent] = useState<Content | null>(null)
   const [showContentViewer, setShowContentViewer] = useState(false)
   const [imageErrors, setImageErrors] = useState<Record<string, boolean>>({})
-  
-  const fetchContent = useCallback(async () => {
-    try {
-      setLoading(true)
-      const params = new URLSearchParams()
-      
-      if (selectedUnit !== 'all') {
-        params.append('unit', selectedUnit)
-      }
-      
-      if (selectedContentType !== 'all') {
-        params.append('contentType', selectedContentType)
-      }
-      
-      if (selectedInstructionType !== 'all') {
-        params.append('instructionType', selectedInstructionType)
-      }
-      
-      if (selectedDocCategory !== 'all') {
-        params.append('docCategory', selectedDocCategory)
-      }
-      
-      // Ensure content is sorted by sequence (this is the default in the API)
-      params.append('sortBy', 'sequence')
-      
-      const response = await fetch(`/api/content?${params}`)
-      if (response.ok) {
-        const data = await response.json()
-        const contentWithAttempts = await Promise.all(
-          data.content.map(async (item: Content) => {
-            try {
-              const progressResponse = await fetch(`/api/progress?contentId=${item._id}`)
-              if (progressResponse.ok) {
-                const progressData = await progressResponse.json()
-                return {
-                  ...item,
-                  attemptStatus: progressData.progress?.status || 'not_attempted'
-                }
-              }
-            } catch (error) {
-              console.error('Failed to fetch attempt status:', error)
-            }
-            return {
-              ...item,
-              attemptStatus: 'not_attempted'
-            }
-          })
-        )
-        setContent(contentWithAttempts)
-      }
-    } catch (error) {
-      console.error('Failed to fetch content:', error)
-    } finally {
-      setLoading(false)
-    }
-  }, [selectedUnit, selectedContentType, selectedInstructionType, selectedDocCategory])
+
+  // Use cached content hook
+  const { content, loading, error, refetch, lastUpdated } = useCachedContent({
+    unit: selectedUnit !== 'all' ? selectedUnit : undefined,
+    contentType: selectedContentType !== 'all' ? selectedContentType : undefined,
+    instructionType: selectedInstructionType !== 'all' ? selectedInstructionType : undefined,
+    docCategory: selectedDocCategory !== 'all' ? selectedDocCategory : undefined,
+    sortBy: 'sequence',
+    limit: 100 // Increased limit for better caching
+  })
   
   useEffect(() => {
     if (status === 'loading') return
@@ -108,9 +61,7 @@ export default function StudyMaterials() {
       router.push('/auth/signin')
       return
     }
-    
-    fetchContent()
-  }, [session, status, router, fetchContent])
+  }, [session, status, router])
 
   const formatDuration = (minutes: number) => {
     const hours = Math.floor(minutes / 60)
@@ -157,14 +108,8 @@ export default function StudyMaterials() {
   }
 
   const handleAttemptUpdate = async (contentId: string, attempted: boolean) => {
-    // Update the local state to reflect the attempt status
-    setContent(prevContent => 
-      prevContent.map(item => 
-        item._id === contentId 
-          ? { ...item, attemptStatus: attempted ? 'attempted' : 'not_attempted' }
-          : item
-      )
-    )
+    // Refetch content to update attempt status
+    refetch()
   }
 
   const handleImageError = (contentId: string) => {
@@ -187,6 +132,11 @@ export default function StudyMaterials() {
         <div className="text-center">
           <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600 mx-auto"></div>
           <p className="mt-4 text-gray-600">Loading study materials...</p>
+          {lastUpdated && (
+            <p className="mt-2 text-sm text-gray-500">
+              Last updated: {lastUpdated.toLocaleTimeString()}
+            </p>
+          )}
         </div>
       </div>
     )
@@ -194,6 +144,23 @@ export default function StudyMaterials() {
 
   if (!session) {
     return null
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="text-red-600 text-xl mb-4">Error loading content</div>
+          <p className="text-gray-600 mb-4">{error}</p>
+          <button 
+            onClick={refetch}
+            className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+          >
+            Retry
+          </button>
+        </div>
+      </div>
+    )
   }
 
   return (
@@ -205,6 +172,17 @@ export default function StudyMaterials() {
           <p className="mt-2 text-gray-600">
             Comprehensive collection of videos, PDFs, links, and test papers covering all Olympiad topics
           </p>
+          {lastUpdated && (
+            <p className="mt-1 text-sm text-gray-500">
+              Last updated: {lastUpdated.toLocaleTimeString()} • 
+              <button 
+                onClick={refetch}
+                className="ml-2 text-blue-600 hover:text-blue-700 underline"
+              >
+                Refresh
+              </button>
+            </p>
+          )}
         </div>
 
         {/* Filters */}
@@ -367,9 +345,6 @@ export default function StudyMaterials() {
                             Not Attempted
                           </Chip>
                         )}
-                        {/* <div className="bg-gray-900 text-white px-2 py-1 rounded text-sm">
-                          {formatDuration(item.duration)}
-                        </div> */}
                       </div>
                     </div>
                     

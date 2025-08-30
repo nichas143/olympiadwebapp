@@ -2,10 +2,11 @@
 
 import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
-import { useEffect, useState, useCallback } from 'react'
+import { useEffect, useState } from 'react'
 import { Card, CardBody, CardHeader, Button, Badge, Select, SelectItem, Chip } from "@heroui/react"
 import { BookOpenIcon, CheckCircleIcon, ClockIcon, AcademicCapIcon, PlayCircleIcon } from '@heroicons/react/24/outline'
 import ContentViewer from '@/app/components/ContentViewer'
+import { useCachedContent } from '@/hooks/useCachedContent'
 
 interface Content {
   _id: string
@@ -33,8 +34,6 @@ interface ContentWithAttempt extends Content {
 export default function PracticeProblems() {
   const { data: session, status } = useSession()
   const router = useRouter()
-  const [practiceSets, setPracticeSets] = useState<ContentWithAttempt[]>([])
-  const [loading, setLoading] = useState(true)
   const [selectedUnit, setSelectedUnit] = useState<string>('all')
   const [stats, setStats] = useState({
     totalAttempted: 0,
@@ -43,57 +42,14 @@ export default function PracticeProblems() {
   })
   const [selectedContent, setSelectedContent] = useState<Content | null>(null)
   const [showContentViewer, setShowContentViewer] = useState(false)
-  
-  const fetchPracticeSets = useCallback(async () => {
-    try {
-      setLoading(true)
-      
-      // Fetch practice sets (Content with docCategory = 'PracticeSet')
-      const contentParams = new URLSearchParams()
-      contentParams.append('docCategory', 'PracticeSet')
-      contentParams.append('sortBy', 'sequence') // This ensures sequenceNo priority
-      if (selectedUnit !== 'all') {
-        contentParams.append('unit', selectedUnit)
-      }
-      
-      const contentResponse = await fetch(`/api/content?${contentParams}`)
-      
-      if (contentResponse.ok) {
-        const contentData = await contentResponse.json()
-        
-        // Fetch attempt status for each practice set
-        const practiceSetWithAttempts = await Promise.all(
-          contentData.content.map(async (content: Content) => {
-            try {
-              const progressResponse = await fetch(`/api/progress?contentId=${content._id}`)
-              if (progressResponse.ok) {
-                const progressData = await progressResponse.json()
-                return {
-                  ...content,
-                  attemptStatus: progressData.progress?.status || 'not_attempted'
-                }
-              }
-            } catch (error) {
-              console.error('Failed to fetch attempt status:', error)
-            }
-            return {
-              ...content,
-              attemptStatus: 'not_attempted'
-            }
-          })
-        )
-        
-        setPracticeSets(practiceSetWithAttempts)
-        
-        // Calculate stats
-        calculateStats(practiceSetWithAttempts)
-      }
-    } catch (error) {
-      console.error('Failed to fetch practice sets:', error)
-    } finally {
-      setLoading(false)
-    }
-  }, [selectedUnit])
+
+  // Use cached content hook for practice sets
+  const { content: practiceSets, loading, error, refetch, lastUpdated } = useCachedContent({
+    docCategory: 'PracticeSet',
+    unit: selectedUnit !== 'all' ? selectedUnit : undefined,
+    sortBy: 'sequence',
+    limit: 100
+  })
   
   useEffect(() => {
     if (status === 'loading') return
@@ -102,21 +58,22 @@ export default function PracticeProblems() {
       router.push('/auth/signin')
       return
     }
-    
-    fetchPracticeSets()
-  }, [session, status, router, fetchPracticeSets])
+  }, [session, status, router])
 
-  const calculateStats = (sets: ContentWithAttempt[]) => {
-    const attempted = sets.filter(set => set.attemptStatus === 'attempted').length
-    const total = sets.length
-    const attemptRate = total > 0 ? Math.round((attempted / total) * 100) : 0
-    
-    setStats({
-      totalAttempted: attempted,
-      totalContent: total,
-      attemptRate: attemptRate
-    })
-  }
+  // Calculate stats when practice sets change
+  useEffect(() => {
+    if (practiceSets.length > 0) {
+      const totalContent = practiceSets.length
+      const totalAttempted = practiceSets.filter(set => set.attemptStatus === 'attempted').length
+      const attemptRate = totalContent > 0 ? Math.round((totalAttempted / totalContent) * 100) : 0
+      
+      setStats({
+        totalAttempted,
+        totalContent,
+        attemptRate
+      })
+    }
+  }, [practiceSets])
 
   const formatDuration = (minutes: number) => {
     const hours = Math.floor(minutes / 60)
@@ -127,28 +84,34 @@ export default function PracticeProblems() {
     return `${mins}m`
   }
 
-  const handleStartPractice = (practiceSet: ContentWithAttempt) => {
-    setSelectedContent(practiceSet)
+  const getContentTypeIcon = (type: string) => {
+    switch (type) {
+      case 'video': return <PlayCircleIcon className="h-5 w-5" />
+      case 'pdf': return <BookOpenIcon className="h-5 w-5" />
+      case 'link': return <AcademicCapIcon className="h-5 w-5" />
+      case 'testpaperLink': return <BookOpenIcon className="h-5 w-5" />
+      default: return <AcademicCapIcon className="h-5 w-5" />
+    }
+  }
+
+  const getContentTypeColor = (type: string) => {
+    switch (type) {
+      case 'video': return 'primary'
+      case 'pdf': return 'danger'
+      case 'link': return 'success'
+      case 'testpaperLink': return 'warning'
+      default: return 'default'
+    }
+  }
+
+  const handleContentAction = (item: Content) => {
+    setSelectedContent(item)
     setShowContentViewer(true)
   }
 
   const handleAttemptUpdate = async (contentId: string, attempted: boolean) => {
-    // Update the local state to reflect the attempt status
-    setPracticeSets(prevSets => 
-      prevSets.map(set => 
-        set._id === contentId 
-          ? { ...set, attemptStatus: attempted ? 'attempted' : 'not_attempted' }
-          : set
-      )
-    )
-    
-    // Recalculate stats
-    const updatedSets: ContentWithAttempt[] = practiceSets.map(set => 
-      set._id === contentId 
-        ? { ...set, attemptStatus: attempted ? 'attempted' : 'not_attempted' }
-        : set
-    )
-    calculateStats(updatedSets)
+    // Refetch content to update attempt status
+    refetch()
   }
 
   if (status === 'loading' || loading) {
@@ -157,6 +120,11 @@ export default function PracticeProblems() {
         <div className="text-center">
           <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600 mx-auto"></div>
           <p className="mt-4 text-gray-600">Loading practice problems...</p>
+          {lastUpdated && (
+            <p className="mt-2 text-sm text-gray-500">
+              Last updated: {lastUpdated.toLocaleTimeString()}
+            </p>
+          )}
         </div>
       </div>
     )
@@ -166,6 +134,23 @@ export default function PracticeProblems() {
     return null
   }
 
+  if (error) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="text-red-600 text-xl mb-4">Error loading practice problems</div>
+          <p className="text-gray-600 mb-4">{error}</p>
+          <button 
+            onClick={refetch}
+            className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+          >
+            Retry
+          </button>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -173,28 +158,39 @@ export default function PracticeProblems() {
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900">Practice Problems</h1>
           <p className="mt-2 text-gray-600">
-            Curated problem sets with detailed solutions to enhance your skills
+            Comprehensive practice sets covering all Olympiad topics with detailed solutions
           </p>
+          {lastUpdated && (
+            <p className="mt-1 text-sm text-gray-500">
+              Last updated: {lastUpdated.toLocaleTimeString()} • 
+              <button 
+                onClick={refetch}
+                className="ml-2 text-blue-600 hover:text-blue-700 underline"
+              >
+                Refresh
+              </button>
+            </p>
+          )}
         </div>
 
         {/* Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-          <Card>
+        <div className="mb-6 grid grid-cols-1 md:grid-cols-3 gap-4">
+          <Card className="bg-blue-50 border-blue-200">
             <CardBody className="text-center">
-              <div className="text-2xl font-bold text-blue-600">{stats.totalAttempted}</div>
-              <div className="text-sm text-gray-500">Sets Attempted</div>
+              <div className="text-2xl font-bold text-blue-600">{stats.totalContent}</div>
+              <div className="text-sm text-blue-700">Total Practice Sets</div>
             </CardBody>
           </Card>
-          <Card>
+          <Card className="bg-green-50 border-green-200">
             <CardBody className="text-center">
-              <div className="text-2xl font-bold text-green-600">{stats.totalContent}</div>
-              <div className="text-sm text-gray-500">Total Sets</div>
+              <div className="text-2xl font-bold text-green-600">{stats.totalAttempted}</div>
+              <div className="text-sm text-green-700">Completed Sets</div>
             </CardBody>
           </Card>
-          <Card>
+          <Card className="bg-purple-50 border-purple-200">
             <CardBody className="text-center">
               <div className="text-2xl font-bold text-purple-600">{stats.attemptRate}%</div>
-              <div className="text-sm text-gray-500">Attempt Rate</div>
+              <div className="text-sm text-purple-700">Completion Rate</div>
             </CardBody>
           </Card>
         </div>
@@ -202,7 +198,7 @@ export default function PracticeProblems() {
         {/* Filters */}
         <div className="mb-6">
           <Select
-            label="Select Unit"
+            label="Filter by Unit"
             placeholder="All Units"
             selectedKeys={[selectedUnit]}
             onSelectionChange={(keys) => setSelectedUnit(Array.from(keys)[0] as string)}
@@ -221,61 +217,82 @@ export default function PracticeProblems() {
           </Select>
         </div>
 
-        {/* Problem Sets Grid */}
+        {/* Practice Sets Grid */}
         {practiceSets.length === 0 ? (
           <div className="text-center py-12">
-            <AcademicCapIcon className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+            <BookOpenIcon className="h-12 w-12 text-gray-400 mx-auto mb-4" />
             <h3 className="text-lg font-medium text-gray-900 mb-2">No practice sets found</h3>
-            <p className="text-gray-500">Try adjusting your filters or check back later for new content.</p>
+            <p className="text-gray-500">Try adjusting your filters or check back later for new practice sets.</p>
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {practiceSets.map((set) => (
-              <Card key={set._id} className="hover:shadow-lg transition-shadow">
-                <CardHeader className="pb-0">
-                  <div className="flex items-center justify-between mb-2">
+            {practiceSets.map((item) => (
+              <Card key={item._id} className="hover:shadow-lg transition-shadow" isPressable onPress={() => handleContentAction(item)}>
+                <CardHeader className="pb-4 bg-slate-200">
+                  <div className="flex justify-between items-start mb-4">
                     <div className="flex items-center gap-2">
-                      <Badge color="primary" variant="flat">{set.unit}</Badge>
-                      <Badge color="default" variant="flat" size="sm">#{set.sequenceNo}</Badge>
+                      <Chip
+                        size="sm"
+                        color={getContentTypeColor(item.contentType)}
+                        variant="flat"
+                        startContent={getContentTypeIcon(item.contentType)}
+                      >
+                        {item.contentType}
+                      </Chip>
+                      <Chip
+                        size="sm"
+                        color="secondary"
+                        variant="flat"
+                      >
+                        Practice Set
+                      </Chip>
                     </div>
-                    {set.attemptStatus === 'attempted' && (
-                      <CheckCircleIcon className="h-5 w-5 text-green-600" />
-                    )}
-                  </div>
-                  <div className="flex items-center gap-2 mb-2">
-                    <Chip
-                      size="sm"
-                      color={set.attemptStatus === 'attempted' ? "success" : "default"}
-                      variant="flat"
-                      startContent={set.attemptStatus === 'attempted' ? <CheckCircleIcon className="h-3 w-3" /> : undefined}
-                    >
-                      {set.attemptStatus === 'attempted' ? 'Attempted' : 'Not Attempted'}
-                    </Chip>
-                    {set.noOfProblems && (
-                      <Badge color="secondary" variant="flat" size="sm">
-                        {set.noOfProblems} problems
-                      </Badge>
-                    )}
+                    <div className="flex items-end gap-10">
+                      {item.attemptStatus === 'attempted' ? (
+                        <Chip
+                          size="sm"
+                          color="success"
+                          variant="solid"
+                          startContent={<CheckCircleIcon className="h-3 w-3" />}
+                        >
+                          Completed
+                        </Chip>
+                      ) : (
+                        <Chip
+                          size="sm"
+                          color="warning"
+                          variant="solid"
+                        >
+                          Not Started
+                        </Chip>
+                      )}
+                    </div>
                   </div>
                 </CardHeader>
-                <CardBody>
-                  <h3 className="text-lg font-semibold mb-1">{set.concept}</h3>
-                  <p className="text-sm text-gray-500 mb-2">{set.chapter} • {set.topic}</p>
-                  <p className="text-gray-600 text-sm mb-4 line-clamp-3">{set.description}</p>
-
+                <CardBody className="bg-slate-100">
+                  <div className="flex items-center gap-2 mb-2 flex-wrap">
+                    <Chip color="primary" variant="flat" size="sm">{item.unit}</Chip>
+                    <Chip color="secondary" variant="flat" size="sm">Practice Set #{item.sequenceNo}</Chip>
+                    {item.noOfProblems && (
+                      <Chip color="warning" variant="flat" size="sm">
+                        {item.noOfProblems} problems
+                      </Chip>
+                    )}
+                  </div>
+                  <h3 className="text-2xl text-slate-800 font-semibold mb-1">{item.concept}</h3>
+                  <p className="text-lg text-slate-600 mb-2">{item.chapter} • {item.topic}</p>
+                  <p className="text-gray-600 tracking-wide font-light text-sm mb-4 line-clamp-3">{item.description}</p>
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2 text-sm text-gray-500">
                       <ClockIcon className="h-4 w-4" />
-                      <span>{formatDuration(set.duration)}</span>
+                      <span>{formatDuration(item.duration)}</span>
                     </div>
-                    <Button 
-                      color="primary" 
-                      size="sm"
-                      startContent={set.contentType === 'video' ? <PlayCircleIcon className="h-4 w-4" /> : <BookOpenIcon className="h-4 w-4" />}
-                      onPress={() => handleStartPractice(set)}
-                    >
-                      {set.attemptStatus === 'attempted' ? 'Review' : 'Start'}
-                    </Button>
+                    <div className="flex items-center gap-2 text-sm text-gray-600">
+                      <span className="flex items-center gap-1">
+                        {getContentTypeIcon(item.contentType)}
+                        Start Practice
+                      </span>
+                    </div>
                   </div>
                 </CardBody>
               </Card>

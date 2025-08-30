@@ -113,6 +113,18 @@ export async function POST(request: NextRequest) {
       createdBy: session.user.id
     })
 
+    // Invalidate cache after creating new content
+    try {
+      await fetch(`${process.env.NEXTAUTH_URL || 'http://localhost:3000'}/api/content/cache-invalidate`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        }
+      })
+    } catch (error) {
+      console.error('Failed to invalidate cache:', error)
+    }
+
     return NextResponse.json({ 
       message: 'Content created successfully',
       content: newContent

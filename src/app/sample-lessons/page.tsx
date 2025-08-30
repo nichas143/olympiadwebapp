@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import Image from 'next/image';
 import { Select, SelectItem } from "@heroui/react";
 
 interface VideoLesson {
@@ -77,12 +78,17 @@ export default function SampleLessons() {
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [selectedDifficulty, setSelectedDifficulty] = useState('All');
   const [selectedVideo, setSelectedVideo] = useState<VideoLesson | null>(null);
+  const [imageErrors, setImageErrors] = useState<Record<string, boolean>>({});
 
   const filteredLessons = sampleLessons.filter(lesson => {
     const categoryMatch = selectedCategory === 'All' || lesson.category === selectedCategory;
     const difficultyMatch = selectedDifficulty === 'All' || lesson.difficulty === selectedDifficulty;
     return categoryMatch && difficultyMatch;
   });
+
+  const handleImageError = (lessonId: string) => {
+    setImageErrors(prev => ({ ...prev, [lessonId]: true }));
+  };
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -236,13 +242,16 @@ export default function SampleLessons() {
                   onClick={() => setSelectedVideo(lesson)}
                 >
                   <div className="relative">
-                    <img
-                      src={`https://img.youtube.com/vi/${lesson.youtubeId}/maxresdefault.jpg`}
+                    <Image
+                      src={imageErrors[lesson.id] 
+                        ? `https://img.youtube.com/vi/${lesson.youtubeId}/hqdefault.jpg`
+                        : `https://img.youtube.com/vi/${lesson.youtubeId}/maxresdefault.jpg`
+                      }
                       alt={lesson.title}
+                      width={400}
+                      height={192}
                       className="w-full h-48 object-cover"
-                      onError={(e) => {
-                        e.currentTarget.src = `https://img.youtube.com/vi/${lesson.youtubeId}/hqdefault.jpg`;
-                      }}
+                      onError={() => handleImageError(lesson.id)}
                     />
                     <div className="absolute inset-0 bg-black bg-opacity-20 flex items-center justify-center">
                       <div className="bg-white bg-opacity-90 rounded-full p-3">

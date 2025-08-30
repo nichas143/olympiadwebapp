@@ -3,6 +3,7 @@
 import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import { useEffect, useState, useCallback } from 'react'
+import Image from 'next/image'
 import { Card, CardBody, CardHeader, Button, Select, SelectItem, Chip, Badge } from "@heroui/react"
 import { PlayCircleIcon, ClockIcon, AcademicCapIcon, BookOpenIcon, LinkIcon, DocumentIcon, CheckCircleIcon, XCircleIcon } from '@heroicons/react/24/outline'
 import ContentViewer from '@/app/components/ContentViewer'
@@ -42,6 +43,7 @@ export default function StudyMaterials() {
   const [selectedDocCategory, setSelectedDocCategory] = useState<string>('all')
   const [selectedContent, setSelectedContent] = useState<Content | null>(null)
   const [showContentViewer, setShowContentViewer] = useState(false)
+  const [imageErrors, setImageErrors] = useState<Record<string, boolean>>({})
   
   const fetchContent = useCallback(async () => {
     try {
@@ -165,6 +167,10 @@ export default function StudyMaterials() {
     )
   }
 
+  const handleImageError = (contentId: string) => {
+    setImageErrors(prev => ({ ...prev, [contentId]: true }))
+  }
+
   const getActionButtonText = (type: string) => {
     switch (type) {
       case 'video': return 'Watch'
@@ -273,14 +279,16 @@ export default function StudyMaterials() {
                 {item.contentType === 'video' && item.videoLink && getYouTubeVideoId(item.videoLink) ? (
                   <CardHeader className="pb-0">
                     <div className="relative">
-                      <img
-                        src={`https://img.youtube.com/vi/${getYouTubeVideoId(item.videoLink)}/maxresdefault.jpg`}
+                      <Image
+                        src={imageErrors[item._id] 
+                          ? `https://img.youtube.com/vi/${getYouTubeVideoId(item.videoLink)}/hqdefault.jpg`
+                          : `https://img.youtube.com/vi/${getYouTubeVideoId(item.videoLink)}/maxresdefault.jpg`
+                        }
                         alt={item.concept}
+                        width={400}
+                        height={192}
                         className="w-full h-48 object-cover rounded-lg"
-                        onError={(e) => {
-                          const target = e.target as HTMLImageElement
-                          target.src = `https://img.youtube.com/vi/${getYouTubeVideoId(item.videoLink!)}/hqdefault.jpg`
-                        }}
+                        onError={() => handleImageError(item._id)}
                       />
                       <div className="absolute top-2 right-2 bg-black bg-opacity-75 text-white px-2 py-1 rounded text-sm">
                         {formatDuration(item.duration)}

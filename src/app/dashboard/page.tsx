@@ -268,11 +268,11 @@ export default function Dashboard() {
           </Link>
 
           <Link href="/training/study-materials">
-            <Card className="hover:shadow-lg transition-shadow cursor-pointer">
+            <Card className="hover:shadow-lg transition-shadow cursor-pointer bg-slate-300">
               <CardBody className="text-center p-6">
                 <ChartBarIcon className="h-12 w-12 text-purple-600 mx-auto mb-4" />
                 <h3 className="text-lg font-semibold mb-2">Study Materials</h3>
-                <p className="text-gray-600 text-sm">
+                <p className="text-black font-extralight text-xs">
                   PDFs, links, and reference materials for comprehensive learning
                 </p>
               </CardBody>

@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation'
 import { useEffect, useState, useCallback } from 'react'
 import Image from 'next/image'
 import { Card, CardBody, CardHeader, Button, Select, SelectItem, Chip, Badge } from "@heroui/react"
-import { PlayCircleIcon, ClockIcon, AcademicCapIcon, BookOpenIcon, LinkIcon, CheckCircleIcon } from '@heroicons/react/24/outline'
+import { AcademicCapIcon, ClockIcon, BookOpenIcon, CheckCircleIcon, DocumentTextIcon } from '@heroicons/react/24/outline'
 import ContentViewer from '@/app/components/ContentViewer'
 
 interface Content {
@@ -31,30 +31,24 @@ interface ContentWithAttempt extends Content {
   attemptStatus?: 'not_attempted' | 'attempted'
 }
 
-export default function VideoLectures() {
+export default function MockTests() {
   const { data: session, status } = useSession()
   const router = useRouter()
   const [content, setContent] = useState<ContentWithAttempt[]>([])
   const [loading, setLoading] = useState(true)
   const [selectedUnit, setSelectedUnit] = useState<string>('all')
-  const [selectedInstructionType, setSelectedInstructionType] = useState<string>('all')
   const [selectedContent, setSelectedContent] = useState<Content | null>(null)
   const [showContentViewer, setShowContentViewer] = useState(false)
-  const [imageErrors, setImageErrors] = useState<Record<string, boolean>>({})
   
   const fetchContent = useCallback(async () => {
     try {
       setLoading(true)
       const params = new URLSearchParams()
-      params.append('contentType', 'video')
+      params.append('docCategory', 'MockTest')
       params.append('sortBy', 'sequence') // Ensure proper sequence ordering
       
       if (selectedUnit !== 'all') {
         params.append('unit', selectedUnit)
-      }
-      
-      if (selectedInstructionType !== 'all') {
-        params.append('instructionType', selectedInstructionType)
       }
       
       const response = await fetch(`/api/content?${params}`)
@@ -87,7 +81,7 @@ export default function VideoLectures() {
     } finally {
       setLoading(false)
     }
-  }, [selectedUnit, selectedInstructionType])
+  }, [selectedUnit])
   
   useEffect(() => {
     if (status === 'loading') return
@@ -109,17 +103,37 @@ export default function VideoLectures() {
     return `${mins}m`
   }
 
-  const getYouTubeVideoId = (url: string) => {
-    const regex = /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/
-    const match = url?.match(regex)
-    return match ? match[1] : null
+  const getContentTypeIcon = (contentType: string) => {
+    switch (contentType) {
+      case 'pdf':
+        return <DocumentTextIcon className="h-6 w-6 text-red-600" />
+      case 'video':
+        return <AcademicCapIcon className="h-6 w-6 text-blue-600" />
+      case 'link':
+        return <BookOpenIcon className="h-6 w-6 text-green-600" />
+      case 'testpaperLink':
+        return <DocumentTextIcon className="h-6 w-6 text-purple-600" />
+      default:
+        return <DocumentTextIcon className="h-6 w-6 text-gray-600" />
+    }
   }
 
-  const getInstructionTypeColor = (type: string) => {
-    return type === 'conceptDiscussion' ? 'primary' : 'secondary'
+  const getContentTypeColor = (contentType: string) => {
+    switch (contentType) {
+      case 'pdf':
+        return 'danger'
+      case 'video':
+        return 'primary'
+      case 'link':
+        return 'success'
+      case 'testpaperLink':
+        return 'secondary'
+      default:
+        return 'default'
+    }
   }
 
-  const handleWatchVideo = (item: Content) => {
+  const handleStartTest = (item: Content) => {
     setSelectedContent(item)
     setShowContentViewer(true)
   }
@@ -135,16 +149,12 @@ export default function VideoLectures() {
     )
   }
 
-  const handleImageError = (contentId: string) => {
-    setImageErrors(prev => ({ ...prev, [contentId]: true }))
-  }
-
   if (status === 'loading' || loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Loading video lectures...</p>
+          <p className="mt-4 text-gray-600">Loading mock tests...</p>
         </div>
       </div>
     )
@@ -159,19 +169,20 @@ export default function VideoLectures() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">Video Lectures</h1>
+          <h1 className="text-3xl font-bold text-gray-900">Mock Tests</h1>
           <p className="mt-2 text-gray-600">
-            Comprehensive video tutorials covering all Olympiad topics
+            Simulate real Olympiad exam conditions with our comprehensive mock tests
           </p>
         </div>
 
         {/* Filters */}
-        <div className="mb-6 grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="mb-6">
           <Select
             label="Select Unit"
             placeholder="All Units"
             selectedKeys={[selectedUnit]}
             onSelectionChange={(keys) => setSelectedUnit(Array.from(keys)[0] as string)}
+            className="max-w-xs"
           >
             <SelectItem key="all">All Units</SelectItem>
             <SelectItem key="Algebra">Algebra</SelectItem>
@@ -184,45 +195,53 @@ export default function VideoLectures() {
             <SelectItem key="Calculus">Calculus</SelectItem>
             <SelectItem key="Other">Other</SelectItem>
           </Select>
-          
-          <Select
-            label="Instruction Type"
-            placeholder="All Types"
-            selectedKeys={[selectedInstructionType]}
-            onSelectionChange={(keys) => setSelectedInstructionType(Array.from(keys)[0] as string)}
-          >
-            <SelectItem key="all">All Types</SelectItem>
-            <SelectItem key="conceptDiscussion">Concept Discussion</SelectItem>
-            <SelectItem key="problemDiscussion">Problem Discussion</SelectItem>
-          </Select>
         </div>
 
-        {/* Quick Access to All Materials */}
+        {/* Quick Access to Other Materials */}
         <div className="mb-6">
-          <Card className="bg-gradient-to-r from-blue-50 to-purple-50 border-blue-200">
+          <Card className="bg-gradient-to-r from-orange-50 to-red-50 border-orange-200">
             <CardBody className="text-center py-6">
-              <AcademicCapIcon className="h-8 w-8 text-blue-600 mx-auto mb-2" />
-              <h3 className="font-semibold text-gray-900 mb-2">Looking for PDFs, Links, or Test Papers?</h3>
+              <AcademicCapIcon className="h-8 w-8 text-orange-600 mx-auto mb-2" />
+              <h3 className="font-semibold text-gray-900 mb-2">Looking for Practice Problems or Study Materials?</h3>
               <p className="text-gray-600 text-sm mb-4">
-                Access our complete collection of study materials including PDFs, external links, and practice test papers.
+                Access our complete collection of practice problems, video lectures, and study materials.
               </p>
-              <Button 
-                color="primary" 
-                variant="flat"
-                onPress={() => router.push('/training/study-materials')}
-              >
-                Browse All Study Materials
-              </Button>
+              <div className="flex flex-col sm:flex-row gap-2 justify-center">
+                <Button 
+                  color="primary" 
+                  variant="flat"
+                  size="sm"
+                  onPress={() => router.push('/training/practice-problems')}
+                >
+                  Practice Problems
+                </Button>
+                <Button 
+                  color="secondary" 
+                  variant="flat"
+                  size="sm"
+                  onPress={() => router.push('/training/video-lectures')}
+                >
+                  Video Lectures
+                </Button>
+                <Button 
+                  color="success" 
+                  variant="flat"
+                  size="sm"
+                  onPress={() => router.push('/training/study-materials')}
+                >
+                  Study Materials
+                </Button>
+              </div>
             </CardBody>
           </Card>
         </div>
 
-        {/* Video Content Grid */}
+        {/* Mock Test Content Grid */}
         {content.length === 0 ? (
           <div className="text-center py-12">
-            <PlayCircleIcon className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-            <h3 className="text-lg font-medium text-gray-900 mb-2">No video lectures found</h3>
-            <p className="text-gray-500">Try adjusting your filters or check back later for new video content.</p>
+            <AcademicCapIcon className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+            <h3 className="text-lg font-medium text-gray-900 mb-2">No mock tests found</h3>
+            <p className="text-gray-500">Try adjusting your filters or check back later for new mock test content.</p>
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -230,39 +249,22 @@ export default function VideoLectures() {
               <Card key={item._id} className="hover:shadow-lg transition-shadow group">
                 <CardHeader className="pb-0">
                   <div className="relative overflow-hidden rounded-lg">
-                    {item.videoLink && getYouTubeVideoId(item.videoLink) ? (
-                      <>
-                        <Image
-                          src={imageErrors[item._id] 
-                            ? `https://img.youtube.com/vi/${getYouTubeVideoId(item.videoLink)}/hqdefault.jpg`
-                            : `https://img.youtube.com/vi/${getYouTubeVideoId(item.videoLink)}/maxresdefault.jpg`
-                          }
-                          alt={item.concept}
-                          width={400}
-                          height={192}
-                          className="w-full h-48 object-cover object-center rounded-lg transition-transform group-hover:scale-105"
-                          onError={() => handleImageError(item._id)}
-                        />
-                        {/* Play overlay */}
-                        <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-30 transition-all flex items-center justify-center">
-                          <PlayCircleIcon className="h-16 w-16 text-white opacity-0 group-hover:opacity-100 transition-opacity" />
-                        </div>
-                      </>
-                    ) : (
-                      <div className="w-full h-48 bg-gradient-to-br from-blue-100 to-purple-100 rounded-lg flex items-center justify-center">
-                        <PlayCircleIcon className="h-16 w-16 text-blue-600" />
-                      </div>
-                    )}
+                    <div className="w-full h-48 bg-gradient-to-br from-orange-100 to-red-100 rounded-lg flex items-center justify-center">
+                      {getContentTypeIcon(item.contentType)}
+                    </div>
                     <div className="absolute top-2 right-2 bg-red-600 text-white px-2 py-1 rounded text-sm font-medium">
                       {formatDuration(item.duration)}
                     </div>
                     <div className="absolute top-2 left-2">
                       <Chip
                         size="sm"
-                        color={getInstructionTypeColor(item.instructionType)}
+                        color={getContentTypeColor(item.contentType)}
                         variant="solid"
                       >
-                        {item.instructionType === 'conceptDiscussion' ? 'Concept' : 'Problem'}
+                        {item.contentType === 'pdf' ? 'PDF' : 
+                         item.contentType === 'video' ? 'Video' : 
+                         item.contentType === 'link' ? 'Link' : 
+                         item.contentType === 'testpaperLink' ? 'Test Paper' : 'Mock Test'}
                       </Chip>
                     </div>
                     {/* Attempt Status Badge */}
@@ -275,6 +277,18 @@ export default function VideoLectures() {
                           startContent={<CheckCircleIcon className="h-3 w-3" />}
                         >
                           Attempted
+                        </Chip>
+                      </div>
+                    )}
+                    {/* Number of Problems Badge */}
+                    {item.noOfProblems && (
+                      <div className="absolute bottom-2 left-2">
+                        <Chip
+                          size="sm"
+                          color="warning"
+                          variant="solid"
+                        >
+                          {item.noOfProblems} Problems
                         </Chip>
                       </div>
                     )}
@@ -291,15 +305,21 @@ export default function VideoLectures() {
                     <div className="flex items-center gap-2 text-sm text-gray-500">
                       <ClockIcon className="h-4 w-4" />
                       <span>{formatDuration(item.duration)}</span>
+                      {item.noOfProblems && (
+                        <>
+                          <span>•</span>
+                          <span>{item.noOfProblems} problems</span>
+                        </>
+                      )}
                     </div>
                     <Button 
                       color="primary" 
                       size="sm"
                       variant="solid"
-                      startContent={<PlayCircleIcon className="h-4 w-4" />}
-                      onPress={() => handleWatchVideo(item)}
+                      startContent={<AcademicCapIcon className="h-4 w-4" />}
+                      onPress={() => handleStartTest(item)}
                     >
-                      Watch Now
+                      Start Test
                     </Button>
                   </div>
                 </CardBody>

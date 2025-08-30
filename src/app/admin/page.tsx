@@ -16,6 +16,8 @@ interface User {
   approvedBy?: string
   subscriptionStatus: 'none' | 'trial' | 'pending' | 'active' | 'expired' | 'cancelled'
   subscriptionPlan?: 'annual' | 'student_annual' | 'monthly_test' | 'monthly' | 'yearly'
+  subscriptionEndDate?: string
+  trialEndDate?: string
 }
 
 interface PaginationData {
@@ -149,7 +151,7 @@ export default function AdminDashboard() {
   }
 
   const getSubscriptionDisplay = (user: User) => {
-    if (user.subscriptionStatus === 'none' || user.subscriptionStatus === 'expired') {
+    if (!user.subscriptionStatus || user.subscriptionStatus === 'none' || user.subscriptionStatus === 'expired') {
       return 'Not Subscribed'
     }
     
@@ -169,6 +171,36 @@ export default function AdminDashboard() {
 
   const canDeleteUser = (user: User) => {
     return user.subscriptionStatus === 'none' || user.subscriptionStatus === 'expired' || user.subscriptionStatus === 'cancelled'
+  }
+
+  const getRemainingDays = (endDate: string | undefined): string => {
+    if (!endDate) return 'N/A'
+    
+    const end = new Date(endDate)
+    const now = new Date()
+    const diffTime = end.getTime() - now.getTime()
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
+    
+    if (diffDays < 0) return 'Expired'
+    if (diffDays === 0) return 'Today'
+    if (diffDays === 1) return '1 day'
+    return `${diffDays} days`
+  }
+
+  const getDaysDisplay = (user: User): string => {
+    if (!user.subscriptionStatus) {
+      return 'N/A'
+    }
+    
+    if (user.subscriptionStatus === 'trial' && user.trialEndDate) {
+      return getRemainingDays(user.trialEndDate)
+    }
+    
+    if (user.subscriptionStatus === 'active' && user.subscriptionEndDate) {
+      return getRemainingDays(user.subscriptionEndDate)
+    }
+    
+    return 'N/A'
   }
 
   if (status === 'loading' || loading) {
@@ -279,6 +311,7 @@ export default function AdminDashboard() {
                   <TableColumn>EMAIL</TableColumn>
                   <TableColumn>STATUS</TableColumn>
                   <TableColumn>SUBSCRIPTION</TableColumn>
+                  <TableColumn>DAYS LEFT</TableColumn>
                   <TableColumn>REGISTERED</TableColumn>
                   <TableColumn>ACTIONS</TableColumn>
                 </TableHeader>
@@ -304,6 +337,11 @@ export default function AdminDashboard() {
                       <TableCell>
                         <div className="text-sm">
                           {getSubscriptionDisplay(user)}
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <div className="text-sm">
+                          {getDaysDisplay(user)}
                         </div>
                       </TableCell>
                       <TableCell>
@@ -363,6 +401,7 @@ export default function AdminDashboard() {
                   <TableColumn>NAME</TableColumn>
                   <TableColumn>EMAIL</TableColumn>
                   <TableColumn>STATUS</TableColumn>
+                  <TableColumn>DAYS LEFT</TableColumn>
                   <TableColumn>REGISTERED</TableColumn>
                   <TableColumn>ACTIONS</TableColumn>
                 </TableHeader>
@@ -384,6 +423,11 @@ export default function AdminDashboard() {
                         >
                           {user.status.charAt(0).toUpperCase() + user.status.slice(1)}
                         </Chip>
+                      </TableCell>
+                      <TableCell>
+                        <div className="text-sm">
+                          {getDaysDisplay(user)}
+                        </div>
                       </TableCell>
                       <TableCell>
                         <div className="text-sm">

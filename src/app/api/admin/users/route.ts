@@ -30,6 +30,7 @@ export async function GET(request: NextRequest) {
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit)
+      .lean()
 
     const total = await User.countDocuments(query)
     const totalPages = Math.ceil(total / limit)

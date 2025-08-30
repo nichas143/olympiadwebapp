@@ -6,7 +6,7 @@ import { User } from '@/models/User'
 // DELETE /api/admin/users/[id] - Delete a user
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await auth()
@@ -17,7 +17,7 @@ export async function DELETE(
 
     await connectDB()
 
-    const userId = params.id
+    const { id: userId } = await params
 
     // Find the user first to check their subscription status
     const user = await User.findById(userId)

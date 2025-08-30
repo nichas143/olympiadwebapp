@@ -233,12 +233,12 @@ export default function ContentViewer({
                         <span className="text-sm font-medium text-gray-500">Content Type:</span>
                         <span className="ml-2 text-sm">{content.contentType}</span>
                       </div>
-                      {content.videoLink && (
+                      {/* {content.videoLink && (
                         <div>
                           <span className="text-sm font-medium text-gray-500">URL:</span>
                           <span className="ml-2 text-sm text-blue-600 break-all">{content.videoLink}</span>
                         </div>
-                      )}
+                      )} */}
                     </div>
                   </CardBody>
                 </Card>

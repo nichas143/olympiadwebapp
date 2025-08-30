@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback } from 'react'
 import { Document, Page, pdfjs } from 'react-pdf'
 import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, Button, Card, CardBody, Spinner, Chip } from "@heroui/react"
 import { DocumentIcon, ArrowsPointingOutIcon, CheckCircleIcon, ChevronLeftIcon, ChevronRightIcon, MagnifyingGlassMinusIcon, MagnifyingGlassPlusIcon } from '@heroicons/react/24/outline'
-import ProgressTracker from './ProgressTracker'
+// import ProgressTracker from './ProgressTracker' // Unused for now
 
 // Configure PDF.js worker
 pdfjs.GlobalWorkerOptions.workerSrc = '/pdf.worker.min.js'
@@ -16,6 +16,7 @@ interface SecurePDFViewerProps {
   title: string
   description?: string
   contentId?: string
+  initialAttemptStatus?: boolean
   onAttemptUpdate?: (contentId: string, attempted: boolean) => void
 }
 
@@ -26,11 +27,12 @@ export default function SecurePDFViewer({
   title, 
   description,
   contentId,
+  initialAttemptStatus = false,
   onAttemptUpdate 
 }: SecurePDFViewerProps) {
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  const [hasAttempted, setHasAttempted] = useState(false)
+  const [hasAttempted, setHasAttempted] = useState(initialAttemptStatus)
   const [numPages, setNumPages] = useState<number>(0)
   const [pageNumber, setPageNumber] = useState<number>(1)
   const [scale, setScale] = useState<number>(1.2)

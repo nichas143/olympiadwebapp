@@ -4,21 +4,7 @@ import { useState } from 'react'
 import { Button, Card, CardBody, Input } from "@heroui/react"
 import ContentViewer from '../components/ContentViewer'
 
-export default function TestViewersPage() {
-  const [showContentViewer, setShowContentViewer] = useState(false)
-  const [testContent, setTestContent] = useState({
-    _id: 'test-content',
-    title: 'Test Content',
-    description: 'This is a test content for debugging',
-    contentType: 'pdf' as const,
-    videoLink: 'https://drive.google.com/file/d/1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgvE2upms/view',
-    concept: 'Test Concept',
-    chapter: 'Test Chapter',
-    topic: 'Test Topic',
-    unit: 'Algebra' as const
-  })
-
-  const testContents = [
+const testContents = [
     {
       _id: 'test-pdf',
       title: 'Test PDF',
@@ -54,7 +40,21 @@ export default function TestViewersPage() {
     }
   ]
 
-  const handleTestContent = (content: typeof testContent) => {
+export default function TestViewersPage() {
+  const [showContentViewer, setShowContentViewer] = useState(false)
+  const [testContent, setTestContent] = useState<(typeof testContents)[0]>({
+    _id: 'test-content',
+    title: 'Test Content',
+    description: 'This is a test content for debugging',
+    contentType: 'pdf' as const,
+    videoLink: 'https://drive.google.com/file/d/1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgvE2upms/view',
+    concept: 'Test Concept',
+    chapter: 'Test Chapter',
+    topic: 'Test Topic',
+    unit: 'Algebra' as const
+  })
+
+  const handleTestContent = (content: (typeof testContents)[0]) => {
     console.log('Testing content:', content)
     setTestContent(content)
     setShowContentViewer(true)

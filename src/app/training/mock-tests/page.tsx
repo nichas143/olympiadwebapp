@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import Image from 'next/image'
 import { Card, CardBody, CardHeader, Button, Select, SelectItem, Chip, Badge } from "@heroui/react"
-import { AcademicCapIcon, ClockIcon, BookOpenIcon, CheckCircleIcon, DocumentTextIcon, PlayCircleIcon } from '@heroicons/react/24/outline'
+import { AcademicCapIcon, ClockIcon, BookOpenIcon, CheckCircleIcon, DocumentTextIcon, PlayCircleIcon, XCircleIcon } from '@heroicons/react/24/outline'
 import ContentViewer from '@/app/components/ContentViewer'
 import { useCachedContent } from '@/hooks/useCachedContent'
 
@@ -36,7 +36,7 @@ export default function MockTests() {
   const { data: session, status } = useSession()
   const router = useRouter()
   const [selectedUnit, setSelectedUnit] = useState<string>('all')
-  const [selectedContent, setSelectedContent] = useState<Content | null>(null)
+  const [selectedContent, setSelectedContent] = useState<ContentWithAttempt | null>(null)
   const [showContentViewer, setShowContentViewer] = useState(false)
 
   // Use cached content hook for mock tests
@@ -85,7 +85,7 @@ export default function MockTests() {
     }
   }
 
-  const handleContentAction = (item: Content) => {
+  const handleContentAction = (item: ContentWithAttempt) => {
     setSelectedContent(item)
     setShowContentViewer(true)
   }
@@ -222,8 +222,9 @@ export default function MockTests() {
                       ) : (
                         <Chip
                           size="sm"
-                          color="warning"
+                          color="danger"
                           variant="solid"
+                          startContent={<XCircleIcon className="h-3 w-3" />}
                         >
                           Not Started
                         </Chip>
@@ -279,7 +280,8 @@ export default function MockTests() {
               concept: selectedContent.concept,
               chapter: selectedContent.chapter,
               topic: selectedContent.topic,
-              unit: selectedContent.unit
+              unit: selectedContent.unit,
+              attemptStatus: selectedContent.attemptStatus
             }}
             onAttemptUpdate={handleAttemptUpdate}
           />

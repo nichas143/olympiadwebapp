@@ -2,8 +2,8 @@
 
 import { useState, useRef, useEffect } from 'react'
 import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, Button, Card, CardBody, Chip } from "@heroui/react"
-import { PlayCircleIcon, PauseIcon, SpeakerWaveIcon, SpeakerXMarkIcon, ArrowsPointingOutIcon, CheckCircleIcon } from '@heroicons/react/24/outline'
-import ProgressTracker from './ProgressTracker'
+import { PlayCircleIcon, PauseIcon, SpeakerWaveIcon, SpeakerXMarkIcon, CheckCircleIcon } from '@heroicons/react/24/outline'
+// import ProgressTracker from './ProgressTracker' // Unused for now
 
 interface VideoPlayerProps {
   isOpen: boolean
@@ -12,6 +12,7 @@ interface VideoPlayerProps {
   title: string
   description?: string
   contentId?: string
+  initialAttemptStatus?: boolean
   onAttemptUpdate?: (contentId: string, attempted: boolean) => void
 }
 
@@ -22,12 +23,13 @@ export default function VideoPlayer({
   title, 
   description,
   contentId,
+  initialAttemptStatus = false,
   onAttemptUpdate 
 }: VideoPlayerProps) {
   const [isPlaying, setIsPlaying] = useState(false)
   const [isMuted, setIsMuted] = useState(false)
-  const [isFullscreen, setIsFullscreen] = useState(false)
-  const [hasAttempted, setHasAttempted] = useState(false)
+  // const [isFullscreen, setIsFullscreen] = useState(false) // Unused for now
+  const [hasAttempted, setHasAttempted] = useState(initialAttemptStatus)
   
   const videoRef = useRef<HTMLVideoElement>(null)
   const containerRef = useRef<HTMLDivElement>(null)
@@ -67,26 +69,27 @@ export default function VideoPlayer({
     videoRef.current.currentTime = newTime
   }
 
-  const toggleFullscreen = () => {
-    if (!containerRef.current) return
-    
-    if (!document.fullscreenElement) {
-      containerRef.current.requestFullscreen?.()
-      setIsFullscreen(true)
-    } else {
-      document.exitFullscreen?.()
-      setIsFullscreen(false)
-    }
-  }
+  // Fullscreen functionality disabled for now
+  // const toggleFullscreen = () => {
+  //   if (!containerRef.current) return
+  //   
+  //   if (!document.fullscreenElement) {
+  //     containerRef.current.requestFullscreen?.()
+  //     setIsFullscreen(true)
+  //   } else {
+  //     document.exitFullscreen?.()
+  //     setIsFullscreen(false)
+  //   }
+  // }
 
-  useEffect(() => {
-    const handleFullscreenChange = () => {
-      setIsFullscreen(!!document.fullscreenElement)
-    }
-    
-    document.addEventListener('fullscreenchange', handleFullscreenChange)
-    return () => document.removeEventListener('fullscreenchange', handleFullscreenChange)
-  }, [])
+  // useEffect(() => {
+  //   const handleFullscreenChange = () => {
+  //     setIsFullscreen(!!document.fullscreenElement)
+  //   }
+  //   
+  //   document.addEventListener('fullscreenchange', handleFullscreenChange)
+  //   return () => document.removeEventListener('fullscreenchange', handleFullscreenChange)
+  // }, [])
 
   useEffect(() => {
     if (isOpen && contentId && !hasAttempted) {
@@ -231,14 +234,15 @@ export default function VideoPlayer({
                       </span>
                     </div>
                     
-                    <Button
+                    {/* Fullscreen button disabled for now */}
+                    {/* <Button
                       isIconOnly
                       variant="light"
                       size="sm"
                       onPress={toggleFullscreen}
                     >
                       <ArrowsPointingOutIcon className="h-5 w-5 text-white" />
-                    </Button>
+                    </Button> */}
                   </div>
                 </div>
               </div>

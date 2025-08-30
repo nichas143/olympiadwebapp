@@ -4,7 +4,7 @@ import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import { Card, CardBody, CardHeader, Button, Badge, Select, SelectItem, Chip } from "@heroui/react"
-import { BookOpenIcon, CheckCircleIcon, ClockIcon, AcademicCapIcon, PlayCircleIcon } from '@heroicons/react/24/outline'
+import { BookOpenIcon, CheckCircleIcon, ClockIcon, AcademicCapIcon, PlayCircleIcon, XCircleIcon } from '@heroicons/react/24/outline'
 import ContentViewer from '@/app/components/ContentViewer'
 import { useCachedContent } from '@/hooks/useCachedContent'
 
@@ -40,7 +40,7 @@ export default function PracticeProblems() {
     totalContent: 0,
     attemptRate: 0
   })
-  const [selectedContent, setSelectedContent] = useState<Content | null>(null)
+  const [selectedContent, setSelectedContent] = useState<ContentWithAttempt | null>(null)
   const [showContentViewer, setShowContentViewer] = useState(false)
 
   // Use cached content hook for practice sets
@@ -104,7 +104,7 @@ export default function PracticeProblems() {
     }
   }
 
-  const handleContentAction = (item: Content) => {
+  const handleContentAction = (item: ContentWithAttempt) => {
     setSelectedContent(item)
     setShowContentViewer(true)
   }
@@ -263,8 +263,9 @@ export default function PracticeProblems() {
                       ) : (
                         <Chip
                           size="sm"
-                          color="warning"
+                          color="danger"
                           variant="solid"
+                          startContent={<XCircleIcon className="h-3 w-3" />}
                         >
                           Not Started
                         </Chip>
@@ -320,7 +321,8 @@ export default function PracticeProblems() {
               concept: selectedContent.concept,
               chapter: selectedContent.chapter,
               topic: selectedContent.topic,
-              unit: selectedContent.unit
+              unit: selectedContent.unit,
+              attemptStatus: selectedContent.attemptStatus
             }}
             onAttemptUpdate={handleAttemptUpdate}
           />

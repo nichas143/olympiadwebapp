@@ -40,7 +40,7 @@ export default function StudyMaterials() {
   const [selectedContentType, setSelectedContentType] = useState<string>('all')
   const [selectedInstructionType, setSelectedInstructionType] = useState<string>('all')
   const [selectedDocCategory, setSelectedDocCategory] = useState<string>('all')
-  const [selectedContent, setSelectedContent] = useState<Content | null>(null)
+  const [selectedContent, setSelectedContent] = useState<ContentWithAttempt | null>(null)
   const [showContentViewer, setShowContentViewer] = useState(false)
   const [imageErrors, setImageErrors] = useState<Record<string, boolean>>({})
 
@@ -102,7 +102,7 @@ export default function StudyMaterials() {
     return type === 'conceptDiscussion' ? 'primary' : 'secondary'
   }
 
-  const handleContentAction = (item: Content) => {
+  const handleContentAction = (item: ContentWithAttempt) => {
     setSelectedContent(item)
     setShowContentViewer(true)
   }
@@ -292,8 +292,8 @@ export default function StudyMaterials() {
                           {item.instructionType === 'conceptDiscussion' ? 'Concept' : 'Problem'}
                         </Chip>
                       </div>
-                      {item.attemptStatus === 'attempted' && (
-                        <div className="absolute bottom-2 right-2">
+                      <div className="absolute bottom-2 right-2">
+                        {item.attemptStatus === 'attempted' ? (
                           <Chip
                             size="sm"
                             color="success"
@@ -302,8 +302,17 @@ export default function StudyMaterials() {
                           >
                             Attempted
                           </Chip>
-                        </div>
-                      )}
+                        ) : (
+                          <Chip
+                            size="sm"
+                            color="danger"
+                            variant="solid"
+                            startContent={<XCircleIcon className="h-3 w-3" />}
+                          >
+                            Not Attempted
+                          </Chip>
+                        )}
+                      </div>
                     </div>
                   </CardHeader>
                 ) : (
@@ -401,7 +410,8 @@ export default function StudyMaterials() {
               concept: selectedContent.concept,
               chapter: selectedContent.chapter,
               topic: selectedContent.topic,
-              unit: selectedContent.unit
+              unit: selectedContent.unit,
+              attemptStatus: selectedContent.attemptStatus
             }}
             onAttemptUpdate={handleAttemptUpdate}
           />

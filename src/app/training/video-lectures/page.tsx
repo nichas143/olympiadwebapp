@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import Image from 'next/image'
 import { Card, CardBody, CardHeader, Button, Select, SelectItem, Chip, Badge } from "@heroui/react"
-import { PlayCircleIcon, ClockIcon, AcademicCapIcon, BookOpenIcon, LinkIcon, CheckCircleIcon } from '@heroicons/react/24/outline'
+import { PlayCircleIcon, ClockIcon, AcademicCapIcon, BookOpenIcon, LinkIcon, CheckCircleIcon, XCircleIcon } from '@heroicons/react/24/outline'
 import ContentViewer from '@/app/components/ContentViewer'
 import { useCachedContent } from '@/hooks/useCachedContent'
 
@@ -37,7 +37,7 @@ export default function VideoLectures() {
   const router = useRouter()
   const [selectedUnit, setSelectedUnit] = useState<string>('all')
   const [selectedInstructionType, setSelectedInstructionType] = useState<string>('all')
-  const [selectedContent, setSelectedContent] = useState<Content | null>(null)
+  const [selectedContent, setSelectedContent] = useState<ContentWithAttempt | null>(null)
   const [showContentViewer, setShowContentViewer] = useState(false)
   const [imageErrors, setImageErrors] = useState<Record<string, boolean>>({})
 
@@ -98,7 +98,7 @@ export default function VideoLectures() {
     return type === 'conceptDiscussion' ? 'primary' : 'secondary'
   }
 
-  const handleContentAction = (item: Content) => {
+  const handleContentAction = (item: ContentWithAttempt) => {
     setSelectedContent(item)
     setShowContentViewer(true)
   }
@@ -253,8 +253,8 @@ export default function VideoLectures() {
                           {item.instructionType === 'conceptDiscussion' ? 'Concept' : 'Problem'}
                         </Chip>
                       </div>
-                      {item.attemptStatus === 'attempted' && (
-                        <div className="absolute bottom-2 right-2">
+                      <div className="absolute bottom-2 right-2">
+                        {item.attemptStatus === 'attempted' ? (
                           <Chip
                             size="sm"
                             color="success"
@@ -263,8 +263,17 @@ export default function VideoLectures() {
                           >
                             Watched
                           </Chip>
-                        </div>
-                      )}
+                        ) : (
+                          <Chip
+                            size="sm"
+                            color="danger"
+                            variant="solid"
+                            startContent={<XCircleIcon className="h-3 w-3" />}
+                          >
+                            Not Watched
+                          </Chip>
+                        )}
+                      </div>
                     </div>
                   </CardHeader>
                 ) : (
@@ -301,8 +310,9 @@ export default function VideoLectures() {
                         ) : (
                           <Chip
                             size="sm"
-                            color="warning"
+                            color="danger"
                             variant="solid"
+                            startContent={<XCircleIcon className="h-3 w-3" />}
                           >
                             Not Watched
                           </Chip>
@@ -359,7 +369,8 @@ export default function VideoLectures() {
               concept: selectedContent.concept,
               chapter: selectedContent.chapter,
               topic: selectedContent.topic,
-              unit: selectedContent.unit
+              unit: selectedContent.unit,
+              attemptStatus: selectedContent.attemptStatus
             }}
             onAttemptUpdate={handleAttemptUpdate}
           />

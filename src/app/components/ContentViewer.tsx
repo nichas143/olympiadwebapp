@@ -24,6 +24,7 @@ interface ContentViewerProps {
     chapter: string
     topic: string
     unit: string
+    attemptStatus?: 'attempted' | 'not_attempted'
   }
   onAttemptUpdate?: (contentId: string, attempted: boolean) => void
 }
@@ -172,6 +173,7 @@ export default function ContentViewer({
           title={content.concept}
           description={`${content.chapter} • ${content.topic} • ${content.unit}`}
           contentId={content._id}
+          initialAttemptStatus={content.attemptStatus === 'attempted'}
           onAttemptUpdate={handleAttemptUpdate}
         />
       )
@@ -186,6 +188,7 @@ export default function ContentViewer({
           title={content.concept}
           description={`${content.chapter} • ${content.topic} • ${content.unit}`}
           contentId={content._id}
+          initialAttemptStatus={content.attemptStatus === 'attempted'}
           onAttemptUpdate={handleAttemptUpdate}
         />
       )

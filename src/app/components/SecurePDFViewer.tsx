@@ -108,7 +108,12 @@ export default function SecurePDFViewer({
     setIsLoading(false)
     setError(null)
     
-    console.log('PDF loaded successfully')
+    // Mark as attempted when PDF loads successfully
+    if (!hasAttempted && contentId && onAttemptUpdate) {
+      console.log('PDF loaded successfully, marking as attempted')
+      setHasAttempted(true)
+      onAttemptUpdate(contentId, true)
+    }
   }
 
   const onDocumentLoadError = (error: Error) => {

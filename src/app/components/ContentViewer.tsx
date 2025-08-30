@@ -37,23 +37,28 @@ export default function ContentViewer({
   onAttemptUpdate 
 }: ContentViewerProps) {
   const [viewerMode, setViewerMode] = useState<ViewerMode>('selector')
-  const [hasInitialized, setHasInitialized] = useState(false)
+  const [pendingAttemptUpdate, setPendingAttemptUpdate] = useState<{contentId: string, attempted: boolean} | null>(null)
 
-  // Initialize state only once when modal opens
+  // Reset state when modal opens/closes
   useEffect(() => {
-    if (isOpen && !hasInitialized) {
+    if (!isOpen) {
       setViewerMode('selector')
-      setHasInitialized(true)
-      console.log('ContentViewer initialized')
-    } else if (!isOpen && hasInitialized) {
-      setHasInitialized(false)
-      console.log('ContentViewer reset')
+      
+      // Send any pending attempt updates when modal closes
+      if (pendingAttemptUpdate && onAttemptUpdate) {
+        console.log('Sending pending attempt update on modal close:', pendingAttemptUpdate)
+        onAttemptUpdate(pendingAttemptUpdate.contentId, pendingAttemptUpdate.attempted)
+        setPendingAttemptUpdate(null)
+      }
     }
-  }, [isOpen, hasInitialized])
+  }, [isOpen, pendingAttemptUpdate, onAttemptUpdate])
 
   const handleAttemptUpdate = useCallback((contentId: string, attempted: boolean) => {
-    // Don't call onAttemptUpdate to prevent parent re-renders
-    console.log('Attempt update received but not propagating to prevent re-render')
+    console.log('Content marked as attempted, storing for later:', contentId)
+    
+    // Store the attempt update for when the modal closes instead of updating parent immediately
+    // This completely prevents parent re-renders while modal is open
+    setPendingAttemptUpdate({ contentId, attempted })
   }, [])
 
   const handleOpenContent = useCallback(() => {
@@ -82,7 +87,7 @@ export default function ContentViewer({
         console.log('Opening external link:', content.videoLink)
         // Open external links in new tab
         window.open(content.videoLink, '_blank')
-        // Mark as attempted for external links immediately
+        // For external links, we can mark as attempted without causing issues
         if (onAttemptUpdate) {
           onAttemptUpdate(content._id, true)
         }
@@ -147,7 +152,6 @@ export default function ContentViewer({
   console.log('ContentViewer render state:', {
     isOpen,
     viewerMode,
-    hasInitialized,
     contentType: content.contentType
   })
 

@@ -101,8 +101,13 @@ export default function VideoPlayer({
   }
 
   const handleTimeUpdate = () => {
-    if (videoRef.current) {
-      // Just track that user is watching, no attempt marking
+    if (videoRef.current && !hasAttempted && contentId && onAttemptUpdate) {
+      // Mark as attempted after user watches for 10 seconds
+      if (videoRef.current.currentTime >= 10) {
+        console.log('Video watched for 10+ seconds, marking as attempted')
+        setHasAttempted(true)
+        onAttemptUpdate(contentId, true)
+      }
     }
   }
 

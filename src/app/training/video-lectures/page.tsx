@@ -227,9 +227,9 @@ export default function VideoLectures() {
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {content.map((item) => (
-              <Card key={item._id} className="hover:shadow-lg transition-shadow group">
-                <CardHeader className="pb-0">
-                  <div className="relative overflow-hidden rounded-lg">
+              <Card key={item._id} className="hover:shadow-lg transition-shadow group" isPressable onPress={() => handleWatchVideo(item)}>
+                <CardHeader className="pb-0 px-3">
+                  <div className="relative overflow-hidden rounded-lg w-full h-48">
                     {item.videoLink && getYouTubeVideoId(item.videoLink) ? (
                       <>
                         <Image
@@ -238,19 +238,22 @@ export default function VideoLectures() {
                             : `https://img.youtube.com/vi/${getYouTubeVideoId(item.videoLink)}/maxresdefault.jpg`
                           }
                           alt={item.concept}
-                          width={400}
-                          height={192}
-                          className="w-full h-48 object-cover object-center rounded-lg transition-transform group-hover:scale-105"
+                          fill
+                          className="object-cover object-center rounded-lg transition-transform group-hover:scale-105"
                           onError={() => handleImageError(item._id)}
                         />
                         {/* Play overlay */}
                         <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-30 transition-all flex items-center justify-center">
-                          <PlayCircleIcon className="h-16 w-16 text-white opacity-0 group-hover:opacity-100 transition-opacity" />
+                          <div className="flex items-center justify-center w-16 h-16">
+                            <PlayCircleIcon className="h-16 w-16 text-white opacity-0 group-hover:opacity-100 transition-opacity" />
+                          </div>
                         </div>
                       </>
                     ) : (
                       <div className="w-full h-48 bg-gradient-to-br from-blue-100 to-purple-100 rounded-lg flex items-center justify-center">
-                        <PlayCircleIcon className="h-16 w-16 text-blue-600" />
+                        <div className="flex items-center justify-center w-16 h-16">
+                          <PlayCircleIcon className="h-16 w-16 text-blue-600" />
+                        </div>
                       </div>
                     )}
                     <div className="absolute top-2 right-2 bg-red-600 text-white px-2 py-1 rounded text-sm font-medium">
@@ -292,15 +295,12 @@ export default function VideoLectures() {
                       <ClockIcon className="h-4 w-4" />
                       <span>{formatDuration(item.duration)}</span>
                     </div>
-                    <Button 
-                      color="primary" 
-                      size="sm"
-                      variant="solid"
-                      startContent={<PlayCircleIcon className="h-4 w-4" />}
-                      onPress={() => handleWatchVideo(item)}
-                    >
-                      Watch Now
-                    </Button>
+                    <div className="flex items-center gap-2 text-sm text-blue-600">
+                      <span className="flex items-center gap-1">
+                        <PlayCircleIcon className="h-4 w-4" />
+                        Watch Now
+                      </span>
+                    </div>
                   </div>
                 </CardBody>
               </Card>

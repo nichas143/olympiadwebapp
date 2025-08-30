@@ -4,7 +4,7 @@ import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import { useEffect, useState, useCallback } from 'react'
 import Image from 'next/image'
-import { Card, CardBody, CardHeader, Button, Select, SelectItem, Chip, Badge } from "@heroui/react"
+import { Card, CardBody, CardHeader, Select, SelectItem, Chip } from "@heroui/react"
 import { PlayCircleIcon, ClockIcon, AcademicCapIcon, BookOpenIcon, LinkIcon, DocumentIcon, CheckCircleIcon, XCircleIcon } from '@heroicons/react/24/outline'
 import ContentViewer from '@/app/components/ContentViewer'
 
@@ -274,20 +274,19 @@ export default function StudyMaterials() {
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {content.map((item) => (
-              <Card key={item._id} className="hover:shadow-lg transition-shadow ">
+              <Card key={item._id} className="hover:shadow-lg transition-shadow" isPressable onPress={() => handleContentAction(item)}>
                 {/* VIDEO CONTENT LAYOUT */}
                 {item.contentType === 'video' && item.videoLink && getYouTubeVideoId(item.videoLink) ? (
-                  <CardHeader className="pb-0">
-                    <div className="relative">
+                  <CardHeader className="pb-0 px-3">
+                    <div className="relative w-full h-48">
                       <Image
                         src={imageErrors[item._id] 
                           ? `https://img.youtube.com/vi/${getYouTubeVideoId(item.videoLink)}/hqdefault.jpg`
                           : `https://img.youtube.com/vi/${getYouTubeVideoId(item.videoLink)}/maxresdefault.jpg`
                         }
                         alt={item.concept}
-                        width={400}
-                        height={192}
-                        className="w-full h-48 object-cover rounded-lg"
+                        fill
+                        className="object-cover object-center rounded-lg"
                         onError={() => handleImageError(item._id)}
                       />
                       <div className="absolute top-2 right-2 bg-black bg-opacity-75 text-white px-2 py-1 rounded text-sm">
@@ -348,7 +347,7 @@ export default function StudyMaterials() {
                           {item.instructionType === 'conceptDiscussion' ? 'Concept' : 'Problem'}
                         </Chip>
                       </div>
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-end gap-10">
                         {item.attemptStatus === 'attempted' ? (
                           <Chip
                             size="sm"
@@ -394,14 +393,12 @@ export default function StudyMaterials() {
                       <ClockIcon className="h-4 w-4" />
                       <span>{formatDuration(item.duration)}</span>
                     </div>
-                    <Button 
-                      color={getContentTypeColor(item.contentType) as "primary" | "success" | "warning" | "danger" | "secondary" | "default"} 
-                      size="sm"
-                      startContent={getContentTypeIcon(item.contentType)}
-                      onPress={() => handleContentAction(item)}
-                    >
-                      {getActionButtonText(item.contentType)}
-                    </Button>
+                    <div className="flex items-center gap-2 text-sm text-gray-600">
+                      <span className="flex items-center gap-1">
+                        {getContentTypeIcon(item.contentType)}
+                        {getActionButtonText(item.contentType)}
+                      </span>
+                    </div>
                   </div>
                 </CardBody>
               </Card>

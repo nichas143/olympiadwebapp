@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import Image from 'next/image';
-import { Select, SelectItem } from "@heroui/react";
+import { Select, SelectItem, Card, CardBody, CardHeader } from "@heroui/react";
 
 interface VideoLesson {
   id: string;
@@ -236,42 +236,44 @@ export default function SampleLessons() {
           ) : (
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
               {filteredLessons.map((lesson) => (
-                <div
+                <Card
                   key={lesson.id}
-                  className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-200 cursor-pointer"
-                  onClick={() => setSelectedVideo(lesson)}
+                  className="hover:shadow-lg transition-shadow cursor-pointer"
+                  isPressable
+                  onPress={() => setSelectedVideo(lesson)}
                 >
-                  <div className="relative">
-                    <Image
-                      src={imageErrors[lesson.id] 
-                        ? `https://img.youtube.com/vi/${lesson.youtubeId}/hqdefault.jpg`
-                        : `https://img.youtube.com/vi/${lesson.youtubeId}/maxresdefault.jpg`
-                      }
-                      alt={lesson.title}
-                      width={400}
-                      height={192}
-                      className="w-full h-48 object-cover"
-                      onError={() => handleImageError(lesson.id)}
-                    />
-                    <div className="absolute inset-0 bg-black bg-opacity-20 flex items-center justify-center">
-                      <div className="bg-white bg-opacity-90 rounded-full p-3">
-                        <svg className="w-8 h-8 text-red-600" fill="currentColor" viewBox="0 0 24 24">
-                          <path d="M8 5v14l11-7z"/>
-                        </svg>
+                  <CardHeader className="pb-0 px-3">
+                    <div className="relative w-full h-48">
+                      <Image
+                        src={imageErrors[lesson.id] 
+                          ? `https://img.youtube.com/vi/${lesson.youtubeId}/hqdefault.jpg`
+                          : `https://img.youtube.com/vi/${lesson.youtubeId}/maxresdefault.jpg`
+                        }
+                        alt={lesson.title}
+                        fill
+                        className="object-cover object-center rounded-lg"
+                        onError={() => handleImageError(lesson.id)}
+                      />
+                      <div className="absolute inset-0 bg-black bg-opacity-20 flex items-center justify-center">
+                        <div className="bg-white bg-opacity-90 rounded-full p-3 flex items-center justify-center w-16 h-16">
+                          <svg className="w-8 h-8 text-red-600" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M8 5v14l11-7z"/>
+                          </svg>
+                        </div>
+                      </div>
+                      <div className="absolute top-2 right-2">
+                        <span className={`px-2 py-1 rounded-full text-xs font-medium text-white ${
+                          lesson.difficulty === 'Beginner' ? 'bg-success-600' :
+                          lesson.difficulty === 'Intermediate' ? 'bg-primary-600' :
+                          'bg-secondary-600'
+                        }`}>
+                          {lesson.difficulty}
+                        </span>
                       </div>
                     </div>
-                    <div className="absolute top-2 right-2">
-                      <span className={`px-2 py-1 rounded-full text-xs font-medium text-white ${
-                        lesson.difficulty === 'Beginner' ? 'bg-success-600' :
-                        lesson.difficulty === 'Intermediate' ? 'bg-primary-600' :
-                        'bg-secondary-600'
-                      }`}>
-                        {lesson.difficulty}
-                      </span>
-                    </div>
-                  </div>
+                  </CardHeader>
                   
-                  <div className="p-4">
+                  <CardBody>
                     <h3 className="text-lg font-semibold text-gray-900 mb-2 overflow-hidden text-ellipsis whitespace-nowrap">
                       {lesson.title}
                     </h3>
@@ -282,8 +284,8 @@ export default function SampleLessons() {
                       <span>{lesson.category}</span>
                       <span>{lesson.duration}</span>
                     </div>
-                  </div>
-                </div>
+                  </CardBody>
+                </Card>
               ))}
             </div>
           )}

@@ -246,7 +246,7 @@ export default function MockTests() {
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {content.map((item) => (
-              <Card key={item._id} className="hover:shadow-lg transition-shadow group">
+              <Card key={item._id} className="hover:shadow-lg transition-shadow group" isPressable onPress={() => handleStartTest(item)}>
                 <CardHeader className="pb-0">
                   <div className="relative overflow-hidden rounded-lg">
                     <div className="w-full h-48 bg-gradient-to-br from-orange-100 to-red-100 rounded-lg flex items-center justify-center">
@@ -312,15 +312,12 @@ export default function MockTests() {
                         </>
                       )}
                     </div>
-                    <Button 
-                      color="primary" 
-                      size="sm"
-                      variant="solid"
-                      startContent={<AcademicCapIcon className="h-4 w-4" />}
-                      onPress={() => handleStartTest(item)}
-                    >
-                      Start Test
-                    </Button>
+                    <div className="flex items-center gap-2 text-sm text-orange-600">
+                      <span className="flex items-center gap-1">
+                        <AcademicCapIcon className="h-4 w-4" />
+                        Start Test
+                      </span>
+                    </div>
                   </div>
                 </CardBody>
               </Card>

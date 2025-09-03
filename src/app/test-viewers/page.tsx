@@ -14,7 +14,8 @@ const testContents = [
       concept: 'Test PDF Concept',
       chapter: 'Test Chapter',
       topic: 'Test Topic',
-      unit: 'Algebra' as const
+      unit: 'Algebra' as const,
+      level: 'Beginner'
     },
     {
       _id: 'test-video',
@@ -25,7 +26,8 @@ const testContents = [
       concept: 'Test Video Concept',
       chapter: 'Test Chapter',
       topic: 'Test Topic',
-      unit: 'Geometry' as const
+      unit: 'Geometry' as const,
+      level: 'Intermediate'
     },
     {
       _id: 'test-link',
@@ -36,7 +38,8 @@ const testContents = [
       concept: 'Test Link Concept',
       chapter: 'Test Chapter',
       topic: 'Test Topic',
-      unit: 'Number Theory' as const
+      unit: 'Number Theory' as const,
+      level: 'Advanced'
     }
   ]
 
@@ -51,7 +54,8 @@ export default function TestViewersPage() {
     concept: 'Test Concept',
     chapter: 'Test Chapter',
     topic: 'Test Topic',
-    unit: 'Algebra' as const
+    unit: 'Algebra' as const,
+    level: 'Beginner'
   })
 
   const handleTestContent = (content: (typeof testContents)[0]) => {

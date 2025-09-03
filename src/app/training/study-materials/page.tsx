@@ -17,6 +17,7 @@ interface Content {
   concept: string
   contentType: 'pdf' | 'video' | 'link' | 'testpaperLink'
   instructionType: 'problemDiscussion' | 'conceptDiscussion'
+  level: string
   duration: number
   videoLink?: string | null
   description: string
@@ -437,6 +438,7 @@ export default function StudyMaterials() {
               chapter: selectedContent.chapter,
               topic: selectedContent.topic,
               unit: selectedContent.unit,
+              level: selectedContent.level,
               attemptStatus: selectedContent.attemptStatus
             }}
             onAttemptUpdate={handleAttemptUpdate}

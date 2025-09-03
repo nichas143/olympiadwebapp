@@ -35,7 +35,7 @@ const sampleLessons: VideoLesson[] = [
   },
   {
     id: '3',
-    title: 'Miquel\'s theorem',
+    title: 'Miquel&apos;s theorem',
     description: 'Miquels Point and Theorem.',
     category: 'Geometry',
     duration: '6 min',
@@ -110,7 +110,7 @@ export default function SampleLessons() {
                 Sample Lessons
               </h1>
               <p className="text-xl text-primary-100 max-w-3xl mx-auto leading-relaxed">
-                We're crafting amazing video lessons to give you a taste of our teaching methodology. 
+                We&apos;re crafting amazing video lessons to give you a taste of our teaching methodology. 
                 Stay tuned for engaging content that will transform your mathematical olympiad journey.
               </p>
             </div>
@@ -282,7 +282,7 @@ export default function SampleLessons() {
         <section className="py-8 bg-gray-50">
           <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
             <p className="text-gray-600">
-              We're working hard to bring you the best learning experience. Thank you for your patience!
+              We&apos;re working hard to bring you the best learning experience. Thank you for your patience!
             </p>
           </div>
         </section>

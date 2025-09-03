@@ -21,6 +21,7 @@ export async function GET(request: NextRequest) {
     const unit = searchParams.get('unit')
     const contentType = searchParams.get('contentType')
     const instructionType = searchParams.get('instructionType')
+    const level = searchParams.get('level')
     const docCategory = searchParams.get('docCategory')
     const chapter = searchParams.get('chapter')
     const topic = searchParams.get('topic')
@@ -35,6 +36,7 @@ export async function GET(request: NextRequest) {
     if (unit) query.unit = unit
     if (contentType) query.contentType = contentType
     if (instructionType) query.instructionType = instructionType
+    if (level) query.level = level
     if (docCategory) query.docCategory = docCategory
     if (chapter) query.chapter = new RegExp(chapter, 'i')
     if (topic) query.topic = new RegExp(topic, 'i')

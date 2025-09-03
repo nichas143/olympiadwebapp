@@ -12,6 +12,7 @@ export async function GET(request: NextRequest) {
     const unit = searchParams.get('unit')
     const contentType = searchParams.get('contentType')
     const instructionType = searchParams.get('instructionType')
+    const level = searchParams.get('level')
     const docCategory = searchParams.get('docCategory')
     const chapter = searchParams.get('chapter')
     const topic = searchParams.get('topic')
@@ -26,6 +27,7 @@ export async function GET(request: NextRequest) {
     if (unit) query.unit = unit
     if (contentType) query.contentType = contentType
     if (instructionType) query.instructionType = instructionType
+    if (level) query.level = level
     if (docCategory) query.docCategory = docCategory
     if (chapter) query.chapter = new RegExp(chapter, 'i') // Case-insensitive search
     if (topic) query.topic = new RegExp(topic, 'i')
@@ -83,7 +85,7 @@ export async function POST(request: NextRequest) {
     const contentData = await request.json()
 
     // Validate required fields
-    const requiredFields = ['unit', 'chapter', 'topic', 'concept', 'contentType', 'instructionType', 'duration', 'description', 'sequenceNo', 'docCategory']
+    const requiredFields = ['unit', 'chapter', 'topic', 'concept', 'contentType', 'instructionType', 'level', 'duration', 'description', 'sequenceNo', 'docCategory']
     for (const field of requiredFields) {
       if (!contentData[field]) {
         return NextResponse.json({ error: `${field} is required` }, { status: 400 })

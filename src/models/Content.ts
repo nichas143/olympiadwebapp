@@ -8,6 +8,7 @@ export interface IContent extends mongoose.Document {
   concept: string
   contentType: 'pdf' | 'video' | 'link' | 'testpaperLink'
   instructionType: 'problemDiscussion' | 'conceptDiscussion'
+  level: 'Beginner' | 'Intermediate' | 'Advanced'
   duration: number // in minutes
   videoLink?: string | null
   description: string
@@ -61,6 +62,12 @@ const contentSchema = new mongoose.Schema({
   instructionType: {
     type: String,
     enum: ['problemDiscussion', 'conceptDiscussion'],
+    required: true,
+    index: true
+  },
+  level: {
+    type: String,
+    enum: ['Beginner', 'Intermediate', 'Advanced'],
     required: true,
     index: true
   },
@@ -191,12 +198,17 @@ const contentSchema = new mongoose.Schema({
 contentSchema.index({ unit: 1, contentType: 1 })
 contentSchema.index({ unit: 1, instructionType: 1 })
 contentSchema.index({ unit: 1, docCategory: 1 })
+contentSchema.index({ unit: 1, level: 1 })
+contentSchema.index({ level: 1, contentType: 1 })
+contentSchema.index({ level: 1, docCategory: 1 })
 contentSchema.index({ chapter: 1, topic: 1 })
 contentSchema.index({ isActive: 1, createdAt: -1 })
 contentSchema.index({ unit: 1, chapter: 1, sequenceNo: 1 })
 contentSchema.index({ docCategory: 1, sequenceNo: 1 })
 contentSchema.index({ isPrivateVideo: 1, contentType: 1 })
 contentSchema.index({ videoAccessLevel: 1, isActive: 1 })
+contentSchema.index({ level: 1, isActive: 1 })
+contentSchema.index({ unit: 1, level: 1, sequenceNo: 1 })
 
 // Update the updatedAt field before saving
 contentSchema.pre('save', function(next) {

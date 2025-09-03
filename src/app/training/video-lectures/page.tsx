@@ -17,6 +17,7 @@ interface Content {
   concept: string
   contentType: 'pdf' | 'video' | 'link' | 'testpaperLink'
   instructionType: 'problemDiscussion' | 'conceptDiscussion'
+  level: string
   duration: number
   videoLink?: string | null
   description: string
@@ -37,6 +38,7 @@ export default function VideoLectures() {
   const router = useRouter()
   const [selectedUnit, setSelectedUnit] = useState<string>('all')
   const [selectedInstructionType, setSelectedInstructionType] = useState<string>('all')
+  const [selectedLevel, setSelectedLevel] = useState<string>('all')
   const [selectedContent, setSelectedContent] = useState<ContentWithAttempt | null>(null)
   const [showContentViewer, setShowContentViewer] = useState(false)
   const [imageErrors, setImageErrors] = useState<Record<string, boolean>>({})
@@ -46,6 +48,7 @@ export default function VideoLectures() {
     contentType: 'video',
     unit: selectedUnit !== 'all' ? selectedUnit : undefined,
     instructionType: selectedInstructionType !== 'all' ? selectedInstructionType : undefined,
+    level: selectedLevel !== 'all' ? selectedLevel : undefined,
     sortBy: 'sequence',
     limit: 100
   })
@@ -197,7 +200,7 @@ export default function VideoLectures() {
         </div>
 
         {/* Filters */}
-        <div className="mb-6 grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="mb-6 grid grid-cols-1 md:grid-cols-3 gap-4">
           <Select
             label="Filter by Unit"
             placeholder="All Units"
@@ -225,6 +228,18 @@ export default function VideoLectures() {
             <SelectItem key="all" className='text-black'>All Types</SelectItem>
             <SelectItem key="conceptDiscussion" className='text-black'>Concept Discussion</SelectItem>
             <SelectItem key="problemDiscussion" className='text-black'>Problem Discussion</SelectItem>
+          </Select>
+          
+          <Select
+            label="Filter by Level"
+            placeholder="All Levels"
+            selectedKeys={[selectedLevel]}
+            onSelectionChange={(keys) => setSelectedLevel(Array.from(keys)[0] as string)}
+          >
+            <SelectItem key="all" className='text-black'>All Levels</SelectItem>
+            <SelectItem key="Beginner" className='text-black'>Beginner</SelectItem>
+            <SelectItem key="Intermediate" className='text-black'>Intermediate</SelectItem>
+            <SelectItem key="Advanced" className='text-black'>Advanced</SelectItem>
           </Select>
         </div>
 
@@ -346,6 +361,17 @@ export default function VideoLectures() {
                 <CardBody className="bg-slate-100">
                   <div className="flex items-center gap-2 mb-2 flex-wrap">
                     <Chip color="primary" variant="flat" size="sm">{item.unit}</Chip>
+                    <Chip 
+                      color={
+                        item.level === 'Beginner' ? 'success' : 
+                        item.level === 'Intermediate' ? 'warning' : 
+                        'danger'
+                      } 
+                      variant="flat" 
+                      size="sm"
+                    >
+                      {item.level}
+                    </Chip>
                     <Chip color="secondary" variant="flat" size="sm">Video #{item.sequenceNo}</Chip>
                     {item.noOfProblems && (
                       <Chip color="warning" variant="flat" size="sm">
@@ -396,6 +422,7 @@ export default function VideoLectures() {
               chapter: selectedContent.chapter,
               topic: selectedContent.topic,
               unit: selectedContent.unit,
+              level: selectedContent.level,
               attemptStatus: selectedContent.attemptStatus
             }}
             onAttemptUpdate={handleAttemptUpdate}

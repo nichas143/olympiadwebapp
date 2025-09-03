@@ -8,6 +8,7 @@ interface Content {
   concept: string
   contentType: 'pdf' | 'video' | 'link' | 'testpaperLink'
   instructionType: 'problemDiscussion' | 'conceptDiscussion'
+  level: string
   duration: number
   videoLink?: string | null
   description: string
@@ -27,6 +28,7 @@ interface CachedContentOptions {
   unit?: string
   contentType?: string
   instructionType?: string
+  level?: string
   docCategory?: string
   chapter?: string
   topic?: string

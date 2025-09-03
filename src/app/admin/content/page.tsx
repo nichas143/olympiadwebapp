@@ -47,6 +47,7 @@ interface Content {
   concept: string
   contentType: string
   instructionType: string
+  level: string
   duration: number
   videoLink?: string
   description: string
@@ -65,6 +66,7 @@ interface ContentFormData {
   concept: string
   contentType: string
   instructionType: string
+  level: string
   duration: number
   videoLink: string
   description: string
@@ -80,6 +82,7 @@ const initialFormData: ContentFormData = {
   concept: '',
   contentType: 'video',
   instructionType: 'conceptDiscussion',
+  level: 'Beginner',
   duration: 30,
   videoLink: '',
   description: '',
@@ -105,7 +108,8 @@ export default function AdminContent() {
   const [filters, setFilters] = useState({
     unit: 'all',
     contentType: 'all',
-    instructionType: 'all'
+    instructionType: 'all',
+    level: 'all'
   })
 
 
@@ -247,6 +251,7 @@ export default function AdminContent() {
       concept: item.concept,
       contentType: item.contentType,
       instructionType: item.instructionType,
+      level: item.level,
       duration: item.duration,
       videoLink: item.videoLink || '',
       description: item.description,
@@ -355,7 +360,7 @@ export default function AdminContent() {
         {/* Filters */}
         <Card className="mb-6">
           <CardBody>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
               <Select
                 label="Filter by Unit"
                 selectedKeys={[filters.unit]}
@@ -394,6 +399,17 @@ export default function AdminContent() {
                 <SelectItem key="conceptDiscussion">Concept Discussion</SelectItem>
                 <SelectItem key="problemDiscussion">Problem Discussion</SelectItem>
               </Select>
+              
+              <Select
+                label="Filter by Level"
+                selectedKeys={[filters.level]}
+                onSelectionChange={(keys) => setFilters(prev => ({ ...prev, level: Array.from(keys)[0] as string }))}
+              >
+                <SelectItem key="all">All Levels</SelectItem>
+                <SelectItem key="Beginner">Beginner</SelectItem>
+                <SelectItem key="Intermediate">Intermediate</SelectItem>
+                <SelectItem key="Advanced">Advanced</SelectItem>
+              </Select>
             </div>
           </CardBody>
         </Card>
@@ -412,6 +428,7 @@ export default function AdminContent() {
                 <TableColumn>CONTENT</TableColumn>
                 <TableColumn>TYPE</TableColumn>
                 <TableColumn>CATEGORY</TableColumn>
+                <TableColumn>LEVEL</TableColumn>
                 <TableColumn>SEQUENCE</TableColumn>
                 <TableColumn>UNIT</TableColumn>
                 <TableColumn>DURATION</TableColumn>
@@ -460,6 +477,19 @@ export default function AdminContent() {
                           <span className="text-xs text-gray-500">{item.noOfProblems} problems</span>
                         )}
                       </div>
+                    </TableCell>
+                    <TableCell>
+                      <Chip
+                        size="sm"
+                        color={
+                          item.level === 'Beginner' ? 'success' : 
+                          item.level === 'Intermediate' ? 'warning' : 
+                          'danger'
+                        }
+                        variant="flat"
+                      >
+                        {item.level}
+                      </Chip>
                     </TableCell>
                     <TableCell>
                       <div className="flex items-center gap-1">
@@ -612,6 +642,17 @@ export default function AdminContent() {
                     >
                       <SelectItem key="conceptDiscussion">Concept Discussion</SelectItem>
                       <SelectItem key="problemDiscussion">Problem Discussion</SelectItem>
+                    </Select>
+                    
+                    <Select
+                      label="Level"
+                      isRequired
+                      selectedKeys={formData.level ? [formData.level] : []}
+                      onSelectionChange={(keys) => setFormData(prev => ({ ...prev, level: Array.from(keys)[0] as string }))}
+                    >
+                      <SelectItem key="Beginner">Beginner</SelectItem>
+                      <SelectItem key="Intermediate">Intermediate</SelectItem>
+                      <SelectItem key="Advanced">Advanced</SelectItem>
                     </Select>
                     
                     <Input

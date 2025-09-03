@@ -24,6 +24,7 @@ interface ContentViewerProps {
     chapter: string
     topic: string
     unit: string
+    level: string
     attemptStatus?: 'attempted' | 'not_attempted'
   }
   onAttemptUpdate?: (contentId: string, attempted: boolean) => void
@@ -176,7 +177,7 @@ export default function ContentViewer({
           onClose={handleCloseViewer}
           videoUrl={content.videoLink || ''}
           title={content.concept}
-          description={`${content.chapter} • ${content.topic} • ${content.unit}`}
+          description={`${content.chapter} • ${content.topic} • ${content.unit} • ${content.level}`}
           contentId={content._id}
           initialAttemptStatus={content.attemptStatus === 'attempted'}
           onAttemptUpdate={handleAttemptUpdate}
@@ -191,7 +192,7 @@ export default function ContentViewer({
           onClose={handleCloseViewer}
           pdfUrl={content.videoLink || ''}
           title={content.concept}
-          description={`${content.chapter} • ${content.topic} • ${content.unit}`}
+          description={`${content.chapter} • ${content.topic} • ${content.unit} • ${content.level}`}
           contentId={content._id}
           initialAttemptStatus={content.attemptStatus === 'attempted'}
           onAttemptUpdate={handleAttemptUpdate}
@@ -237,6 +238,10 @@ export default function ContentViewer({
                       <div>
                         <span className="text-sm font-medium text-gray-500">Content Type:</span>
                         <span className="ml-2 text-sm">{content.contentType}</span>
+                      </div>
+                      <div>
+                        <span className="text-sm font-medium text-gray-500">Level:</span>
+                        <span className="ml-2 text-sm">{content.level}</span>
                       </div>
                       {/* {content.videoLink && (
                         <div>

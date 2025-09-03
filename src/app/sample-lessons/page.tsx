@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import Image from 'next/image';
-import { Select, SelectItem, Card, CardBody, CardHeader } from "@heroui/react";
+import { Select, SelectItem, Card, CardBody, CardHeader, Button } from "@heroui/react";
 
 interface VideoLesson {
   id: string;
@@ -74,6 +74,9 @@ const sampleLessons: VideoLesson[] = [
 const categories = ['All', 'Number Theory', 'Geometry', 'Algebra', 'Combinatorics', 'Functions', 'Problem Solving'];
 const difficulties = ['All', 'Beginner', 'Intermediate', 'Advanced'];
 
+// Toggle this to false when you're ready to show the full video lessons
+const SHOW_WORK_IN_PROGRESS = true;
+
 export default function SampleLessons() {
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [selectedDifficulty, setSelectedDifficulty] = useState('All');
@@ -90,6 +93,204 @@ export default function SampleLessons() {
     setImageErrors(prev => ({ ...prev, [lessonId]: true }));
   };
 
+  // Work in Progress Page
+  if (SHOW_WORK_IN_PROGRESS) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
+        {/* Header */}
+        <section className="bg-gradient-to-r from-primary-600 to-secondary-600 text-white py-20">
+          <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            <div className="mb-8">
+              <div className="inline-flex items-center justify-center w-24 h-24 bg-white bg-opacity-20 rounded-full mb-6">
+                <svg className="w-12 h-12 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.828 14.828a4 4 0 01-5.656 0M9 10h1m4 0h1m-6 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </div>
+              <h1 className="text-5xl md:text-6xl font-bold mb-6">
+                Sample Lessons
+              </h1>
+              <p className="text-xl text-primary-100 max-w-3xl mx-auto leading-relaxed">
+                We're crafting amazing video lessons to give you a taste of our teaching methodology. 
+                Stay tuned for engaging content that will transform your mathematical olympiad journey.
+              </p>
+            </div>
+          </div>
+        </section>
+
+        {/* Work in Progress Section */}
+        <section className="py-20">
+          <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="text-center mb-16">
+              <div className="inline-flex items-center justify-center w-20 h-20 bg-yellow-100 rounded-full mb-6">
+                <svg className="w-10 h-10 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </div>
+              <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+                Coming Soon!
+              </h2>
+              <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+                Our team of expert educators is working hard to create high-quality video lessons 
+                that will help you master mathematical olympiad concepts.
+              </p>
+            </div>
+
+            {/* Progress Cards */}
+            <div className="grid md:grid-cols-3 gap-8 mb-16">
+              <Card className="text-center hover:shadow-lg transition-all duration-300 hover:-translate-y-1">
+                <CardHeader className="pb-0">
+                  <div className="inline-flex items-center justify-center w-16 h-16 bg-blue-100 rounded-full mb-4">
+                    <svg className="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+                    </svg>
+                  </div>
+                </CardHeader>
+                <CardBody>
+                  <h3 className="text-xl font-semibold text-gray-900 mb-2">Content Creation</h3>
+                  <p className="text-gray-600">
+                    Recording and editing high-quality video lessons with clear explanations
+                  </p>
+                </CardBody>
+              </Card>
+
+              <Card className="text-center hover:shadow-lg transition-all duration-300 hover:-translate-y-1">
+                <CardHeader className="pb-0">
+                  <div className="inline-flex items-center justify-center w-16 h-16 bg-green-100 rounded-full mb-4">
+                    <svg className="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                  </div>
+                </CardHeader>
+                <CardBody>
+                  <h3 className="text-xl font-semibold text-gray-900 mb-2">Quality Assurance</h3>
+                  <p className="text-gray-600">
+                    Reviewing and testing content to ensure accuracy and effectiveness
+                  </p>
+                </CardBody>
+              </Card>
+
+              <Card className="text-center hover:shadow-lg transition-all duration-300 hover:-translate-y-1">
+                <CardHeader className="pb-0">
+                  <div className="inline-flex items-center justify-center w-16 h-16 bg-purple-100 rounded-full mb-4">
+                    <svg className="w-8 h-8 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                    </svg>
+                  </div>
+                </CardHeader>
+                <CardBody>
+                  <h3 className="text-xl font-semibold text-gray-900 mb-2">Platform Integration</h3>
+                  <p className="text-gray-600">
+                    Setting up the video player and progress tracking systems
+                  </p>
+                </CardBody>
+              </Card>
+            </div>
+
+            {/* What to Expect */}
+            <Card className="bg-gradient-to-r from-primary-50 to-secondary-50 border-0">
+              <CardBody className="p-8">
+                <h3 className="text-2xl font-bold text-gray-900 mb-6 text-center">
+                  What You Can Expect
+                </h3>
+                <div className="grid md:grid-cols-2 gap-6">
+                  <div className="space-y-4">
+                    <div className="flex items-start space-x-3">
+                      <div className="flex-shrink-0 w-6 h-6 bg-primary-600 rounded-full flex items-center justify-center">
+                        <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
+                          <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                        </svg>
+                      </div>
+                      <div>
+                        <h4 className="font-semibold text-gray-900">Interactive Video Lessons</h4>
+                        <p className="text-gray-600 text-sm">Engaging content with clear explanations and examples</p>
+                      </div>
+                    </div>
+                    <div className="flex items-start space-x-3">
+                      <div className="flex-shrink-0 w-6 h-6 bg-primary-600 rounded-full flex items-center justify-center">
+                        <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
+                          <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                        </svg>
+                      </div>
+                      <div>
+                        <h4 className="font-semibold text-gray-900">Multiple Difficulty Levels</h4>
+                        <p className="text-gray-600 text-sm">From beginner to advanced olympiad problems</p>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="space-y-4">
+                    <div className="flex items-start space-x-3">
+                      <div className="flex-shrink-0 w-6 h-6 bg-primary-600 rounded-full flex items-center justify-center">
+                        <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
+                          <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                        </svg>
+                      </div>
+                      <div>
+                        <h4 className="font-semibold text-gray-900">Progress Tracking</h4>
+                        <p className="text-gray-600 text-sm">Monitor your learning journey and achievements</p>
+                      </div>
+                    </div>
+                    <div className="flex items-start space-x-3">
+                      <div className="flex-shrink-0 w-6 h-6 bg-primary-600 rounded-full flex items-center justify-center">
+                        <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
+                          <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                        </svg>
+                      </div>
+                      <div>
+                        <h4 className="font-semibold text-gray-900">Expert Instructors</h4>
+                        <p className="text-gray-600 text-sm">Learn from experienced olympiad coaches and mathematicians</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </CardBody>
+            </Card>
+          </div>
+        </section>
+
+        {/* Call to Action */}
+        <section className="py-16 bg-gradient-to-r from-primary-600 to-secondary-600 text-white">
+          <div className="max-w-4xl mx-auto text-center px-4 sm:px-6 lg:px-8">
+            <h2 className="text-3xl md:text-4xl font-bold mb-6">
+              Get Notified When We Launch
+            </h2>
+            <p className="text-xl mb-8 text-primary-100">
+              Be the first to know when our sample lessons are ready. Join our community and stay updated!
+            </p>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <Button
+                size="lg"
+                color="default"
+                variant="solid"
+                className="bg-white text-primary-600 hover:bg-gray-100 font-semibold"
+                onPress={() => window.location.href = '/join'}
+              >
+                Join Waitlist
+              </Button>
+              <Button
+                size="lg"
+                variant="bordered"
+                className="border-2 border-white text-white hover:bg-white hover:text-primary-600 font-semibold"
+                onPress={() => window.location.href = '/curriculum'}
+              >
+                View Full Curriculum
+              </Button>
+            </div>
+          </div>
+        </section>
+
+        {/* Footer Note */}
+        <section className="py-8 bg-gray-50">
+          <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            <p className="text-gray-600">
+              We're working hard to bring you the best learning experience. Thank you for your patience!
+            </p>
+          </div>
+        </section>
+      </div>
+    );
+  }
+
+  // Full Video Lessons Page
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
@@ -113,10 +314,8 @@ export default function SampleLessons() {
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <div className="flex flex-col sm:flex-row gap-4">
               <Select
-                // label="Category"
                 placeholder="Select a category"
                 color='primary'
-                // selectedKeys={[selectedCategory]}
                 onSelectionChange={(keys) => {
                   const selected = Array.from(keys)[0] as string;
                   setSelectedCategory(selected);
@@ -146,9 +345,7 @@ export default function SampleLessons() {
               </Select>
               
               <Select
-                // label="Difficulty"
                 placeholder="Select difficulty"
-                // selectedKeys={[selectedDifficulty]}
                 onSelectionChange={(keys) => {
                   const selected = Array.from(keys)[0] as string;
                   setSelectedDifficulty(selected);

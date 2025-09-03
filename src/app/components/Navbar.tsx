@@ -619,23 +619,42 @@ export default function Navbar() {
                   ))}
                 </div>
 
-                {/* Mobile Program Section */}
-                <div className="border-t border-gray-200 pt-2 mt-2">
-                  <div className="px-3 py-2 text-sm font-medium text-gray-500 uppercase tracking-wider">
-                   More 
-                  </div>
-                  {programItems.map((item) => (
-                    <Link
-                      key={item.name}
-                      href={item.href}
-                      className={getMobileLinkClassName(item.href, pathname === item.href)}
-                      onClick={() => setIsMobileMenuOpen(false)}
-                    >
-                      <div className="font-medium">{item.name}</div>
-                      <div className="text-sm text-gray-600 mt-1">{item.description}</div>
-                    </Link>
-                  ))}
-                </div>
+                                 {/* Mobile More Section */}
+                 <div className="border-t border-gray-200 pt-2 mt-2">
+                   <div className="px-3 py-2 text-sm font-medium text-gray-500 uppercase tracking-wider">
+                    More 
+                   </div>
+                   {programItems.map((item) => (
+                     <Link
+                       key={item.name}
+                       href={item.href}
+                       className={getMobileLinkClassName(item.href, pathname === item.href)}
+                       onClick={() => setIsMobileMenuOpen(false)}
+                     >
+                       <div className="font-medium">{item.name}</div>
+                       <div className="text-sm text-gray-600 mt-1">{item.description}</div>
+                     </Link>
+                   ))}
+                   
+                   {/* Mobile Pricing Section */}
+                   <div className="px-3 py-2 border-t border-gray-100 mt-2">
+                     <div className="font-medium text-gray-900 mb-1">💰 Pricing Plans</div>
+                     <div className="text-sm text-gray-600 mb-2">
+                       {freeAccess ? (
+                         <span className="text-green-600 font-medium">🎉 Currently FREE Access!</span>
+                       ) : (
+                         <span>Monthly ₹300 • Yearly ₹3000</span>
+                       )}
+                     </div>
+                     <Link
+                       href="/pricing"
+                       className="inline-block px-3 py-1 bg-blue-600 text-white text-sm rounded-md hover:bg-blue-700 transition-colors"
+                       onClick={() => setIsMobileMenuOpen(false)}
+                     >
+                       View Plans
+                     </Link>
+                   </div>
+                 </div>
 
                 {/* Mobile Resources Section */}
                 <div className="border-t border-gray-200 pt-2 mt-2">

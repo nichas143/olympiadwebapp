@@ -89,8 +89,7 @@ export async function DELETE(
     }
 
     // Soft delete by setting isActive to false
-    content.isActive = false
-    await content.save()
+    await Content.findByIdAndUpdate(id, { isActive: false }, { runValidators: false })
 
     return NextResponse.json({ 
       message: 'Content deleted successfully'

@@ -53,7 +53,7 @@ export function usePublicContent(options: PublicContentOptions = {}): PublicCont
   const createCacheKey = useCallback((opts: PublicContentOptions) => {
     const params = new URLSearchParams()
     Object.entries(opts).forEach(([key, value]) => {
-      if (value && value !== 'all') {
+      if (value) {
         params.append(key, value)
       }
     })
@@ -88,7 +88,7 @@ export function usePublicContent(options: PublicContentOptions = {}): PublicCont
       // Build API parameters
       const params = new URLSearchParams()
       Object.entries(opts).forEach(([key, value]) => {
-        if (value && value !== 'all') {
+        if (value) {
           params.append(key, value)
         }
       })

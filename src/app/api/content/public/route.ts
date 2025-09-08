@@ -13,18 +13,17 @@ export async function GET(request: NextRequest) {
     const sortBy = searchParams.get('sortBy') || 'sequence'
     const limit = parseInt(searchParams.get('limit') || '50')
 
-    // Only allow access to prerequisite content for public endpoint
-    if (level !== 'Pre-requisite') {
-      return NextResponse.json({ error: 'Only prerequisite content is available publicly' }, { status: 403 })
-    }
-
-    // Build query for public prerequisite content
+    // Build query for public content (any level that is marked for public access)
     const query: Record<string, unknown> = { 
       isActive: true,
-      level: 'Pre-requisite',
       contentType: contentType,
       // Only show content that is marked for public access
       isPublicAccess: true
+    }
+
+    // If level is specified, filter by that level
+    if (level && level !== 'all') {
+      query.level = level
     }
 
     // Determine sort order

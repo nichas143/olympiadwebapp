@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { Button, Card, CardBody, Input } from "@heroui/react"
 import ContentViewer from '../components/ContentViewer'
 
-const testContents = [
+  const testContents = [
     {
       _id: 'test-pdf',
       title: 'Test PDF',
@@ -15,7 +15,7 @@ const testContents = [
       chapter: 'Test Chapter',
       topic: 'Test Topic',
       unit: 'Algebra' as const,
-      level: 'Beginner'
+      level: 'Pre-requisite'
     },
     {
       _id: 'test-video',
@@ -55,7 +55,7 @@ export default function TestViewersPage() {
     chapter: 'Test Chapter',
     topic: 'Test Topic',
     unit: 'Algebra' as const,
-    level: 'Beginner'
+    level: 'Pre-requisite'
   })
 
   const handleTestContent = (content: (typeof testContents)[0]) => {

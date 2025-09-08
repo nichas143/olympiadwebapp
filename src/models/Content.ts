@@ -8,7 +8,7 @@ export interface IContent extends mongoose.Document {
   concept: string
   contentType: 'pdf' | 'video' | 'link' | 'testpaperLink'
   instructionType: 'problemDiscussion' | 'conceptDiscussion'
-  level: 'Beginner' | 'Intermediate' | 'Advanced'
+  level: 'Pre-requisite' | 'Beginner' | 'Intermediate' | 'Advanced'
   duration: number // in minutes
   videoLink?: string | null
   description: string
@@ -67,7 +67,7 @@ const contentSchema = new mongoose.Schema({
   },
   level: {
     type: String,
-    enum: ['Beginner', 'Intermediate', 'Advanced'],
+    enum: ['Pre-requisite', 'Beginner', 'Intermediate', 'Advanced'],
     required: true,
     index: true
   },

@@ -237,6 +237,7 @@ export default function VideoLectures() {
             onSelectionChange={(keys) => setSelectedLevel(Array.from(keys)[0] as string)}
           >
             <SelectItem key="all" className='text-black'>All Levels</SelectItem>
+            <SelectItem key="Pre-requisite" className='text-black'>Pre-requisite</SelectItem>
             <SelectItem key="Beginner" className='text-black'>Beginner</SelectItem>
             <SelectItem key="Intermediate" className='text-black'>Intermediate</SelectItem>
             <SelectItem key="Advanced" className='text-black'>Advanced</SelectItem>
@@ -363,6 +364,7 @@ export default function VideoLectures() {
                     <Chip color="primary" variant="flat" size="sm">{item.unit}</Chip>
                     <Chip 
                       color={
+                        item.level === 'Pre-requisite' ? 'secondary' : 
                         item.level === 'Beginner' ? 'success' : 
                         item.level === 'Intermediate' ? 'warning' : 
                         'danger'

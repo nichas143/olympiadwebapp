@@ -406,6 +406,7 @@ export default function AdminContent() {
                 onSelectionChange={(keys) => setFilters(prev => ({ ...prev, level: Array.from(keys)[0] as string }))}
               >
                 <SelectItem key="all">All Levels</SelectItem>
+                <SelectItem key="Pre-requisite">Pre-requisite</SelectItem>
                 <SelectItem key="Beginner">Beginner</SelectItem>
                 <SelectItem key="Intermediate">Intermediate</SelectItem>
                 <SelectItem key="Advanced">Advanced</SelectItem>
@@ -482,6 +483,7 @@ export default function AdminContent() {
                       <Chip
                         size="sm"
                         color={
+                          item.level === 'Pre-requisite' ? 'secondary' : 
                           item.level === 'Beginner' ? 'success' : 
                           item.level === 'Intermediate' ? 'warning' : 
                           'danger'
@@ -650,6 +652,7 @@ export default function AdminContent() {
                       selectedKeys={formData.level ? [formData.level] : []}
                       onSelectionChange={(keys) => setFormData(prev => ({ ...prev, level: Array.from(keys)[0] as string }))}
                     >
+                      <SelectItem key="Pre-requisite">Pre-requisite</SelectItem>
                       <SelectItem key="Beginner">Beginner</SelectItem>
                       <SelectItem key="Intermediate">Intermediate</SelectItem>
                       <SelectItem key="Advanced">Advanced</SelectItem>

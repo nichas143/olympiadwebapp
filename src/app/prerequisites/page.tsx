@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { Card, CardBody, CardHeader, Button, Badge, Chip } from "@heroui/react"
-import { PlayCircleIcon, ClockIcon, AcademicCapIcon } from '@heroicons/react/24/outline'
+import { PlayCircleIcon, ClockIcon, AcademicCapIcon, DocumentIcon } from '@heroicons/react/24/outline'
 import PublicVideoPlayer from '@/app/components/PublicVideoPlayer'
 import { usePublicContent } from '@/hooks/usePublicContent'
 
@@ -38,6 +38,14 @@ export default function Prerequisites() {
     limit: 50
   })
 
+  // Fetch prerequisite PDFs (public access)
+  const { content: prerequisitePDFs, loading: pdfsLoading, error: pdfsError } = usePublicContent({
+    level: 'Pre-requisite',
+    contentType: 'pdf',
+    sortBy: 'sequence',
+    limit: 50
+  })
+
   // No authentication required for prerequisites page
   // useEffect(() => {
   //   if (status === 'loading') return
@@ -66,6 +74,12 @@ export default function Prerequisites() {
   const handleVideoAction = (item: Content) => {
     setSelectedVideo(item)
     setShowVideoPlayer(true)
+  }
+
+  const handlePDFAction = (pdf: Content) => {
+    if (pdf.videoLink) {
+      window.open(pdf.videoLink, '_blank')
+    }
   }
 
   // No progress tracking for public videos
@@ -376,6 +390,95 @@ export default function Prerequisites() {
             )}
           </div>
         </section>
+
+      {/* Prerequisite PDFs */}
+      <section className="py-16 bg-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+              Prerequisite Study Materials
+            </h2>
+            <p className="text-lg text-gray-600 max-w-3xl mx-auto">
+              Essential PDF resources to help you master the foundational concepts before starting the program.
+            </p>
+          </div>
+
+          {pdfsLoading ? (
+            <div className="flex items-center justify-center py-12">
+              <div className="text-center">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600 mx-auto"></div>
+                <p className="mt-4 text-gray-600">Loading prerequisite materials...</p>
+              </div>
+            </div>
+          ) : pdfsError ? (
+            <div className="text-center py-12">
+              <p className="text-red-600">Error loading prerequisite materials. Please try again later.</p>
+            </div>
+          ) : prerequisitePDFs && prerequisitePDFs.length > 0 ? (
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {prerequisitePDFs.map((pdf) => (
+                <Card key={pdf._id} className="hover:shadow-lg transition-shadow duration-200">
+                  <CardHeader className="p-0">
+                    <div className="relative w-full h-48 bg-gray-100 rounded-t-lg overflow-hidden flex items-center justify-center">
+                      <div className="text-center">
+                        <DocumentIcon className="h-16 w-16 text-gray-400 mx-auto mb-2" />
+                        <p className="text-sm text-gray-500">PDF Document</p>
+                      </div>
+                      <div className="absolute top-2 left-2">
+                        <Chip size="sm" color="secondary" variant="solid">
+                          {pdf.sequenceNo}
+                        </Chip>
+                      </div>
+                      <div className="absolute top-2 right-2">
+                        <Chip size="sm" color="primary" variant="solid">
+                          {formatDuration(pdf.duration)}
+                        </Chip>
+                      </div>
+                    </div>
+                  </CardHeader>
+                  <CardBody className="p-4">
+                    <div className="flex items-center justify-between mb-2">
+                      <Badge color="primary" variant="flat" size="sm">
+                        {pdf.unit}
+                      </Badge>
+                      <div className="flex items-center text-sm text-gray-500">
+                        <ClockIcon className="h-4 w-4 mr-1" />
+                        {formatDuration(pdf.duration)}
+                      </div>
+                    </div>
+                    <h3 className="text-lg font-semibold text-gray-900 mb-2 line-clamp-2">
+                      {pdf.concept}
+                    </h3>
+                    <p className="text-sm text-gray-600 mb-3 line-clamp-2">
+                      {pdf.description}
+                    </p>
+                    <div className="flex items-center justify-between">
+                      <div className="text-xs text-gray-500">
+                        {pdf.chapter} • {pdf.topic}
+                      </div>
+                      <Button
+                        size="sm"
+                        color="primary"
+                        variant="flat"
+                        onPress={() => handlePDFAction(pdf)}
+                        startContent={<DocumentIcon className="h-4 w-4" />}
+                      >
+                        View PDF
+                      </Button>
+                    </div>
+                  </CardBody>
+                </Card>
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-12">
+              <DocumentIcon className="h-16 w-16 text-gray-400 mx-auto mb-4" />
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">No Prerequisite Materials Available</h3>
+              <p className="text-gray-600">Check back later for prerequisite study materials.</p>
+            </div>
+          )}
+        </div>
+      </section>
 
       {/* Assessment Areas */}
       <section className="py-16 bg-gray-50">

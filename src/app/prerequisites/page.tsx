@@ -325,6 +325,11 @@ export default function Prerequisites() {
                               {formatDuration(video.duration)}
                             </Chip>
                           </div>
+                          <div className="absolute top-2 left-2">
+                            <Chip size="sm" color="secondary" variant="solid">
+                              {video.sequenceNo}
+                            </Chip>
+                          </div>
                         </div>
                       </CardHeader>
                       <CardBody className="p-4">

@@ -1,4 +1,112 @@
+'use client'
+
+import { useSession } from 'next-auth/react'
+import { useRouter } from 'next/navigation'
+import { useEffect, useState } from 'react'
+import { Card, CardBody, CardHeader, Button, Badge, Chip } from "@heroui/react"
+import { PlayCircleIcon, ClockIcon, AcademicCapIcon } from '@heroicons/react/24/outline'
+import ContentViewer from '@/app/components/ContentViewer'
+import { useCachedContent } from '@/hooks/useCachedContent'
+
+interface Content {
+  _id: string
+  unit: 'Algebra' | 'Geometry' | 'Number Theory' | 'Combinatorics' | 'Functional Equations' | 'Inequalities' | 'Advanced Math' | 'Calculus' | 'Other'
+  chapter: string
+  topic: string
+  concept: string
+  contentType: 'pdf' | 'video' | 'link' | 'testpaperLink'
+  instructionType: 'problemDiscussion' | 'conceptDiscussion'
+  level: string
+  duration: number
+  videoLink?: string | null
+  description: string
+  sequenceNo: number
+  docCategory: 'Learning' | 'MockTest' | 'PracticeSet'
+  noOfProblems?: number
+  createdAt: string
+  updatedAt: string
+  isActive: boolean
+}
+
+interface ContentWithAttempt extends Content {
+  attemptStatus?: 'attempted' | 'not_attempted'
+  title?: string // For ContentViewer compatibility
+}
+
 export default function Prerequisites() {
+  const { data: session, status } = useSession()
+  const router = useRouter()
+  const [selectedContent, setSelectedContent] = useState<(ContentWithAttempt & { title: string }) | null>(null)
+  const [showContentViewer, setShowContentViewer] = useState(false)
+
+  // Fetch prerequisite videos
+  const { content: prerequisiteVideos, loading: videosLoading, error: videosError } = useCachedContent({
+    level: 'Pre-requisite',
+    contentType: 'video',
+    sortBy: 'sequence',
+    limit: 50
+  })
+
+  useEffect(() => {
+    if (status === 'loading') return
+    
+    if (!session) {
+      router.push('/auth/signin')
+      return
+    }
+  }, [session, status, router])
+
+  const formatDuration = (minutes: number) => {
+    const hours = Math.floor(minutes / 60)
+    const mins = minutes % 60
+    if (hours > 0) {
+      return `${hours}h ${mins}m`
+    }
+    return `${mins}m`
+  }
+
+  const getYouTubeVideoId = (url: string) => {
+    const regex = /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/
+    const match = url?.match(regex)
+    return match ? match[1] : null
+  }
+
+  const handleContentAction = (item: ContentWithAttempt) => {
+    // Add title property for ContentViewer compatibility
+    const contentWithTitle: ContentWithAttempt & { title: string } = {
+      ...item,
+      title: item.concept
+    }
+    setSelectedContent(contentWithTitle)
+    setShowContentViewer(true)
+  }
+
+  const handleAttemptUpdate = async (contentId: string, attempted: boolean) => {
+    try {
+      console.log('Updating progress for content:', contentId, 'attempted:', attempted)
+      
+      // Make API call to save progress
+      const response = await fetch('/api/progress', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          contentId,
+          status: attempted ? 'attempted' : 'not_attempted'
+        })
+      })
+
+      if (response.ok) {
+        const data = await response.json()
+        console.log('Progress updated successfully:', data)
+      } else {
+        console.error('Failed to update progress:', response.statusText)
+      }
+    } catch (error) {
+      console.error('Error updating progress:', error)
+    }
+  }
   const prerequisites = [
     {
       category: 'Algebra',
@@ -194,6 +302,113 @@ export default function Prerequisites() {
         </div>
       </section>
 
+      {/* Pre-requisites Lectures */}
+      {session && (
+        <section className="py-16 bg-gray-50">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="text-center mb-12">
+              <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+                Pre-requisites Lectures
+              </h2>
+              <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+                Watch these video lectures to strengthen your understanding of prerequisite concepts before starting the olympiad program
+              </p>
+            </div>
+
+            {videosLoading ? (
+              <div className="flex items-center justify-center py-12">
+                <div className="text-center">
+                  <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600 mx-auto"></div>
+                  <p className="mt-4 text-gray-600">Loading prerequisite lectures...</p>
+                </div>
+              </div>
+            ) : videosError ? (
+              <div className="text-center py-12">
+                <p className="text-red-600">Error loading prerequisite lectures. Please try again later.</p>
+              </div>
+            ) : prerequisiteVideos && prerequisiteVideos.length > 0 ? (
+              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {prerequisiteVideos.map((video) => {
+                  const videoId = getYouTubeVideoId(video.videoLink || '')
+                  const thumbnailUrl = videoId ? `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg` : ''
+                  
+                  return (
+                    <Card key={video._id} className="hover:shadow-lg transition-shadow duration-200">
+                      <CardHeader className="p-0">
+                        <div className="relative w-full h-48 bg-gray-200 rounded-t-lg overflow-hidden">
+                          {thumbnailUrl ? (
+                            <img
+                              src={thumbnailUrl}
+                              alt={video.concept}
+                              className="w-full h-full object-cover"
+                              onError={(e) => {
+                                const target = e.target as HTMLImageElement
+                                target.src = `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`
+                              }}
+                            />
+                          ) : (
+                            <div className="w-full h-full flex items-center justify-center bg-gray-200">
+                              <PlayCircleIcon className="h-16 w-16 text-gray-400" />
+                            </div>
+                          )}
+                          <div className="absolute inset-0 bg-black bg-opacity-0 hover:bg-opacity-20 transition-all duration-200 flex items-center justify-center">
+                            <div className="opacity-0 hover:opacity-100 transition-opacity duration-200">
+                              <PlayCircleIcon className="h-16 w-16 text-white" />
+                            </div>
+                          </div>
+                          <div className="absolute top-2 right-2">
+                            <Chip size="sm" color="primary" variant="solid">
+                              {formatDuration(video.duration)}
+                            </Chip>
+                          </div>
+                        </div>
+                      </CardHeader>
+                      <CardBody className="p-4">
+                        <div className="flex items-center justify-between mb-2">
+                          <Badge color="primary" variant="flat" size="sm">
+                            {video.unit}
+                          </Badge>
+                          <div className="flex items-center text-sm text-gray-500">
+                            <ClockIcon className="h-4 w-4 mr-1" />
+                            {formatDuration(video.duration)}
+                          </div>
+                        </div>
+                        <h3 className="text-lg font-semibold text-gray-900 mb-2 line-clamp-2">
+                          {video.concept}
+                        </h3>
+                        <p className="text-sm text-gray-600 mb-3 line-clamp-2">
+                          {video.description}
+                        </p>
+                        <div className="flex items-center justify-between">
+                          <div className="text-xs text-gray-500">
+                            {video.chapter} • {video.topic}
+                          </div>
+                          <Button
+                            size="sm"
+                            color="primary"
+                            variant="flat"
+                            onPress={() => handleContentAction(video)}
+                            startContent={<PlayCircleIcon className="h-4 w-4" />}
+                          >
+                            Watch
+                          </Button>
+                        </div>
+                      </CardBody>
+                    </Card>
+                  )
+                })}
+              </div>
+            ) : (
+              <div className="text-center py-12">
+                <AcademicCapIcon className="h-16 w-16 text-gray-400 mx-auto mb-4" />
+                <h3 className="text-lg font-semibold text-gray-900 mb-2">No Prerequisite Lectures Available</h3>
+                <p className="text-gray-600">Check back later for prerequisite video lectures.</p>
+              </div>
+            )}
+          </div>
+        </section>
+      )}
+
       {/* Assessment Areas */}
       <section className="py-16 bg-gray-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -316,6 +531,19 @@ export default function Prerequisites() {
           </div>
         </div>
       </section>
+
+      {/* Content Viewer Modal */}
+      {selectedContent && (
+        <ContentViewer
+          isOpen={showContentViewer}
+          onClose={() => {
+            setShowContentViewer(false)
+            setSelectedContent(null)
+          }}
+          content={selectedContent}
+          onAttemptUpdate={handleAttemptUpdate}
+        />
+      )}
     </div>
   );
 }

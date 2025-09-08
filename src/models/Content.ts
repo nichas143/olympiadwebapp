@@ -26,6 +26,7 @@ export interface IContent extends mongoose.Document {
   allowedUserRoles?: string[] // Roles that can access this video
   domainRestrictions?: string[] // Domains allowed to embed this video
   requiresSubscription?: boolean // Whether active subscription is needed
+  isPublicAccess?: boolean // Whether content is accessible to non-logged-in users (for prerequisites)
 }
 
 const contentSchema = new mongoose.Schema({
@@ -191,6 +192,11 @@ const contentSchema = new mongoose.Schema({
     type: Boolean,
     default: true,
     index: true
+  },
+  isPublicAccess: {
+    type: Boolean,
+    default: false,
+    index: true
   }
 })
 
@@ -209,6 +215,7 @@ contentSchema.index({ isPrivateVideo: 1, contentType: 1 })
 contentSchema.index({ videoAccessLevel: 1, isActive: 1 })
 contentSchema.index({ level: 1, isActive: 1 })
 contentSchema.index({ unit: 1, level: 1, sequenceNo: 1 })
+contentSchema.index({ isPublicAccess: 1, level: 1, isActive: 1 })
 
 // Update the updatedAt field before saving
 contentSchema.pre('save', function(next) {

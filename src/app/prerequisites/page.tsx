@@ -1,12 +1,10 @@
 'use client'
 
-import { useSession } from 'next-auth/react'
-import { useRouter } from 'next/navigation'
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { Card, CardBody, CardHeader, Button, Badge, Chip } from "@heroui/react"
 import { PlayCircleIcon, ClockIcon, AcademicCapIcon } from '@heroicons/react/24/outline'
-import ContentViewer from '@/app/components/ContentViewer'
-import { useCachedContent } from '@/hooks/useCachedContent'
+import PublicVideoPlayer from '@/app/components/PublicVideoPlayer'
+import { usePublicContent } from '@/hooks/usePublicContent'
 
 interface Content {
   _id: string
@@ -28,33 +26,27 @@ interface Content {
   isActive: boolean
 }
 
-interface ContentWithAttempt extends Content {
-  attemptStatus?: 'attempted' | 'not_attempted'
-  title?: string // For ContentViewer compatibility
-}
-
 export default function Prerequisites() {
-  const { data: session, status } = useSession()
-  const router = useRouter()
-  const [selectedContent, setSelectedContent] = useState<(ContentWithAttempt & { title: string }) | null>(null)
-  const [showContentViewer, setShowContentViewer] = useState(false)
+  const [selectedVideo, setSelectedVideo] = useState<Content | null>(null)
+  const [showVideoPlayer, setShowVideoPlayer] = useState(false)
 
-  // Fetch prerequisite videos
-  const { content: prerequisiteVideos, loading: videosLoading, error: videosError } = useCachedContent({
+  // Fetch prerequisite videos (public access)
+  const { content: prerequisiteVideos, loading: videosLoading, error: videosError } = usePublicContent({
     level: 'Pre-requisite',
     contentType: 'video',
     sortBy: 'sequence',
     limit: 50
   })
 
-  useEffect(() => {
-    if (status === 'loading') return
-    
-    if (!session) {
-      router.push('/auth/signin')
-      return
-    }
-  }, [session, status, router])
+  // No authentication required for prerequisites page
+  // useEffect(() => {
+  //   if (status === 'loading') return
+  //   
+  //   if (!session) {
+  //     router.push('/auth/signin')
+  //     return
+  //   }
+  // }, [session, status, router])
 
   const formatDuration = (minutes: number) => {
     const hours = Math.floor(minutes / 60)
@@ -71,42 +63,15 @@ export default function Prerequisites() {
     return match ? match[1] : null
   }
 
-  const handleContentAction = (item: ContentWithAttempt) => {
-    // Add title property for ContentViewer compatibility
-    const contentWithTitle: ContentWithAttempt & { title: string } = {
-      ...item,
-      title: item.concept
-    }
-    setSelectedContent(contentWithTitle)
-    setShowContentViewer(true)
+  const handleVideoAction = (item: Content) => {
+    setSelectedVideo(item)
+    setShowVideoPlayer(true)
   }
 
-  const handleAttemptUpdate = async (contentId: string, attempted: boolean) => {
-    try {
-      console.log('Updating progress for content:', contentId, 'attempted:', attempted)
-      
-      // Make API call to save progress
-      const response = await fetch('/api/progress', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          contentId,
-          status: attempted ? 'attempted' : 'not_attempted'
-        })
-      })
-
-      if (response.ok) {
-        const data = await response.json()
-        console.log('Progress updated successfully:', data)
-      } else {
-        console.error('Failed to update progress:', response.statusText)
-      }
-    } catch (error) {
-      console.error('Error updating progress:', error)
-    }
-  }
+  // No progress tracking for public videos
+  // const handleAttemptUpdate = async (contentId: string, attempted: boolean) => {
+  //   // Progress tracking not available for public access
+  // }
   const prerequisites = [
     {
       category: 'Algebra',
@@ -303,8 +268,7 @@ export default function Prerequisites() {
       </section>
 
       {/* Pre-requisites Lectures */}
-      {session && (
-        <section className="py-16 bg-gray-50">
+      <section className="py-16 bg-gray-50">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center mb-12">
               <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
@@ -387,7 +351,7 @@ export default function Prerequisites() {
                             size="sm"
                             color="primary"
                             variant="flat"
-                            onPress={() => handleContentAction(video)}
+                            onPress={() => handleVideoAction(video)}
                             startContent={<PlayCircleIcon className="h-4 w-4" />}
                           >
                             Watch
@@ -407,7 +371,6 @@ export default function Prerequisites() {
             )}
           </div>
         </section>
-      )}
 
       {/* Assessment Areas */}
       <section className="py-16 bg-gray-50">
@@ -532,16 +495,17 @@ export default function Prerequisites() {
         </div>
       </section>
 
-      {/* Content Viewer Modal */}
-      {selectedContent && (
-        <ContentViewer
-          isOpen={showContentViewer}
+      {/* Public Video Player Modal */}
+      {selectedVideo && (
+        <PublicVideoPlayer
+          isOpen={showVideoPlayer}
           onClose={() => {
-            setShowContentViewer(false)
-            setSelectedContent(null)
+            setShowVideoPlayer(false)
+            setSelectedVideo(null)
           }}
-          content={selectedContent}
-          onAttemptUpdate={handleAttemptUpdate}
+          videoUrl={selectedVideo.videoLink || ''}
+          title={selectedVideo.concept}
+          description={`${selectedVideo.chapter} • ${selectedVideo.topic} • ${selectedVideo.unit} • ${selectedVideo.level}`}
         />
       )}
     </div>

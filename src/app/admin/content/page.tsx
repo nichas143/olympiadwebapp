@@ -57,6 +57,7 @@ interface Content {
   createdAt: string
   isActive: boolean
   createdBy?: string
+  isPublicAccess?: boolean
 }
 
 interface ContentFormData {
@@ -73,6 +74,7 @@ interface ContentFormData {
   sequenceNo: number
   docCategory: string
   noOfProblems: number | undefined
+  isPublicAccess: boolean
 }
 
 const initialFormData: ContentFormData = {
@@ -88,7 +90,8 @@ const initialFormData: ContentFormData = {
   description: '',
   sequenceNo: 1,
   docCategory: 'Learning',
-  noOfProblems: undefined
+  noOfProblems: undefined,
+  isPublicAccess: false
 }
 
 export default function AdminContent() {
@@ -257,7 +260,8 @@ export default function AdminContent() {
       description: item.description,
       sequenceNo: item.sequenceNo,
       docCategory: item.docCategory,
-      noOfProblems: item.noOfProblems
+      noOfProblems: item.noOfProblems,
+      isPublicAccess: item.isPublicAccess || false
     })
     setEditingId(item._id)
     onFormOpen()
@@ -510,13 +514,24 @@ export default function AdminContent() {
                       </div>
                     </TableCell>
                     <TableCell>
-                      <Chip
-                        size="sm"
-                        color={item.isActive ? 'success' : 'danger'}
-                        variant="flat"
-                      >
-                        {item.isActive ? 'Active' : 'Inactive'}
-                      </Chip>
+                      <div className="flex flex-col gap-1">
+                        <Chip
+                          size="sm"
+                          color={item.isActive ? 'success' : 'danger'}
+                          variant="flat"
+                        >
+                          {item.isActive ? 'Active' : 'Inactive'}
+                        </Chip>
+                        {item.isPublicAccess && (
+                          <Chip
+                            size="sm"
+                            color="success"
+                            variant="dot"
+                          >
+                            Public
+                          </Chip>
+                        )}
+                      </div>
                     </TableCell>
                     <TableCell>
                       <div className="flex items-center gap-2">
@@ -740,6 +755,23 @@ export default function AdminContent() {
                         description="Total number of problems in this test/practice set"
                       />
                     )}
+                    
+                    <Select
+                      label="Public Access"
+                      selectedKeys={formData.isPublicAccess ? ['true'] : ['false']}
+                      onSelectionChange={(keys) => {
+                        const isPublic = Array.from(keys)[0] === 'true'
+                        setFormData(prev => ({ ...prev, isPublicAccess: isPublic }))
+                      }}
+                      description={
+                        formData.level === 'Pre-requisite' 
+                          ? 'Public access allows non-logged-in users to view this content on the prerequisites page'
+                          : 'Public access makes this content available to non-logged-in users (currently only prerequisite content appears on public pages)'
+                      }
+                    >
+                      <SelectItem key="false">Private (Subscription Required)</SelectItem>
+                      <SelectItem key="true">Public (Free Access)</SelectItem>
+                    </Select>
                   </div>
                   
                   <Textarea

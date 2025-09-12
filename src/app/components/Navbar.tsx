@@ -34,6 +34,7 @@ export default function Navbar() {
   const navItems = [
     { name: 'Home', href: '/' },
     { name: 'About Us', href: '/about' },
+    { name: 'Blog', href: '/blog' },
   ];
 
   const liveLecturesItems = [
@@ -458,6 +459,13 @@ export default function Navbar() {
                           >
                             📚 Content Management
                           </Link>
+                          <Link
+                            href="/admin/blog"
+                            className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                            onClick={() => setIsUserDropdownOpen(false)}
+                          >
+                            📝 Blog Management
+                          </Link>
                           {session.user?.role === 'superadmin' && (
                             <Link
                               href="/dashboard"
@@ -698,6 +706,13 @@ export default function Navbar() {
                         onClick={() => setIsMobileMenuOpen(false)}
                       >
                         📚 Content Management
+                      </Link>
+                      <Link
+                        href="/admin/blog"
+                        className={getMobileLinkClassName('/admin/blog', pathname === '/admin/blog')}
+                        onClick={() => setIsMobileMenuOpen(false)}
+                      >
+                        📝 Blog Management
                       </Link>
                       {session.user?.role === 'superadmin' && (
                         <Link

@@ -248,6 +248,13 @@ export default function AdminDashboard() {
             >
               📚 Manage Content
             </Button>
+            <Button
+              color="secondary"
+              variant="flat"
+              onPress={() => router.push('/admin/blog')}
+            >
+              📝 Manage Blog
+            </Button>
             {session.user.role === 'superadmin' && (
               <Button
                 color="secondary"

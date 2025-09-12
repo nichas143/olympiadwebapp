@@ -88,12 +88,6 @@ export async function GET(
       )
     }
     
-    console.log('GET - Blog found:', {
-      id: blog._id,
-      title: blog.title,
-      content: blog.content,
-      contentLength: blog.content?.length
-    })
     
     // Check if user can access this blog
     if (!isAdmin && (blog.status !== 'published' || !blog.isPublic)) {
@@ -141,9 +135,7 @@ export async function PUT(
     
     const { id } = await params
     const body = await request.json()
-    console.log('Update - Received blog data:', JSON.stringify(body, null, 2))
     const validatedData = updateBlogSchema.parse(body)
-    console.log('Update - Validated blog data:', JSON.stringify(validatedData, null, 2))
     
     // Find existing blog
     const existingBlog = await Blog.findById(id)
@@ -165,14 +157,11 @@ export async function PUT(
       ...validatedData,
       ...(slug !== existingBlog.slug && { slug })
     }
-    console.log('Update - Data to save:', JSON.stringify(updateData, null, 2))
-    
     const blog = await Blog.findByIdAndUpdate(
       id,
       updateData,
       { new: true, runValidators: true }
     )
-    console.log('Update - Blog updated successfully:', blog?._id)
     
     return NextResponse.json({
       success: true,

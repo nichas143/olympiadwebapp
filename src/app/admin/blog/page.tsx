@@ -47,6 +47,7 @@ interface Blog {
   _id: string
   title: string
   slug: string
+  content: string
   excerpt: string
   author: string
   authorId: string
@@ -55,6 +56,10 @@ interface Blog {
   status: 'draft' | 'published' | 'archived'
   readTime: number
   views: number
+  isPublic: boolean
+  seoTitle?: string
+  seoDescription?: string
+  metaKeywords?: string[]
   publishedAt?: string
   createdAt: string
   updatedAt: string
@@ -206,16 +211,16 @@ export default function AdminBlogPage() {
     setEditingBlog(blog)
     setFormData({
       title: blog.title,
-      content: '', // We'll need to fetch full content separately
+      content: blog.content, // Load the actual content
       excerpt: blog.excerpt,
       tags: blog.tags.join(', '),
       category: blog.category as any,
       status: blog.status as any,
       readTime: blog.readTime,
-      isPublic: true, // Default to true, can be added to model later
-      seoTitle: '',
-      seoDescription: '',
-      metaKeywords: ''
+      isPublic: blog.isPublic || true,
+      seoTitle: blog.seoTitle || '',
+      seoDescription: blog.seoDescription || '',
+      metaKeywords: blog.metaKeywords?.join(', ') || ''
     })
     setFormErrors({})
     onModalOpen()
@@ -245,9 +250,6 @@ export default function AdminBlogPage() {
       }
 
       const validatedData = blogFormSchema.parse(submitData)
-      console.log('Frontend - Form data:', formData)
-      console.log('Frontend - Submit data:', submitData)
-      console.log('Frontend - Validated data:', validatedData)
 
       const url = editingBlog ? `/api/blog/${editingBlog._id}` : '/api/blog'
       const method = editingBlog ? 'PUT' : 'POST'

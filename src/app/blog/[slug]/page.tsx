@@ -34,7 +34,6 @@ interface BlogResponse {
 
 // Component to render content with LaTeX support
 function BlogContent({ content }: { content: string }) {
-  console.log('BlogContent received content:', content)
   // Split content by LaTeX delimiters and render accordingly
   const renderContent = (text: string) => {
     const parts = text.split(/(\$\$[\s\S]*?\$\$|\$[^$]*?\$)/g)
@@ -86,8 +85,6 @@ export default function BlogPostPage() {
         const data: BlogResponse = await response.json()
         
         if (data.success && data.blog) {
-          console.log('Blog data received:', data.blog)
-          console.log('Blog content:', data.blog.content)
           setBlog(data.blog)
           // Update page title and meta
           document.title = data.blog.seoTitle || data.blog.title

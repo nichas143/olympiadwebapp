@@ -179,9 +179,7 @@ export async function POST(request: NextRequest) {
     await connectDB()
     
     const body = await request.json()
-    console.log('Received blog data:', JSON.stringify(body, null, 2))
     const validatedData = createBlogSchema.parse(body)
-    console.log('Validated blog data:', JSON.stringify(validatedData, null, 2))
     
     // Generate slug from title
     const baseSlug = generateSlug(validatedData.title)
@@ -194,10 +192,8 @@ export async function POST(request: NextRequest) {
       authorId: session.user.id || session.user.email || 'unknown'
     }
     
-    console.log('Blog data to save:', JSON.stringify(blogData, null, 2))
     const blog = new Blog(blogData)
     await blog.save()
-    console.log('Blog saved successfully:', blog._id)
     
     return NextResponse.json({
       success: true,

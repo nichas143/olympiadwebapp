@@ -6,6 +6,10 @@ import Link from 'next/link'
 import { Card, CardBody, Chip, Button, Spinner } from '@heroui/react'
 import { CalendarIcon, ClockIcon, EyeIcon, TagIcon, ArrowLeftIcon, UserIcon } from '@heroicons/react/24/outline'
 import 'katex/dist/katex.min.css'
+import ReactMarkdown from 'react-markdown'
+import remarkGfm from 'remark-gfm'
+import rehypeHighlight from 'rehype-highlight'
+import 'highlight.js/styles/github.css'
 import { InlineMath, BlockMath } from 'react-katex'
 
 interface Blog {
@@ -32,12 +36,11 @@ interface BlogResponse {
   error?: string
 }
 
-// Component to render content with LaTeX support
+// Component to render content with full markdown and LaTeX support
 function BlogContent({ content }: { content: string }) {
-  // Split content by LaTeX delimiters and render accordingly
-  const renderContent = (text: string) => {
+  // Process LaTeX expressions and create a mixed content array
+  const processContent = (text: string) => {
     const parts = text.split(/(\$\$[\s\S]*?\$\$|\$[^$]*?\$)/g)
-    
     return parts.map((part, index) => {
       if (part.startsWith('$$') && part.endsWith('$$')) {
         // Block math
@@ -52,23 +55,100 @@ function BlogContent({ content }: { content: string }) {
         const mathContent = part.slice(1, -1).trim()
         return <InlineMath key={index} math={mathContent} />
       } else {
-        // Regular text - convert line breaks to paragraphs
-        const paragraphs = part.split('\n\n').filter(p => p.trim())
-        return paragraphs.map((paragraph, pIndex) => (
-          <p key={`${index}-${pIndex}`} className="mb-4 leading-relaxed">
-            {paragraph.split('\n').map((line, lIndex, lines) => (
-              <span key={lIndex}>
-                {line}
-                {lIndex < lines.length - 1 && <br />}
-              </span>
-            ))}
-          </p>
-        ))
+        // Regular text - render as markdown
+        return (
+          <ReactMarkdown
+            key={index}
+            remarkPlugins={[remarkGfm]}
+            rehypePlugins={[rehypeHighlight]}
+            components={{
+              // Custom styling for code blocks
+              code({ className, children, ...props }: any) {
+                const match = /language-(\w+)/.exec(className || '')
+                const isInline = !match
+                return !isInline ? (
+                  <pre className="bg-gray-900 text-gray-100 p-4 rounded-lg overflow-x-auto my-4">
+                    <code className={className} {...props}>
+                      {children}
+                    </code>
+                  </pre>
+                ) : (
+                  <code className="bg-pink-50 text-pink-600 px-1 py-0.5 rounded text-sm" {...props}>
+                    {children}
+                  </code>
+                )
+              },
+              // Custom styling for blockquotes
+              blockquote({ children }) {
+                return (
+                  <blockquote className="border-l-4 border-blue-500 pl-4 italic text-gray-600 my-4">
+                    {children}
+                  </blockquote>
+                )
+              },
+              // Custom styling for tables
+              table({ children }) {
+                return (
+                  <div className="overflow-x-auto my-6">
+                    <table className="min-w-full border-collapse border border-gray-200">
+                      {children}
+                    </table>
+                  </div>
+                )
+              },
+              th({ children }) {
+                return (
+                  <th className="bg-gray-50 font-semibold text-left px-3 py-2 border border-gray-200">
+                    {children}
+                  </th>
+                )
+              },
+              td({ children }) {
+                return (
+                  <td className="px-3 py-2 border border-gray-200">
+                    {children}
+                  </td>
+                )
+              },
+              // Custom styling for images
+              img({ src, alt, ...props }) {
+                return (
+                  <img
+                    src={src}
+                    alt={alt}
+                    className="max-w-full h-auto rounded-lg shadow-md my-4"
+                    {...props}
+                  />
+                )
+              },
+              // Custom styling for links
+              a({ href, children, ...props }) {
+                return (
+                  <a
+                    href={href}
+                    className="text-blue-600 hover:text-blue-800 hover:underline transition-colors"
+                    target={href?.startsWith('http') ? '_blank' : undefined}
+                    rel={href?.startsWith('http') ? 'noopener noreferrer' : undefined}
+                    {...props}
+                  >
+                    {children}
+                  </a>
+                )
+              }
+            }}
+          >
+            {part}
+          </ReactMarkdown>
+        )
       }
     })
   }
 
-  return <div className="prose prose-lg max-w-none">{renderContent(content)}</div>
+  return (
+    <div className="prose prose-lg max-w-none prose-headings:text-gray-900 prose-headings:font-bold prose-p:text-gray-700 prose-p:leading-relaxed prose-a:text-blue-600 prose-a:no-underline hover:prose-a:underline prose-strong:text-gray-900 prose-strong:font-semibold prose-code:text-pink-600 prose-code:bg-pink-50 prose-code:px-1 prose-code:py-0.5 prose-code:rounded prose-code:text-sm prose-pre:bg-gray-900 prose-pre:text-gray-100 prose-blockquote:border-l-4 prose-blockquote:border-blue-500 prose-blockquote:pl-4 prose-blockquote:italic prose-ul:list-disc prose-ol:list-decimal prose-li:text-gray-700 prose-table:text-sm prose-th:bg-gray-50 prose-th:font-semibold prose-td:border prose-td:border-gray-200 prose-td:px-3 prose-td:py-2">
+      {processContent(content)}
+    </div>
+  )
 }
 
 export default function BlogPostPage() {
